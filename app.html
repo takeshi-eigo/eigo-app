@@ -16,7 +16,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .screen{display:none;min-height:100vh}
 .screen.on{display:block}
 /* ============ HOME SCREEN ============ */
-.home-hdr{background:#1d1d1f;padding:20px 16px 18px;position:sticky;top:0;z-index:100}
+.home-hdr{background:#1d1d1f;padding:20px 16px 14px;position:sticky;top:0;z-index:100}
+.search-bar{display:flex;gap:8px;margin-top:12px}
+.search-input{flex:1;padding:10px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:14px;outline:none;-webkit-appearance:none}
+.search-input::placeholder{color:rgba(255,255,255,.4)}
+.search-input:focus{background:rgba(255,255,255,.2)}
+.tag-bar{display:flex;overflow-x:auto;gap:7px;padding:10px 14px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tag-bar::-webkit-scrollbar{display:none}
+.tag-chip{font-size:12px;padding:5px 13px;border-radius:20px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.7);cursor:pointer;white-space:nowrap;font-weight:600;flex-shrink:0;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.tag-chip.on{background:rgba(255,255,255,.9);color:#1d1d1f;border-color:transparent}
 .home-hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .home-hdr-icon{font-size:24px}
 .home-hdr-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px}
@@ -194,6 +202,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <div class="stat"><div class="stat-num" id="statVocab">0</div><div class="stat-lbl">単語数</div></div>
       <div class="stat"><div class="stat-num" id="statMonths">0</div><div class="stat-lbl">ヶ月分</div></div>
     </div>
+    <div class="search-bar">
+      <input class="search-input" id="searchInput" type="search" placeholder="🔍 記事を検索..." oninput="applyFilter()">
+    </div>
+    <div class="tag-bar" id="tagBar">
+      <div class="tag-chip on" data-tag="all" onclick="selectTag('all')">すべて</div>
+      <div class="tag-chip" data-tag="mlb" onclick="selectTag('mlb')">⚾ MLB</div>
+      <div class="tag-chip" data-tag="news" onclick="selectTag('news')">🌍 World</div>
+      <div class="tag-chip" data-tag="sg" onclick="selectTag('sg')">🇸🇬 SG</div>
+      <div class="tag-chip" data-tag="ai" onclick="selectTag('ai')">🤖 AI</div>
+      <div class="tag-chip" data-tag="biz" onclick="selectTag('biz')">💼 Biz</div>
+    </div>
   </div>
   <div class="home-body">
     <button class="import-btn" onclick="openImport()">＋ 記事を追加</button>
@@ -299,39 +318,63 @@ function dbGet(id){
    HOME
 ================================================ */
 var allArticles=[];
+var currentTag='all';
 var BADGE_COLORS={'mlb':'badge-mlb','sg':'badge-sg','ai':'badge-ai','biz':'badge-biz','news':'badge-news'};
+
+function selectTag(tag){
+  currentTag=tag;
+  document.querySelectorAll('.tag-chip').forEach(function(c){
+    c.classList.toggle('on',c.dataset.tag===tag);
+  });
+  applyFilter();
+}
+
+function applyFilter(){
+  var query=(document.getElementById('searchInput')||{value:''}).value.trim().toLowerCase();
+  var filtered=allArticles.filter(function(a){
+    var tagMatch=currentTag==='all'||a.badge===currentTag;
+    var textMatch=!query||
+      a.title.toLowerCase().includes(query)||
+      (a.source||'').toLowerCase().includes(query)||
+      a.date.includes(query)||
+      (a.badgeLabel||'').toLowerCase().includes(query);
+    return tagMatch&&textMatch;
+  });
+  renderArticleList(filtered);
+}
 
 function loadHome(){
   dbGetAll().then(function(rows){
     allArticles=rows.sort(function(a,b){return b.date.localeCompare(a.date);});
-    renderHome();
+
+    var totalVocab=0;
+    allArticles.forEach(function(a){
+      try{var vd=Array.isArray(a.vd)?a.vd:(typeof a.vd==='string'?JSON.parse(a.vd):[]);totalVocab+=vd.length;}catch(e){}
+    });
+    document.getElementById('statArticles').textContent=allArticles.length;
+    document.getElementById('statVocab').textContent=totalVocab;
+    var months=new Set(allArticles.map(function(a){return a.date.substring(0,7);}));
+    document.getElementById('statMonths').textContent=months.size;
+
+    applyFilter();
   });
 }
 
-function renderHome(){
-  var totalVocab=0;
-  allArticles.forEach(function(a){
-    try{var vd=eval('('+a.vd+')');totalVocab+=vd.length;}catch(e){}
-  });
+function renderArticleList(articles){
+  var container=document.getElementById('articleList');
+  container.innerHTML='';
 
-  document.getElementById('statArticles').textContent=allArticles.length;
-  document.getElementById('statVocab').textContent=totalVocab;
+  if(articles.length===0){
+    container.innerHTML='<div class="empty-state"><div class="empty-icon">'+(allArticles.length===0?'📖':'🔍')+'</div><div class="empty-title">'+(allArticles.length===0?'記事がまだありません':'該当する記事がありません')+'</div><div class="empty-text">'+(allArticles.length===0?'「＋ 記事を追加」ボタンから<br>JSONファイルを選択してください':'検索条件を変えてみてください')+'</div></div>';
+    return;
+  }
 
   var monthMap={},monthOrder=[];
-  allArticles.forEach(function(a){
+  articles.forEach(function(a){
     var ym=a.date.substring(0,7);
     if(!monthMap[ym]){monthMap[ym]=[];monthOrder.push(ym);}
     monthMap[ym].push(a);
   });
-  document.getElementById('statMonths').textContent=monthOrder.length;
-
-  var container=document.getElementById('articleList');
-  container.innerHTML='';
-
-  if(allArticles.length===0){
-    container.innerHTML='<div class="empty-state"><div class="empty-icon">📖</div><div class="empty-title">記事がまだありません</div><div class="empty-text">「＋ 記事を追加」ボタンから<br>記事JSONを貼り付けて追加してください</div></div>';
-    return;
-  }
 
   var colors=['#1a5fa8','#166534','#4a3f8f','#c0392b','#92400e','#0369a1'];
   monthOrder.forEach(function(ym,mi){
@@ -359,7 +402,6 @@ function renderHome(){
     container.appendChild(card);
   });
 
-  // 最新月を自動展開
   if(monthOrder.length>0){
     var first=monthOrder[0];
     toggleMonth('m_'+first.replace('-',''),'ma_'+first.replace('-',''));
@@ -387,7 +429,6 @@ function openImport(){
 
 function closeImport(){
   document.getElementById('importModal').classList.remove('on');
-  // インポート後にホームを更新
   loadHome();
 }
 
@@ -458,9 +499,9 @@ function openArticle(id){
     currentArt=data;
 
     // データをevalで復元
-    try{curART=typeof data.art==='string'?eval('('+data.art+')'):data.art;}catch(e){curART=[];}
-    try{curVD=typeof data.vd==='string'?eval('('+data.vd+')'):data.vd;}catch(e){curVD=[];}
-    try{curGD=typeof data.gd==='string'?eval('('+data.gd+')'):data.gd;}catch(e){curGD=[];}
+    try{curART=Array.isArray(data.art)?data.art:(typeof data.art==='string'?JSON.parse(data.art):[]);}catch(e){curART=[];}
+    try{curVD=Array.isArray(data.vd)?data.vd:(typeof data.vd==='string'?JSON.parse(data.vd):[]);}catch(e){curVD=[];}
+    try{curGD=Array.isArray(data.gd)?data.gd:(typeof data.gd==='string'?JSON.parse(data.gd):[]);}catch(e){curGD=[];}
     curVD_MAP={};curVD.forEach(function(v,i){curVD_MAP[v.word]=i;});
 
     // テーマカラー設定
