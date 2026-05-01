@@ -637,7 +637,7 @@ async function generateQuestion(mode, usedScenes) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.9, maxOutputTokens: 600 }
+      generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
     })
   });
 
@@ -648,8 +648,9 @@ async function generateQuestion(mode, usedScenes) {
 
   const data = await res.json();
   const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  const clean = raw.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean);
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('JSONの取得に失敗しました');
+  return JSON.parse(match[0]);
 }
 
 // ──────────────────────────────
