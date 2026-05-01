@@ -647,9 +647,15 @@ async function generateQuestion(mode, usedScenes) {
   }
 
   const data = await res.json();
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // thinking modelはparts[0]がthought、parts[1]がtextの場合がある
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  let raw = '';
+  for (const part of parts) {
+    if (part.text && !part.thought) { raw = part.text; break; }
+  }
+  if (!raw) raw = parts[parts.length - 1]?.text || '';
   const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('JSONの取得に失敗しました');
+  if (!match) throw new Error('RAW: ' + raw.substring(0, 200));
   return JSON.parse(match[0]);
 }
 
