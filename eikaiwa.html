@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>瞬間英作文</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Sans+JP:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --white: #ffffff;
+    --border: #e8e6e0;
+    --border2: #f0ede8;
+    --text: #1a1917;
+    --text2: #6b6860;
+    --text3: #aaa89f;
+    --accent: #2d6a4f;
+    --accent-light: #e8f4ee;
+    --accent2: #c17f3a;
+    --accent2-light: #fdf3e7;
+    --casual: #2d6a4f;
+    --casual-light: #e8f4ee;
+    --biz: #2c4a7c;
+    --biz-light: #e8eef7;
+    --radius: 16px;
+    --shadow: 0 2px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Setup screen ── */
+  #setupScreen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+    gap: 32px;
+  }
+  .setup-logo {
+    text-align: center;
+  }
+  .setup-logo h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .setup-logo p {
+    font-size: 13px;
+    color: var(--text3);
+    margin-top: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .setup-card {
+    width: 100%;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .setup-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .api-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-input:focus { border-color: var(--accent); }
+  .api-hint {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  .mode-select {
+    display: flex;
+    gap: 10px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 14px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .mode-btn .mode-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .mode-btn .mode-name { font-size: 13px; font-weight: 500; color: var(--text2); }
+  .mode-btn.selected-casual {
+    border-color: var(--casual);
+    background: var(--casual-light);
+  }
+  .mode-btn.selected-casual .mode-name { color: var(--casual); }
+  .mode-btn.selected-biz {
+    border-color: var(--biz);
+    background: var(--biz-light);
+  }
+  .mode-btn.selected-biz .mode-name { color: var(--biz); }
+
+  .btn-start {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .btn-start:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-start:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; transform: none; }
+
+  /* ── App screen ── */
+  #appScreen { display: none; min-height: 100vh; flex-direction: column; }
+
+  /* Header */
+  .app-header {
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border2);
+    background: var(--white);
+  }
+  .app-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .mode-badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  .mode-badge.casual { background: var(--casual-light); color: var(--casual); }
+  .mode-badge.biz { background: var(--biz-light); color: var(--biz); }
+
+  /* Progress */
+  .progress-area {
+    padding: 16px 24px 0;
+    background: var(--white);
+  }
+  .progress-dots {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .dot {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .dot.done { background: var(--accent); }
+  .dot.current { background: var(--accent2); }
+  .progress-label {
+    font-size: 12px;
+    color: var(--text3);
+    padding-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Main content */
+  .main-content {
+    flex: 1;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Loading */
+  #loadingArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px 0;
+  }
+  .loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text3); }
+
+  /* Scene card */
+  .scene-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .scene-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+  .scene-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text2);
+    font-weight: 300;
+  }
+
+  /* Japanese card */
+  .jp-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 24px 20px;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.4s ease 0.1s both;
+  }
+  .jp-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+  .jp-text {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  /* Answer card */
+  .answer-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: none;
+    animation: fadeUp 0.35s ease;
+  }
+  .answer-card.visible { display: block; }
+
+  .answer-section { margin-bottom: 16px; }
+  .answer-section:last-child { margin-bottom: 0; }
+
+  .ans-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ans-label.correct { color: var(--casual); }
+  .ans-label.wrong { color: #c0392b; }
+  .ans-label.note { color: var(--accent2); }
+
+  .en-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .wrong-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+  .note-text {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text2);
+    font-weight: 300;
+    padding: 10px 14px;
+    background: var(--accent2-light);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent2);
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border2);
+    margin: 14px 0;
+  }
+
+  /* Buttons */
+  .btn-area {
+    padding: 0 24px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg);
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-primary.biz-mode { background: var(--biz); }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text2);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:active { background: var(--bg); }
+
+  /* Complete screen */
+  #completeScreen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 28px;
+    gap: 20px;
+    min-height: 100vh;
+    text-align: center;
+  }
+  .complete-emoji { font-size: 64px; }
+  .complete-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .complete-sub {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.8;
+    font-weight: 300;
+    max-width: 300px;
+  }
+  .btn-again {
+    margin-top: 12px;
+    padding: 16px 48px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-again:active { transform: scale(0.98); }
+  .btn-change {
+    padding: 12px 32px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--text2);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Error */
+  .error-banner {
+    background: #fdf0f0;
+    border: 1px solid #f5c6c6;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #c0392b;
+    line-height: 1.6;
+    display: none;
+  }
+  .error-banner.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ── Setup Screen ── -->
+<div id="setupScreen">
+  <div class="setup-logo">
+    <h1>瞬間英作文</h1>
+    <p>Instant English Speaking</p>
+  </div>
+
+  <div class="setup-card">
+    <div>
+      <div class="setup-label">Gemini API Key</div>
+      <input class="api-input" type="password" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off" />
+      <div class="api-hint">Google AI Studioで取得したAPIキーを入力してください。キーはこのデバイス内にのみ保存されます。</div>
+      <div class="error-banner" id="errorBanner"></div>
+    </div>
+
+    <div>
+      <div class="setup-label">モードを選択</div>
+      <div class="mode-select">
+        <div class="mode-btn" id="btnCasual" onclick="selectMode('casual')">
+          <span class="mode-icon">🍽️</span>
+          <span class="mode-name">カジュアル</span>
+        </div>
+        <div class="mode-btn" id="btnBiz" onclick="selectMode('biz')">
+          <span class="mode-icon">💼</span>
+          <span class="mode-name">ビジネス</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-start" id="btnStart" onclick="startSession()" disabled>
+      スタート →
+    </button>
+  </div>
+</div>
+
+<!-- ── App Screen ── -->
+<div id="appScreen">
+  <div class="app-header">
+    <div class="app-title">瞬間英作文</div>
+    <div class="mode-badge" id="modeBadge">カジュアル</div>
+  </div>
+
+  <div class="progress-area">
+    <div class="progress-dots" id="progressDots"></div>
+    <div class="progress-label" id="progressLabel">問題 1 / 5</div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <div id="loadingArea">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="loadingText">問題を生成中...</div>
+    </div>
+  </div>
+
+  <div class="btn-area" id="btnArea" style="display:none">
+    <button class="btn-primary" id="btnMain" onclick="handleMain()">答えを見る</button>
+    <button class="btn-secondary" id="btnSkip" onclick="handleSkip()">スキップ</button>
+  </div>
+</div>
+
+<!-- ── Complete Screen ── -->
+<div id="completeScreen">
+  <div class="complete-emoji">🎉</div>
+  <div class="complete-title">お疲れさまでした！</div>
+  <div class="complete-sub" id="completeMsg">5問完了。毎日続けることで、英語が口から自然に出るようになります。</div>
+  <button class="btn-again" onclick="restartSameMode()">もう一度（同じモード）</button>
+  <button class="btn-change" onclick="backToSetup()">モードを変える</button>
+</div>
+
+<script>
+// ──────────────────────────────
+// STATE
+// ──────────────────────────────
+let apiKey = '';
+let currentMode = null; // 'casual' | 'biz'
+let questions = [];
+let currentIdx = 0;
+let answerVisible = false;
+const TOTAL = 5;
+
+// ──────────────────────────────
+// SETUP
+// ──────────────────────────────
+// APIキーをlocalStorageから復元
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gemini_api_key');
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    checkStartable();
+  }
+  document.getElementById('apiKeyInput').addEventListener('input', checkStartable);
+});
+
+function selectMode(mode) {
+  currentMode = mode;
+  document.getElementById('btnCasual').className = 'mode-btn' + (mode === 'casual' ? ' selected-casual' : '');
+  document.getElementById('btnBiz').className = 'mode-btn' + (mode === 'biz' ? ' selected-biz' : '');
+  checkStartable();
+}
+
+function checkStartable() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const ok = key.length > 10 && currentMode !== null;
+  document.getElementById('btnStart').disabled = !ok;
+}
+
+async function startSession() {
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('gemini_api_key', apiKey);
+
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  document.getElementById('completeScreen').style.display = 'none';
+
+  // モードバッジ
+  const badge = document.getElementById('modeBadge');
+  badge.textContent = currentMode === 'casual' ? 'カジュアル' : 'ビジネス';
+  badge.className = 'mode-badge ' + currentMode;
+
+  // プログレスドット初期化
+  buildDots();
+
+  questions = [];
+  currentIdx = 0;
+  await loadQuestion(0);
+}
+
+// ──────────────────────────────
+// PROGRESS
+// ──────────────────────────────
+function buildDots() {
+  const row = document.getElementById('progressDots');
+  row.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' current' : '');
+    d.id = 'dot' + i;
+    row.appendChild(d);
+  }
+}
+
+function updateDots(idx) {
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.getElementById('dot' + i);
+    if (i < idx) d.className = 'dot done';
+    else if (i === idx) d.className = 'dot current';
+    else d.className = 'dot';
+  }
+  document.getElementById('progressLabel').textContent = `問題 ${idx + 1} / ${TOTAL}`;
+}
+
+// ──────────────────────────────
+// GEMINI API
+// ──────────────────────────────
+async function generateQuestion(mode, usedScenes) {
+  const modeDesc = mode === 'casual'
+    ? 'シンガポールの友人と食事・雑談をしているカジュアルな場面（再会の挨拶、食事の注文・感想、家族や仕事の雑談、冗談・相槌、別れの挨拶など）'
+    : '日本人ビジネスパーソンが外国人と英語で話すビジネスの場面（会議での意見・提案・断り、シンガポールでの商談・自己紹介、電話・Zoom会議など）';
+
+  const usedList = usedScenes.length > 0 ? `\n既に使った場面（重複禁止）: ${usedScenes.join('、')}` : '';
+
+  const prompt = `あなたは英会話トレーナーです。以下の条件で瞬間英作文の問題を1問作成してください。
+
+モード: ${modeDesc}${usedList}
+
+【重要なルール】
+- メールや書き言葉ではなく、実際に口に出す会話英語
+- 英語はできるだけシンプルで自然なネイティブ表現
+- 直訳すると長くなりがちな日本語を選ぶ
+- 場面の説明は2〜3文の具体的なシチュエーション
+
+以下のJSON形式のみで返答してください（他のテキスト不要）:
+{
+  "scene": "場面の説明（2〜3文、日本語）",
+  "japanese": "言いたい日本語（1文、短め）",
+  "english": "正解の英語（シンプルなネイティブ表現）",
+  "wrong_example": "日本人が直訳しがちな長い英語の例",
+  "note": "なぜこの表現が自然か、どう使うかの短い解説（日本語、2文程度）"
+}`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.9, maxOutputTokens: 600 }
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'API Error');
+  }
+
+  const data = await res.json();
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const clean = raw.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ──────────────────────────────
+// LOAD QUESTION
+// ──────────────────────────────
+async function loadQuestion(idx) {
+  showLoading(true);
+  updateDots(idx);
+  answerVisible = false;
+
+  const usedScenes = questions.map(q => q.scene?.substring(0, 20));
+
+  try {
+    const q = await generateQuestion(currentMode, usedScenes);
+    questions[idx] = q;
+    renderQuestion(q);
+    showLoading(false);
+    hideError();
+  } catch (e) {
+    showLoading(false);
+    showError('問題の生成に失敗しました。APIキーを確認してください。\n' + e.message);
+  }
+}
+
+// ──────────────────────────────
+// RENDER
+// ──────────────────────────────
+function renderQuestion(q) {
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div class="scene-card">
+      <div class="scene-label">🎬 場面</div>
+      <div class="scene-text">${q.scene}</div>
+    </div>
+    <div class="jp-card">
+      <div class="jp-label">💬 あなたはこう言いたい</div>
+      <div class="jp-text">${q.japanese}</div>
+    </div>
+    <div class="answer-card" id="answerCard">
+      <div class="answer-section">
+        <div class="ans-label correct">✓ ネイティブはこう言う</div>
+        <div class="en-text">${q.english}</div>
+      </div>
+      <div class="divider"></div>
+      <div class="answer-section">
+        <div class="ans-label wrong">✗ 直訳しがち</div>
+        <div class="wrong-text">${q.wrong_example}</div>
+      </div>
+      <div class="divider"></div>
+      <div class="answer-section">
+        <div class="ans-label note">💡 ポイント</div>
+        <div class="note-text">${q.note}</div>
+      </div>
+    </div>
+  `;
+
+  const btnArea = document.getElementById('btnArea');
+  btnArea.style.display = 'flex';
+  const btnMain = document.getElementById('btnMain');
+  btnMain.textContent = '答えを見る';
+  btnMain.className = 'btn-primary' + (currentMode === 'biz' ? ' biz-mode' : '');
+  document.getElementById('btnSkip').style.display = 'block';
+}
+
+// ──────────────────────────────
+// BUTTON HANDLERS
+// ──────────────────────────────
+function handleMain() {
+  if (!answerVisible) {
+    // 答えを表示
+    const card = document.getElementById('answerCard');
+    if (card) {
+      card.classList.add('visible');
+      answerVisible = true;
+      document.getElementById('btnMain').textContent = '次の問題 →';
+      document.getElementById('btnSkip').style.display = 'none';
+    }
+  } else {
+    // 次へ
+    goNext();
+  }
+}
+
+function handleSkip() {
+  goNext();
+}
+
+function goNext() {
+  currentIdx++;
+  if (currentIdx >= TOTAL) {
+    showComplete();
+  } else {
+    loadQuestion(currentIdx);
+  }
+}
+
+// ──────────────────────────────
+// COMPLETE
+// ──────────────────────────────
+function showComplete() {
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('completeScreen').style.display = 'flex';
+  const msg = currentMode === 'casual'
+    ? '5問完了！シンガポールの友人との会話で、今日の表現を使ってみてください。'
+    : '5問完了！実際のビジネスシーンで、今日の表現を使ってみてください。';
+  document.getElementById('completeMsg').textContent = msg;
+}
+
+function restartSameMode() {
+  questions = [];
+  currentIdx = 0;
+  document.getElementById('completeScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'flex';
+  buildDots();
+  loadQuestion(0);
+}
+
+function backToSetup() {
+  document.getElementById('completeScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'flex';
+  currentMode = null;
+  document.getElementById('btnCasual').className = 'mode-btn';
+  document.getElementById('btnBiz').className = 'mode-btn';
+  checkStartable();
+}
+
+// ──────────────────────────────
+// HELPERS
+// ──────────────────────────────
+function showLoading(show) {
+  const content = document.getElementById('mainContent');
+  const btnArea = document.getElementById('btnArea');
+  if (show) {
+    content.innerHTML = `
+      <div id="loadingArea">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">問題を生成中...</div>
+      </div>`;
+    btnArea.style.display = 'none';
+  }
+}
+
+function showError(msg) {
+  const content = document.getElementById('mainContent');
+  content.innerHTML = `
+    <div style="padding:20px 0">
+      <div class="error-banner visible">${msg}</div>
+      <button class="btn-secondary" style="margin-top:16px; width:100%" onclick="loadQuestion(${currentIdx})">再試行</button>
+    </div>`;
+  document.getElementById('btnArea').style.display = 'none';
+}
+
+function hideError() {
+  const b = document.getElementById('errorBanner');
+  if (b) b.classList.remove('visible');
+}
+</script>
+</body>
+</html>
