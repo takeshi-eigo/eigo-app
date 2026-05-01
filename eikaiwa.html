@@ -637,7 +637,7 @@ async function generateQuestion(mode, usedScenes) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.9, maxOutputTokens: 1024 }
+      generationConfig: { temperature: 0.9, maxOutputTokens: 2048 }
     })
   });
 
