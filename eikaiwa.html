@@ -490,37 +490,38 @@
 
   /* PDF印刷用スタイル */
   @media print {
+    @page { size: A4 portrait; margin: 10mm; }
     body * { visibility: hidden; }
     #printArea, #printArea * { visibility: visible; }
     #printArea {
       position: fixed;
       top: 0; left: 0;
       width: 100%;
-      padding: 20px;
       font-family: 'Noto Sans JP', sans-serif;
+      font-size: 10px;
     }
     .print-header {
-      font-size: 18px;
+      font-size: 13px;
       font-weight: bold;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #2d6a4f;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid #2d6a4f;
       color: #2d6a4f;
     }
     .print-item {
-      margin-bottom: 14px;
-      padding: 10px 14px;
-      border-left: 3px solid #2d6a4f;
+      margin-bottom: 7px;
+      padding: 6px 10px;
+      border-left: 2px solid #2d6a4f;
       background: #f9f9f7;
       page-break-inside: avoid;
     }
-    .print-num { font-size: 10px; color: #aaa; margin-bottom: 3px; }
-    .print-scene { font-size: 11px; color: #888; margin-bottom: 4px; }
-    .print-jp { font-size: 13px; font-weight: 500; color: #1a1917; margin-bottom: 4px; }
-    .print-en { font-size: 15px; font-weight: bold; color: #2d6a4f; margin-bottom: 3px; }
-    .print-wrong { font-size: 11px; color: #bbb; text-decoration: line-through; }
-    .print-note { font-size: 11px; color: #666; margin-top: 4px; font-style: italic; }
-    .print-footer { margin-top: 16px; font-size: 10px; color: #bbb; text-align: right; }
+    .print-num { font-size: 9px; color: #aaa; margin-bottom: 1px; }
+    .print-scene { font-size: 9px; color: #999; margin-bottom: 2px; line-height: 1.4; }
+    .print-jp { font-size: 11px; font-weight: 500; color: #1a1917; margin-bottom: 2px; }
+    .print-en { font-size: 13px; font-weight: bold; color: #2d6a4f; margin-bottom: 1px; }
+    .print-wrong { font-size: 9px; color: #ccc; text-decoration: line-through; }
+    .print-note { font-size: 9px; color: #777; margin-top: 2px; line-height: 1.4; }
+    .print-footer { margin-top: 8px; font-size: 9px; color: #bbb; text-align: right; }
   }
 
   /* Error */
