@@ -683,7 +683,9 @@ async function generateQuestion(mode, usedScenes) {
     if (part.text && !part.thought) { raw = part.text; break; }
   }
   if (!raw) raw = parts[parts.length - 1]?.text || '';
-  const match = raw.match(/\{[\s\S]*\}/);
+  // ```json ``` を除去してからJSON抽出
+  const cleaned = raw.replace(/```json|```/g, '').trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('RAW: ' + raw.substring(0, 200));
   return JSON.parse(match[0]);
 }
