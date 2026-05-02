@@ -541,6 +541,16 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   cursor:pointer;
 }
 
+.loading-spinner {
+  width:32px; height:32px;
+  border:2px solid var(--border);
+  border-top-color:var(--green);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+  margin-bottom:8px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
 /* PDF印刷 */
 @media print {
   @page { size:A4 portrait; margin:10mm; }
@@ -595,13 +605,17 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
 <!-- ══ IMPORT MODAL ══ -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
-    <div class="modal-title">📂 JSONを貼り付けて追加</div>
-    <textarea class="modal-textarea" id="jsonInput" placeholder='{"theme":"ホーカーセンター","date":"2026-05-03","cards":[...]}'></textarea>
-    <div class="modal-hint">GeminiのGemで生成したJSONをそのまま貼り付けてください。</div>
+    <div class="modal-title">📂 JSONファイルを追加</div>
+    <div class="modal-hint" style="margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.8;">
+      ① GeminiのGemでシーン名を入力してJSONを生成<br>
+      ② <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;">cards/</code> フォルダにJSONファイルを保存してGitHubにアップロード<br>
+      ③ <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;">cards/index.json</code> にファイル名を追加<br>
+      ④ このボタンで再読み込み
+    </div>
     <div class="modal-error" id="modalError"></div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
-      <button class="btn-import" onclick="importJSON()">追加する</button>
+      <button class="btn-cancel" onclick="closeModal()">閉じる</button>
+      <button class="btn-import" onclick="reloadThemes()">再読み込み</button>
     </div>
   </div>
 </div>
@@ -671,63 +685,60 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
 
 <script>
 // ──────────────────────────────
-// DATA (IndexedDB)
+// DATA (fetch from cards/ folder)
 // ──────────────────────────────
-const DB_NAME = 'eikaiwaDB';
-const DB_VERSION = 1;
-const STORE = 'themes';
-let db;
 let allThemes = [];
 let currentTheme = null;
 let currentIdx = 0;
 let isFlipped = false;
 
-function initDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains(STORE)) {
-        d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    req.onsuccess = e => { db = e.target.result; res(); };
-    req.onerror = () => rej(req.error);
-  });
-}
+const CARDS_DIR = 'cards/';
+const INDEX_FILE = CARDS_DIR + 'index.json';
 
-function getAllThemes() {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(STORE, 'readonly');
-    const req = tx.objectStore(STORE).getAll();
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function addTheme(data) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    const req = tx.objectStore(STORE).add(data);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
+async function loadAllThemes() {
+  try {
+    const res = await fetch(INDEX_FILE + '?t=' + Date.now());
+    if (!res.ok) return [];
+    const index = await res.json();
+    const themes = [];
+    for (const file of index.files) {
+      try {
+        const r = await fetch(CARDS_DIR + file + '?t=' + Date.now());
+        if (!r.ok) continue;
+        const data = await r.json();
+        data._file = file;
+        data.id = file;
+        themes.push(data);
+      } catch(e) { console.warn('Failed to load', file, e); }
+    }
+    return themes;
+  } catch(e) {
+    console.warn('No index.json found', e);
+    return [];
+  }
 }
 
 // ──────────────────────────────
 // TOP PAGE
 // ──────────────────────────────
 async function initApp() {
-  await initDB();
-  allThemes = await getAllThemes();
-
   // 日付表示
   const now = new Date();
   document.getElementById('topDate').textContent =
     now.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
 
-  renderThemeList();
   showPage('top');
+  showLoading(true);
+  allThemes = await loadAllThemes();
+  showLoading(false);
+  renderThemeList();
+}
+
+function showLoading(show) {
+  const list = document.getElementById('themeList');
+  if (show) {
+    list.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><div class="empty-sub">読み込み中...</div></div>';
+  }
 }
 
 function renderThemeList() {
@@ -781,26 +792,12 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
-async function importJSON() {
-  const raw = document.getElementById('jsonInput').value.trim();
-  const errEl = document.getElementById('modalError');
-  errEl.style.display = 'none';
-
-  try {
-    // ```json ``` を除去
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const data = JSON.parse(clean);
-    if (!data.theme || !Array.isArray(data.cards) || data.cards.length === 0) {
-      throw new Error('theme と cards が必要です');
-    }
-    await addTheme(data);
-    allThemes = await getAllThemes();
-    renderThemeList();
-    closeModal();
-  } catch (e) {
-    errEl.textContent = 'JSONの形式が正しくありません: ' + e.message;
-    errEl.style.display = 'block';
-  }
+async function reloadThemes() {
+  closeModal();
+  showLoading(true);
+  allThemes = await loadAllThemes();
+  showLoading(false);
+  renderThemeList();
 }
 
 // ──────────────────────────────
