@@ -316,15 +316,23 @@
   .ans-label.note { color: var(--accent2); }
 
   .en-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 20px;
     line-height: 1.7;
     color: var(--text);
     font-weight: 500;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
   }
   .wrong-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
     line-height: 1.7;
     color: var(--text3);
     text-decoration: line-through;
@@ -698,7 +706,7 @@ function renderQuestion(q) {
     <div class="answer-card" id="answerCard">
       <div class="answer-section">
         <div class="ans-label correct">✓ ネイティブはこう言う</div>
-        <div class="en-text">${q.english}</div>
+        <textarea class="en-text" readonly onclick="this.select()">${q.english}</textarea>
       </div>
       <div class="divider"></div>
       <div class="answer-section">
