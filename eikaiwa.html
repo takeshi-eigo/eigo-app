@@ -657,8 +657,16 @@ async function generateQuestion(mode, usedScenes) {
     if (retryMatch) {
       const wait = Math.ceil(parseFloat(retryMatch[1])) + 2;
       // ローディングテキストに残り秒数を表示
+      // ローディング画面を強制表示してカウントダウン
+      const content = document.getElementById('mainContent');
+      content.innerHTML = `
+        <div id="loadingArea">
+          <div class="loading-spinner"></div>
+          <div class="loading-text" id="countdownText">少し混んでいます。${wait}秒後に再試行...</div>
+        </div>`;
+      document.getElementById('btnArea').style.display = 'none';
       for (let i = wait; i > 0; i--) {
-        const el = document.querySelector('.loading-text');
+        const el = document.getElementById('countdownText');
         if (el) el.textContent = `少し混んでいます。${i}秒後に再試行...`;
         await new Promise(r => setTimeout(r, 1000));
       }
@@ -691,14 +699,17 @@ async function loadQuestion(idx) {
   const usedScenes = questions.map(q => q.scene?.substring(0, 20));
 
   try {
+    // ローディング表示したまま生成（リトライ中もローディング継続）
     const q = await generateQuestion(currentMode, usedScenes);
     questions[idx] = q;
     renderQuestion(q);
     showLoading(false);
     hideError();
   } catch (e) {
+    // rate limitエラーは自動リトライ済みなのでここには来ないはず
+    // それ以外のエラーのみ表示
     showLoading(false);
-    showError('問題の生成に失敗しました。APIキーを確認してください。\n' + e.message);
+    showError('問題の生成に失敗しました。APIキーを確認してください。<br>' + e.message);
   }
 }
 
