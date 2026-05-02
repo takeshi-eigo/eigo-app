@@ -618,9 +618,9 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,'Helve
   <div class="modal">
     <div class="modal-title">📥 問題を追加</div>
     <div class="modal-hint" style="margin-bottom:16px;color:var(--text2);font-size:13px;line-height:1.7;">GeminiのGemで生成したJSONファイルを選択してください。複数まとめて選択すれば一括インポートできます。</div>
-    <label class="file-select-label" id="fileSelectLabel">
+    <label class="file-select-label" id="fileSelectLabel" for="fileInput">
       <input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="onFileSelected(event)" />
-      <div class="file-select-inner" onclick="document.getElementById('fileInput').click()">
+      <div class="file-select-inner">
         <div style="font-size:28px;margin-bottom:6px;">📂</div>
         <div style="font-size:15px;font-weight:500;color:var(--green);">JSONファイルを選択</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px;">複数選択可</div>
