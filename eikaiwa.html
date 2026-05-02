@@ -6,8 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>瞬間英作文</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --bg: #f7f6f3;
@@ -28,7 +27,7 @@
   --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-serif; min-height:100vh; max-width:480px; margin:0 auto; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,'Helvetica Neue',sans-serif; min-height:100vh; max-width:480px; margin:0 auto; }
 
 /* ── TOP PAGE ── */
 #topPage { display:flex; flex-direction:column; min-height:100vh; }
@@ -41,7 +40,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   box-sizing:border-box;
 }
 .top-header h1 {
-  font-family:'Cormorant Garamond',serif;
+  font-family:'Georgia',serif;
   font-size:28px;
   font-weight:600;
   color:var(--text);
@@ -65,7 +64,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   padding:10px 14px;
   border:1.5px solid var(--border);
   border-radius:10px;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   background:var(--bg);
   color:var(--text);
@@ -80,7 +79,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:none;
   background:var(--green);
   color:white;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:13px;
   font-weight:500;
   cursor:pointer;
@@ -185,7 +184,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   padding:12px;
   border:1.5px solid var(--border);
   border-radius:10px;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:12px;
   color:var(--text);
   background:var(--bg);
@@ -212,7 +211,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:1.5px solid var(--border);
   background:var(--white);
   color:var(--text2);
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   cursor:pointer;
 }
@@ -223,7 +222,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:none;
   background:var(--green);
   color:white;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   font-weight:500;
   cursor:pointer;
@@ -397,7 +396,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   cursor:pointer;
   padding:0;
   overflow:hidden;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
 }
 .wrong-ex {
   font-size:14px;
@@ -430,7 +429,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:none;
   background:var(--green);
   color:white;
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:15px;
   font-weight:500;
   cursor:pointer;
@@ -444,7 +443,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:1.5px solid var(--border);
   background:var(--white);
   color:var(--text2);
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   cursor:pointer;
 }
@@ -461,7 +460,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   gap:12px;
 }
 .review-title {
-  font-family:'Cormorant Garamond',serif;
+  font-family:'Georgia',serif;
   font-size:22px;
   font-weight:600;
 }
@@ -524,7 +523,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:1.5px solid var(--green);
   background:var(--green-light);
   color:var(--green);
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   font-weight:500;
   cursor:pointer;
@@ -536,11 +535,23 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
   border:1.5px solid var(--border);
   background:var(--white);
   color:var(--text2);
-  font-family:'Noto Sans JP',sans-serif;
+  font-family:-apple-system,'Helvetica Neue',sans-serif;
   font-size:14px;
   cursor:pointer;
 }
 
+.file-select-label {
+  display:block;
+  width:100%;
+  border-radius:12px;
+  border:2px dashed var(--green);
+  background:var(--green-light);
+  text-align:center;
+  cursor:pointer;
+}
+.file-select-inner {
+  padding:24px 20px;
+}
 .loading-spinner {
   width:32px; height:32px;
   border:2px solid var(--border);
@@ -560,7 +571,7 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
     position:fixed;
     top:0; left:0;
     width:100%;
-    font-family:'Noto Sans JP',sans-serif;
+    font-family:-apple-system,'Helvetica Neue',sans-serif;
   }
   .p-header {
     font-size:14px;
@@ -605,17 +616,19 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
 <!-- ══ IMPORT MODAL ══ -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
-    <div class="modal-title">📂 JSONファイルを追加</div>
-    <div class="modal-hint" style="margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.8;">
-      ① GeminiのGemでシーン名を入力してJSONを生成<br>
-      ② <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;">cards/</code> フォルダにJSONファイルを保存してGitHubにアップロード<br>
-      ③ <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px;">cards/index.json</code> にファイル名を追加<br>
-      ④ このボタンで再読み込み
-    </div>
+    <div class="modal-title">📥 問題を追加</div>
+    <div class="modal-hint" style="margin-bottom:16px;color:var(--text2);font-size:13px;line-height:1.7;">GeminiのGemで生成したJSONファイルを選択してください。複数まとめて選択すれば一括インポートできます。</div>
+    <label class="file-select-label" id="fileSelectLabel">
+      <input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="onFileSelected(event)" />
+      <div class="file-select-inner" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:28px;margin-bottom:6px;">📂</div>
+        <div style="font-size:15px;font-weight:500;color:var(--green);">JSONファイルを選択</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;">複数選択可</div>
+      </div>
+    </label>
     <div class="modal-error" id="modalError"></div>
-    <div class="modal-btns">
+    <div class="modal-btns" style="margin-top:14px;">
       <button class="btn-cancel" onclick="closeModal()">閉じる</button>
-      <button class="btn-import" onclick="reloadThemes()">再読み込み</button>
     </div>
   </div>
 </div>
@@ -685,38 +698,12 @@ body { background:var(--bg); color:var(--text); font-family:'Noto Sans JP',sans-
 
 <script>
 // ──────────────────────────────
-// DATA (fetch from cards/ folder)
+// STATE
 // ──────────────────────────────
 let allThemes = [];
 let currentTheme = null;
 let currentIdx = 0;
 let isFlipped = false;
-
-const CARDS_DIR = 'cards/';
-const INDEX_FILE = CARDS_DIR + 'index.json';
-
-async function loadAllThemes() {
-  try {
-    const res = await fetch(INDEX_FILE + '?t=' + Date.now());
-    if (!res.ok) return [];
-    const index = await res.json();
-    const themes = [];
-    for (const file of index.files) {
-      try {
-        const r = await fetch(CARDS_DIR + file + '?t=' + Date.now());
-        if (!r.ok) continue;
-        const data = await r.json();
-        data._file = file;
-        data.id = file;
-        themes.push(data);
-      } catch(e) { console.warn('Failed to load', file, e); }
-    }
-    return themes;
-  } catch(e) {
-    console.warn('No index.json found', e);
-    return [];
-  }
-}
 
 // ──────────────────────────────
 // TOP PAGE
@@ -728,9 +715,8 @@ async function initApp() {
     now.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
 
   showPage('top');
-  showLoading(true);
-  allThemes = await loadAllThemes();
-  showLoading(false);
+  await openDB();
+  allThemes = await loadFromDB();
   renderThemeList();
 }
 
@@ -792,12 +778,80 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
-async function reloadThemes() {
-  closeModal();
-  showLoading(true);
-  allThemes = await loadAllThemes();
-  showLoading(false);
-  renderThemeList();
+function onFileSelected(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+  const errEl = document.getElementById('modalError');
+  errEl.style.display = 'none';
+
+  let loaded = 0;
+  let errors = [];
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const raw = e.target.result;
+        const clean = raw.replace(/```json|```/g, '').trim();
+        const data = JSON.parse(clean);
+        if (!data.theme || !Array.isArray(data.cards) || data.cards.length === 0) {
+          throw new Error(file.name + ': theme と cards が必要です');
+        }
+        await saveTheme(data);
+      } catch(e) {
+        errors.push(e.message);
+      }
+      loaded++;
+      if (loaded === files.length) {
+        if (errors.length > 0) {
+          errEl.textContent = errors.join('\n');
+          errEl.style.display = 'block';
+        } else {
+          closeModal();
+        }
+        allThemes = await loadFromDB();
+        renderThemeList();
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+// IndexedDB
+const DB_NAME = 'eikaiwaDB2';
+const DB_VER = 1;
+let db2;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('themes')) {
+        d.createObjectStore('themes', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => { db2 = e.target.result; res(); };
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function saveTheme(data) {
+  return new Promise((res, rej) => {
+    const tx = db2.transaction('themes', 'readwrite');
+    const req = tx.objectStore('themes').add(data);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function loadFromDB() {
+  return new Promise((res, rej) => {
+    const tx = db2.transaction('themes', 'readonly');
+    const req = tx.objectStore('themes').getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
 }
 
 // ──────────────────────────────
