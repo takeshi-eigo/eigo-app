@@ -443,6 +443,85 @@
     font-size: 14px;
     cursor: pointer;
   }
+  .btn-pdf {
+    padding: 13px 32px;
+    border-radius: 12px;
+    border: 1.5px solid #2c4a7c;
+    background: #e8eef7;
+    color: #2c4a7c;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-pdf:active { opacity: 0.8; }
+  .review-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: left;
+    width: 100%;
+  }
+  .review-scene {
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .review-jp {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .review-en {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--casual);
+    margin-bottom: 4px;
+  }
+  .review-wrong {
+    font-size: 12px;
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+
+  /* PDF印刷用スタイル */
+  @media print {
+    body * { visibility: hidden; }
+    #printArea, #printArea * { visibility: visible; }
+    #printArea {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 20px;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    .print-header {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #2d6a4f;
+      color: #2d6a4f;
+    }
+    .print-item {
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      border-left: 3px solid #2d6a4f;
+      background: #f9f9f7;
+      page-break-inside: avoid;
+    }
+    .print-num { font-size: 10px; color: #aaa; margin-bottom: 3px; }
+    .print-scene { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .print-jp { font-size: 13px; font-weight: 500; color: #1a1917; margin-bottom: 4px; }
+    .print-en { font-size: 15px; font-weight: bold; color: #2d6a4f; margin-bottom: 3px; }
+    .print-wrong { font-size: 11px; color: #bbb; text-decoration: line-through; }
+    .print-note { font-size: 11px; color: #666; margin-top: 4px; font-style: italic; }
+    .print-footer { margin-top: 16px; font-size: 10px; color: #bbb; text-align: right; }
+  }
 
   /* Error */
   .error-banner {
@@ -525,6 +604,10 @@
   <div class="complete-emoji">🎉</div>
   <div class="complete-title">お疲れさまでした！</div>
   <div class="complete-sub" id="completeMsg">5問完了。毎日続けることで、英語が口から自然に出るようになります。</div>
+
+  <div id="reviewList" style="width:100%;margin:8px 0;display:flex;flex-direction:column;gap:10px;"></div>
+
+  <button class="btn-pdf" onclick="printPDF()">📄 PDFで保存</button>
   <button class="btn-again" onclick="restartSameMode()">もう一度（同じモード）</button>
   <button class="btn-change" onclick="backToSetup()">モードを変える</button>
 </div>
@@ -797,6 +880,56 @@ function showComplete() {
     ? '5問完了！シンガポールの友人との会話で、今日の表現を使ってみてください。'
     : '5問完了！実際のビジネスシーンで、今日の表現を使ってみてください。';
   document.getElementById('completeMsg').textContent = msg;
+
+  // 振り返りリスト生成
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  questions.forEach((q, i) => {
+    if (!q) return;
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    card.innerHTML = `
+      <div class="review-scene">🎬 ${q.scene}</div>
+      <div class="review-jp">💬 ${q.japanese}</div>
+      <div class="review-en">✅ ${q.english}</div>
+      <div class="review-wrong">❌ ${q.wrong_example}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function printPDF() {
+  // 印刷用エリアを生成
+  let existing = document.getElementById('printArea');
+  if (existing) existing.remove();
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ja-JP');
+  const modeStr = currentMode === 'casual' ? 'カジュアル' : 'ビジネス';
+
+  let items = '';
+  questions.forEach((q, i) => {
+    if (!q) return;
+    items += `
+      <div class="print-item">
+        <div class="print-num">Q${i+1}</div>
+        <div class="print-scene">${q.scene}</div>
+        <div class="print-jp">${q.japanese}</div>
+        <div class="print-en">${q.english}</div>
+        <div class="print-wrong">${q.wrong_example}</div>
+        <div class="print-note">💡 ${q.note}</div>
+      </div>`;
+  });
+
+  const printArea = document.createElement('div');
+  printArea.id = 'printArea';
+  printArea.innerHTML = `
+    <div class="print-header">瞬間英作文 ─ ${modeStr}モード</div>
+    ${items}
+    <div class="print-footer">${dateStr}</div>
+  `;
+  document.body.appendChild(printArea);
+  window.print();
 }
 
 function restartSameMode() {
