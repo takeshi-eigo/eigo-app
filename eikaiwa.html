@@ -4,650 +4,159 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>瞬間英作文</title>
-
 <style>
-:root {
-  --bg: #f7f6f3;
-  --white: #ffffff;
-  --border: #e4e1d9;
-  --border2: #eeece7;
-  --text: #1c1a17;
-  --text2: #6b6860;
-  --text3: #b0ada4;
-  --green: #2d6a4f;
-  --green-light: #eaf3ee;
-  --gold: #b07d3a;
-  --gold-light: #fdf3e3;
-  --red-light: #fdf0ee;
-  --red: #c0392b;
-  --radius: 16px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
-}
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:var(--bg); color:var(--text); font-family:-apple-system,'Helvetica Neue',sans-serif; min-height:100vh; max-width:480px; margin:0 auto; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue',sans-serif;min-height:100vh;max-width:480px;margin:0 auto}
 
-/* ── TOP PAGE ── */
-#topPage { display:flex; flex-direction:column; min-height:100vh; }
+/* TOP */
+#topPage{display:flex;flex-direction:column;min-height:100vh}
+.top-header{background:#fff;border-bottom:1px solid #eeece7;padding:20px 20px 16px}
+.top-header h1{font-size:28px;font-weight:700;color:#1c1a17}
+.top-date{font-size:12px;color:#b0ada4;margin-top:2px}
+.search-row{display:flex;gap:8px;margin-top:14px}
+.search-input{flex:1;min-width:0;padding:10px 14px;border:1.5px solid #e4e1d9;border-radius:10px;font-size:14px;background:#f7f6f3;color:#1c1a17;outline:none}
+.search-input:focus{border-color:#2d6a4f}
+.btn-add{flex-shrink:0;padding:10px 14px;border-radius:10px;border:none;background:#2d6a4f;color:#fff;font-size:13px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.theme-list{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 20px;text-align:center;color:#b0ada4}
+.empty-icon{font-size:48px}
+.empty-title{font-size:16px;color:#6b6860;font-weight:500}
+.empty-sub{font-size:13px;line-height:1.7}
+.theme-card{background:#fff;border-radius:16px;border:1px solid #e4e1d9;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 16px rgba(0,0,0,.06);touch-action:manipulation}
+.theme-icon{width:44px;height:44px;border-radius:10px;background:#eaf3ee;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.theme-info{flex:1;min-width:0}
+.theme-name{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.theme-meta{font-size:12px;color:#b0ada4;margin-top:2px}
+.theme-arrow{color:#b0ada4;font-size:18px}
 
-.top-header {
-  background:var(--white);
-  border-bottom:1px solid var(--border2);
-  padding:20px 20px 16px;
-  width:100%;
-  box-sizing:border-box;
-}
-.top-header h1 {
-  font-family:'Georgia',serif;
-  font-size:28px;
-  font-weight:600;
-  color:var(--text);
-  letter-spacing:0.02em;
-}
-.top-date {
-  font-size:12px;
-  color:var(--text3);
-  margin-top:2px;
-  letter-spacing:0.06em;
-}
-.search-row {
-  display:flex;
-  gap:8px;
-  margin-top:14px;
-  width:100%;
-}
-.search-input {
-  flex:1;
-  min-width:0;
-  padding:10px 14px;
-  border:1.5px solid var(--border);
-  border-radius:10px;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  background:var(--bg);
-  color:var(--text);
-  outline:none;
-  transition:border-color 0.2s;
-}
-.search-input:focus { border-color:var(--green); }
-.btn-add {
-  flex-shrink:0;
-  padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  background:var(--green);
-  color:white;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:13px;
-  font-weight:500;
-  cursor:pointer;
-  white-space:nowrap;
-  transition:opacity 0.15s;
-}
-.btn-add:active { opacity:0.85; }
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.on{display:flex}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:480px}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:8px}
+.modal-sub{font-size:13px;color:#6b6860;line-height:1.7;margin-bottom:16px}
+.file-pick-btn{width:100%;padding:24px;border-radius:12px;border:2px dashed #2d6a4f;background:#eaf3ee;color:#2d6a4f;font-size:15px;font-weight:700;cursor:pointer;touch-action:manipulation;text-align:center;display:block}
+.file-pick-btn:active{background:#d4ece0}
+.modal-error{font-size:12px;color:#c0392b;margin-top:8px;display:none}
+.modal-btns{margin-top:14px}
+.btn-close{width:100%;padding:14px;border-radius:12px;border:1.5px solid #e4e1d9;background:#fff;font-size:14px;color:#6b6860;cursor:pointer;touch-action:manipulation}
 
-.theme-list {
-  flex:1;
-  padding:16px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  overflow-y:auto;
-}
-.empty-state {
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  padding:60px 20px;
-  text-align:center;
-  color:var(--text3);
-}
-.empty-icon { font-size:48px; }
-.empty-title { font-size:16px; color:var(--text2); font-weight:500; }
-.empty-sub { font-size:13px; line-height:1.7; }
+/* STUDY */
+#studyPage{display:none;flex-direction:column;min-height:100vh}
+.study-header{background:#fff;border-bottom:1px solid #eeece7;padding:16px 20px;display:flex;align-items:center;gap:12px}
+.btn-back{width:36px;height:36px;border-radius:50%;border:1.5px solid #e4e1d9;background:#fff;cursor:pointer;font-size:16px;flex-shrink:0;touch-action:manipulation}
+.study-title{font-size:16px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.study-count{font-size:13px;color:#b0ada4;white-space:nowrap}
+.progress-bar-wrap{background:#fff;padding:0 20px 14px}
+.progress-dots{display:flex;gap:6px}
+.dot{flex:1;height:3px;border-radius:2px;background:#e4e1d9;transition:background .3s}
+.dot.done{background:#2d6a4f}
+.dot.current{background:#b07d3a}
+.card-area{flex:1;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.flashcard-wrap{width:100%;perspective:1000px}
+.flashcard{width:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-face{width:100%;background:#fff;border-radius:16px;border:1px solid #e4e1d9;box-shadow:0 8px 40px rgba(0,0,0,.10);padding:24px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card-back{position:absolute;top:0;left:0;transform:rotateY(180deg)}
+.face-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#b0ada4;margin-bottom:14px}
+.scene-block{margin-bottom:18px;padding:12px 14px;background:#f7f6f3;border-radius:10px;border-left:3px solid #2d6a4f}
+.scene-ja{font-size:13px;color:#6b6860;line-height:1.7;margin-bottom:4px}
+.scene-en{font-size:12px;color:#b0ada4;line-height:1.7;font-style:italic}
+.jp-sentence{font-size:22px;font-weight:500;color:#1c1a17;line-height:1.6;letter-spacing:.02em}
+.tap-hint{margin-top:20px;font-size:12px;color:#b0ada4;text-align:center}
+.back-section{margin-bottom:14px}
+.back-section:last-child{margin-bottom:0}
+.back-label{font-size:11px;font-weight:500;letter-spacing:.08em;margin-bottom:6px}
+.back-label.correct{color:#2d6a4f}
+.back-label.wrong{color:#c0392b}
+.back-label.note{color:#b07d3a}
+.en-answer{font-size:22px;font-weight:500;color:#1c1a17;line-height:1.6;width:100%;border:none;outline:none;background:transparent;resize:none;cursor:pointer;padding:0;overflow:hidden;font-family:-apple-system,'Helvetica Neue',sans-serif}
+.wrong-ex{font-size:14px;color:#b0ada4;text-decoration:line-through;line-height:1.6}
+.note-box{font-size:13px;color:#6b6860;line-height:1.8;padding:10px 12px;background:#fdf3e3;border-radius:8px;border-left:3px solid #b07d3a}
+.divider{height:1px;background:#eeece7;margin:12px 0}
+.study-btns{padding:0 20px 36px;display:flex;flex-direction:column;gap:10px}
+.btn-flip{width:100%;padding:16px;border-radius:12px;border:none;background:#2d6a4f;color:#fff;font-size:15px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.btn-next{width:100%;padding:14px;border-radius:12px;border:1.5px solid #e4e1d9;background:#fff;color:#6b6860;font-size:14px;cursor:pointer;touch-action:manipulation}
 
-.theme-card {
-  background:var(--white);
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  padding:16px 18px;
-  box-shadow:var(--shadow);
-  cursor:pointer;
-  transition:all 0.15s;
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-.theme-card:active { transform:scale(0.98); }
-.theme-icon {
-  width:44px; height:44px;
-  border-radius:10px;
-  background:var(--green-light);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  flex-shrink:0;
-}
-.theme-info { flex:1; min-width:0; }
-.theme-name {
-  font-size:15px;
-  font-weight:500;
-  color:var(--text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.theme-meta {
-  font-size:12px;
-  color:var(--text3);
-  margin-top:2px;
-}
-.theme-arrow { color:var(--text3); font-size:18px; }
+/* REVIEW */
+#reviewPage{display:none;flex-direction:column;min-height:100vh}
+.review-header{background:#fff;border-bottom:1px solid #eeece7;padding:20px;display:flex;align-items:center;gap:12px}
+.review-title{font-size:22px;font-weight:700}
+.review-body{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.review-card{background:#fff;border-radius:12px;border:1px solid #e4e1d9;padding:14px 16px}
+.review-num{font-size:10px;color:#b0ada4;letter-spacing:.08em;margin-bottom:4px}
+.review-scene-ja{font-size:11px;color:#b0ada4;line-height:1.5;margin-bottom:6px}
+.review-jp{font-size:14px;font-weight:500;color:#1c1a17;margin-bottom:6px}
+.review-en{font-size:16px;font-weight:500;color:#2d6a4f;margin-bottom:3px}
+.review-wrong{font-size:12px;color:#b0ada4;text-decoration:line-through}
+.review-footer{padding:16px 20px 36px;display:flex;flex-direction:column;gap:10px}
+.btn-pdf{width:100%;padding:14px;border-radius:12px;border:1.5px solid #2d6a4f;background:#eaf3ee;color:#2d6a4f;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.btn-home{width:100%;padding:14px;border-radius:12px;border:1.5px solid #e4e1d9;background:#fff;color:#6b6860;font-size:14px;cursor:pointer;touch-action:manipulation}
 
-/* ── IMPORT MODAL ── */
-.modal-overlay {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.4);
-  z-index:100;
-  align-items:flex-end;
-  justify-content:center;
-}
-.modal-overlay.open { display:flex; }
-.modal {
-  background:var(--white);
-  border-radius:20px 20px 0 0;
-  padding:24px 20px 40px;
-  width:100%;
-  max-width:480px;
-  animation:slideUp 0.3s ease;
-}
-@keyframes slideUp {
-  from { transform:translateY(100%); }
-  to { transform:translateY(0); }
-}
-.modal-title {
-  font-size:17px;
-  font-weight:500;
-  margin-bottom:14px;
-}
-.modal-textarea {
-  width:100%;
-  height:160px;
-  padding:12px;
-  border:1.5px solid var(--border);
-  border-radius:10px;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:12px;
-  color:var(--text);
-  background:var(--bg);
-  outline:none;
-  resize:none;
-  line-height:1.6;
-}
-.modal-textarea:focus { border-color:var(--green); }
-.modal-hint {
-  font-size:11px;
-  color:var(--text3);
-  margin-top:6px;
-  line-height:1.6;
-}
-.modal-btns {
-  display:flex;
-  gap:10px;
-  margin-top:14px;
-}
-.btn-cancel {
-  flex:1;
-  padding:13px;
-  border-radius:10px;
-  border:1.5px solid var(--border);
-  background:var(--white);
-  color:var(--text2);
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  cursor:pointer;
-}
-.btn-import {
-  flex:2;
-  padding:13px;
-  border-radius:10px;
-  border:none;
-  background:var(--green);
-  color:white;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  font-weight:500;
-  cursor:pointer;
-}
-.modal-error {
-  font-size:12px;
-  color:var(--red);
-  margin-top:8px;
-  display:none;
-}
-
-/* ── STUDY PAGE ── */
-#studyPage { display:none; flex-direction:column; min-height:100vh; }
-
-.study-header {
-  background:var(--white);
-  border-bottom:1px solid var(--border2);
-  padding:16px 20px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.btn-back {
-  width:36px; height:36px;
-  border-radius:50%;
-  border:1.5px solid var(--border);
-  background:var(--white);
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  flex-shrink:0;
-}
-.study-title {
-  font-size:16px;
-  font-weight:500;
-  flex:1;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.study-count {
-  font-size:13px;
-  color:var(--text3);
-  white-space:nowrap;
-}
-
-.progress-bar-wrap {
-  background:var(--white);
-  padding:0 20px 14px;
-}
-.progress-dots {
-  display:flex;
-  gap:6px;
-}
-.dot {
-  flex:1;
-  height:3px;
-  border-radius:2px;
-  background:var(--border);
-  transition:background 0.3s;
-}
-.dot.done { background:var(--green); }
-.dot.current { background:var(--gold); }
-
-.card-area {
-  flex:1;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-/* フラッシュカード */
-.flashcard-wrap {
-  width:100%;
-  perspective:1000px;
-}
-.flashcard {
-  width:100%;
-  position:relative;
-  transform-style:preserve-3d;
-  transition:transform 0.5s ease;
-  cursor:pointer;
-}
-.flashcard.flipped { transform:rotateY(180deg); }
-
-.card-face {
-  width:100%;
-  background:var(--white);
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow-lg);
-  padding:24px 20px;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-}
-.card-back {
-  position:absolute;
-  top:0; left:0;
-  transform:rotateY(180deg);
-}
-
-/* 表面 */
-.face-label {
-  font-size:11px;
-  font-weight:500;
-  letter-spacing:0.1em;
-  text-transform:uppercase;
-  color:var(--text3);
-  margin-bottom:14px;
-}
-.scene-block {
-  margin-bottom:18px;
-  padding:12px 14px;
-  background:var(--bg);
-  border-radius:10px;
-  border-left:3px solid var(--green);
-}
-.scene-ja {
-  font-size:13px;
-  color:var(--text2);
-  line-height:1.7;
-  margin-bottom:4px;
-}
-.scene-en {
-  font-size:12px;
-  color:var(--text3);
-  line-height:1.7;
-  font-style:italic;
-}
-.jp-sentence {
-  font-size:22px;
-  font-weight:500;
-  color:var(--text);
-  line-height:1.6;
-  letter-spacing:0.02em;
-}
-.tap-hint {
-  margin-top:20px;
-  font-size:12px;
-  color:var(--text3);
-  text-align:center;
-  letter-spacing:0.05em;
-}
-
-/* 裏面 */
-.back-section { margin-bottom:14px; }
-.back-section:last-child { margin-bottom:0; }
-.back-label {
-  font-size:11px;
-  font-weight:500;
-  letter-spacing:0.08em;
-  margin-bottom:6px;
-}
-.back-label.correct { color:var(--green); }
-.back-label.wrong { color:var(--red); }
-.back-label.note { color:var(--gold); }
-.en-answer {
-  font-size:22px;
-  font-weight:500;
-  color:var(--text);
-  line-height:1.6;
-  width:100%;
-  border:none;
-  outline:none;
-  background:transparent;
-  resize:none;
-  cursor:pointer;
-  padding:0;
-  overflow:hidden;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-}
-.wrong-ex {
-  font-size:14px;
-  color:var(--text3);
-  text-decoration:line-through;
-  line-height:1.6;
-}
-.note-box {
-  font-size:13px;
-  color:var(--text2);
-  line-height:1.8;
-  padding:10px 12px;
-  background:var(--gold-light);
-  border-radius:8px;
-  border-left:3px solid var(--gold);
-}
-.divider { height:1px; background:var(--border2); margin:12px 0; }
-
-/* ボタン */
-.study-btns {
-  padding:0 20px 36px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.btn-flip {
-  width:100%;
-  padding:16px;
-  border-radius:12px;
-  border:none;
-  background:var(--green);
-  color:white;
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:15px;
-  font-weight:500;
-  cursor:pointer;
-  transition:opacity 0.15s;
-}
-.btn-flip:active { opacity:0.85; }
-.btn-next {
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:1.5px solid var(--border);
-  background:var(--white);
-  color:var(--text2);
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  cursor:pointer;
-}
-
-/* ── REVIEW PAGE ── */
-#reviewPage { display:none; flex-direction:column; min-height:100vh; }
-
-.review-header {
-  background:var(--white);
-  border-bottom:1px solid var(--border2);
-  padding:20px;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.review-title {
-  font-family:'Georgia',serif;
-  font-size:22px;
-  font-weight:600;
-}
-
-.review-body {
-  flex:1;
-  padding:16px 20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  overflow-y:auto;
-}
-.review-card {
-  background:var(--white);
-  border-radius:12px;
-  border:1px solid var(--border);
-  padding:14px 16px;
-  box-shadow:var(--shadow);
-}
-.review-num {
-  font-size:10px;
-  color:var(--text3);
-  letter-spacing:0.08em;
-  margin-bottom:4px;
-}
-.review-scene-ja {
-  font-size:11px;
-  color:var(--text3);
-  line-height:1.5;
-  margin-bottom:6px;
-}
-.review-jp {
-  font-size:14px;
-  font-weight:500;
-  color:var(--text);
-  margin-bottom:6px;
-}
-.review-en {
-  font-size:16px;
-  font-weight:500;
-  color:var(--green);
-  margin-bottom:3px;
-}
-.review-wrong {
-  font-size:12px;
-  color:var(--text3);
-  text-decoration:line-through;
-}
-
-.review-footer {
-  padding:16px 20px 36px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.btn-pdf {
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:1.5px solid var(--green);
-  background:var(--green-light);
-  color:var(--green);
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  font-weight:500;
-  cursor:pointer;
-}
-.btn-home {
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:1.5px solid var(--border);
-  background:var(--white);
-  color:var(--text2);
-  font-family:-apple-system,'Helvetica Neue',sans-serif;
-  font-size:14px;
-  cursor:pointer;
-}
-
-.file-select-label {
-  display:block;
-  width:100%;
-  border-radius:12px;
-  border:2px dashed var(--green);
-  background:var(--green-light);
-  text-align:center;
-  cursor:pointer;
-}
-.file-select-inner {
-  padding:24px 20px;
-}
-.loading-spinner {
-  width:32px; height:32px;
-  border:2px solid var(--border);
-  border-top-color:var(--green);
-  border-radius:50%;
-  animation:spin 0.8s linear infinite;
-  margin-bottom:8px;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* PDF印刷 */
-@media print {
-  @page { size:A4 portrait; margin:10mm; }
-  body * { visibility:hidden; }
-  #printArea, #printArea * { visibility:visible; }
-  #printArea {
-    position:fixed;
-    top:0; left:0;
-    width:100%;
-    font-family:-apple-system,'Helvetica Neue',sans-serif;
-  }
-  .p-header {
-    font-size:14px;
-    font-weight:bold;
-    color:#2d6a4f;
-    border-bottom:2px solid #2d6a4f;
-    padding-bottom:5px;
-    margin-bottom:10px;
-  }
-  .p-item {
-    margin-bottom:8px;
-    padding:7px 10px;
-    border-left:2px solid #2d6a4f;
-    background:#f9f9f7;
-    page-break-inside:avoid;
-  }
-  .p-num { font-size:9px; color:#aaa; }
-  .p-scene { font-size:9px; color:#999; margin:2px 0; line-height:1.4; }
-  .p-jp { font-size:12px; font-weight:500; margin:3px 0; }
-  .p-en { font-size:14px; font-weight:bold; color:#2d6a4f; margin:2px 0; }
-  .p-wrong { font-size:9px; color:#ccc; text-decoration:line-through; }
-  .p-note { font-size:9px; color:#777; margin-top:2px; line-height:1.4; }
-  .p-footer { font-size:9px; color:#bbb; text-align:right; margin-top:8px; }
+/* PRINT */
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{position:fixed;top:0;left:0;width:100%;font-family:sans-serif}
+  .p-header{font-size:14px;font-weight:bold;color:#2d6a4f;border-bottom:2px solid #2d6a4f;padding-bottom:5px;margin-bottom:10px}
+  .p-item{margin-bottom:8px;padding:7px 10px;border-left:2px solid #2d6a4f;background:#f9f9f7;page-break-inside:avoid}
+  .p-num{font-size:9px;color:#aaa}
+  .p-scene{font-size:9px;color:#999;margin:2px 0;line-height:1.4}
+  .p-jp{font-size:12px;font-weight:500;margin:3px 0}
+  .p-en{font-size:14px;font-weight:bold;color:#2d6a4f;margin:2px 0}
+  .p-wrong{font-size:9px;color:#ccc;text-decoration:line-through}
+  .p-note{font-size:9px;color:#777;margin-top:2px;line-height:1.4}
+  .p-footer{font-size:9px;color:#bbb;text-align:right;margin-top:8px}
 }
 </style>
 </head>
 <body>
 
-<!-- ══ TOP PAGE ══ -->
+<!-- TOP -->
 <div id="topPage">
   <div class="top-header">
     <h1>瞬間英作文</h1>
     <div class="top-date" id="topDate"></div>
     <div class="search-row">
-      <input class="search-input" type="search" placeholder="テーマを検索..." id="searchInput" oninput="renderThemeList()" />
-      <button class="btn-add" onclick="openModal()">＋ 問題を追加</button>
+      <input class="search-input" type="search" placeholder="テーマを検索..." id="searchInput" oninput="renderList()">
+      <button class="btn-add" onclick="openImport()">＋ 問題を追加</button>
     </div>
   </div>
   <div class="theme-list" id="themeList"></div>
 </div>
 
-<!-- ══ IMPORT MODAL ══ -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-  <div class="modal">
+<!-- MODAL -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-box">
     <div class="modal-title">📥 問題を追加</div>
-    <div class="modal-hint" style="margin-bottom:16px;color:var(--text2);font-size:13px;line-height:1.7;">GeminiのGemで生成したJSONファイルを選択してください。複数まとめて選択すれば一括インポートできます。</div>
-    <label class="file-select-label" id="fileSelectLabel" for="fileInput">
-      <input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="onFileSelected(event)" />
-      <div class="file-select-inner">
-        <div style="font-size:28px;margin-bottom:6px;">📂</div>
-        <div style="font-size:15px;font-weight:500;color:var(--green);">JSONファイルを選択</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:4px;">複数選択可</div>
-      </div>
-    </label>
-    <div class="modal-error" id="modalError"></div>
-    <div class="modal-btns" style="margin-top:14px;">
-      <button class="btn-cancel" onclick="closeModal()">閉じる</button>
+    <div class="modal-sub">GeminiのGemで生成したJSONファイルを選択してください。複数まとめて選択すれば一括インポートできます。</div>
+    <input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="handleFiles(this.files)">
+    <button class="file-pick-btn" onclick="document.getElementById('fileInput').click()">
+      📂 JSONファイルを選択<br><span style="font-size:12px;font-weight:400;opacity:.7">複数選択可</span>
+    </button>
+    <div class="modal-error" id="importError"></div>
+    <div class="modal-btns">
+      <button class="btn-close" onclick="closeImport()">閉じる</button>
     </div>
   </div>
 </div>
 
-<!-- ══ STUDY PAGE ══ -->
+<!-- STUDY -->
 <div id="studyPage">
   <div class="study-header">
-    <button class="btn-back" onclick="backToTop()">←</button>
+    <button class="btn-back" onclick="showPage('top')">←</button>
     <div class="study-title" id="studyTitle"></div>
     <div class="study-count" id="studyCount"></div>
   </div>
   <div class="progress-bar-wrap">
     <div class="progress-dots" id="studyDots"></div>
   </div>
-  <div class="card-area" id="cardArea">
+  <div class="card-area">
     <div class="flashcard-wrap">
       <div class="flashcard" id="flashcard" onclick="flipCard()">
-        <!-- 表面 -->
-        <div class="card-face card-front">
+        <div class="card-face">
           <div class="face-label">💬 日本語</div>
           <div class="scene-block">
             <div class="scene-ja" id="sceneJa"></div>
@@ -656,7 +165,6 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,'Helve
           <div class="jp-sentence" id="jpSentence"></div>
           <div class="tap-hint">タップして英語を確認 →</div>
         </div>
-        <!-- 裏面 -->
         <div class="card-face card-back">
           <div class="face-label">🇬🇧 英語</div>
           <div class="back-section">
@@ -678,326 +186,269 @@ body { background:var(--bg); color:var(--text); font-family:-apple-system,'Helve
     </div>
   </div>
   <div class="study-btns">
-    <button class="btn-flip" id="btnFlip" onclick="handleFlipBtn()">めくる</button>
+    <button class="btn-flip" id="btnFlip" onclick="flipCard()">めくる</button>
     <button class="btn-next" id="btnNext" style="display:none" onclick="nextCard()">次の問題 →</button>
   </div>
 </div>
 
-<!-- ══ REVIEW PAGE ══ -->
+<!-- REVIEW -->
 <div id="reviewPage">
   <div class="review-header">
-    <button class="btn-back" onclick="backToTop()">←</button>
+    <button class="btn-back" onclick="showPage('top')">←</button>
     <div class="review-title">振り返り</div>
   </div>
   <div class="review-body" id="reviewBody"></div>
   <div class="review-footer">
     <button class="btn-pdf" onclick="printPDF()">📄 PDFで保存</button>
-    <button class="btn-home" onclick="backToTop()">トップへ戻る</button>
+    <button class="btn-home" onclick="showPage('top')">トップへ戻る</button>
   </div>
 </div>
 
 <script>
-// ──────────────────────────────
-// STATE
-// ──────────────────────────────
-let allThemes = [];
-let currentTheme = null;
-let currentIdx = 0;
-let isFlipped = false;
+/* ================================================
+   IndexedDB - app.htmlと同じ方式
+================================================ */
+var DB_NAME='eikaiwaDB3', DB_VER=1, DB_STORE='themes';
+var db=null;
 
-// ──────────────────────────────
-// TOP PAGE
-// ──────────────────────────────
-async function initApp() {
-  // 日付表示
-  const now = new Date();
-  document.getElementById('topDate').textContent =
-    now.toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
-
-  showPage('top');
-  await openDB();
-  allThemes = await loadFromDB();
-  renderThemeList();
+function openDB(){
+  return new Promise(function(resolve,reject){
+    var req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=function(e){
+      e.target.result.createObjectStore(DB_STORE,{keyPath:'_id',autoIncrement:true});
+    };
+    req.onsuccess=function(e){db=e.target.result;resolve(db);};
+    req.onerror=function(e){reject(e);};
+  });
 }
 
-function showLoading(show) {
-  const list = document.getElementById('themeList');
-  if (show) {
-    list.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><div class="empty-sub">読み込み中...</div></div>';
-  }
+function dbGetAll(){
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction(DB_STORE,'readonly');
+    var req=tx.objectStore(DB_STORE).getAll();
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=reject;
+  });
 }
 
-function renderThemeList() {
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  const filtered = q
-    ? allThemes.filter(t => t.theme.toLowerCase().includes(q))
-    : allThemes;
+function dbAdd(obj){
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction(DB_STORE,'readwrite');
+    var req=tx.objectStore(DB_STORE).add(obj);
+    req.onsuccess=function(){resolve();};
+    req.onerror=reject;
+  });
+}
 
-  const list = document.getElementById('themeList');
+/* ================================================
+   STATE
+================================================ */
+var allThemes=[];
+var currentTheme=null;
+var currentIdx=0;
+var isFlipped=false;
 
-  if (filtered.length === 0) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📚</div>
-        <div class="empty-title">${q ? '該当するテーマがありません' : '問題がまだありません'}</div>
-        <div class="empty-sub">${q ? '別のキーワードで検索してみてください。' : '「＋ 問題を追加」ボタンからJSONを追加してください。'}</div>
-      </div>`;
+/* ================================================
+   TOP PAGE
+================================================ */
+function loadHome(){
+  dbGetAll().then(function(themes){
+    allThemes=themes;
+    renderList();
+  });
+}
+
+function renderList(){
+  var q=document.getElementById('searchInput').value.trim().toLowerCase();
+  var filtered=q ? allThemes.filter(function(t){return t.theme.toLowerCase().indexOf(q)>=0;}) : allThemes;
+  var list=document.getElementById('themeList');
+  if(filtered.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">'+(q?'該当するテーマがありません':'問題がまだありません')+'</div><div class="empty-sub">'+(q?'別のキーワードで検索してみてください。':'「＋ 問題を追加」ボタンからJSONを追加してください。')+'</div></div>';
     return;
   }
-
-  // 新しい順に表示
-  const sorted = [...filtered].reverse();
-  list.innerHTML = sorted.map(t => {
-    const icons = { casual:'🍽️', biz:'💼', default:'📖' };
-    const icon = icons[t.category] || icons.default;
-    const dateStr = t.date ? new Date(t.date).toLocaleDateString('ja-JP', { month:'numeric', day:'numeric' }) : '';
-    return `
-      <div class="theme-card" onclick="startStudy(${t.id})">
-        <div class="theme-icon">${icon}</div>
-        <div class="theme-info">
-          <div class="theme-name">${t.theme}</div>
-          <div class="theme-meta">${dateStr}　${t.cards.length}問</div>
-        </div>
-        <div class="theme-arrow">›</div>
-      </div>`;
+  var sorted=filtered.slice().reverse();
+  list.innerHTML=sorted.map(function(t){
+    var d=t.date ? new Date(t.date).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'}) : '';
+    return '<div class="theme-card" onclick="startStudy('+t._id+')"><div class="theme-icon">📖</div><div class="theme-info"><div class="theme-name">'+t.theme+'</div><div class="theme-meta">'+d+'　'+t.cards.length+'問</div></div><div class="theme-arrow">›</div></div>';
   }).join('');
 }
 
-// ──────────────────────────────
-// IMPORT MODAL
-// ──────────────────────────────
-function openModal() {
-  document.getElementById('jsonInput').value = '';
-  document.getElementById('modalError').style.display = 'none';
-  document.getElementById('modalOverlay').classList.add('open');
-}
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
+/* ================================================
+   IMPORT
+================================================ */
+function openImport(){
+  document.getElementById('fileInput').value='';
+  document.getElementById('importError').style.display='none';
+  document.getElementById('importModal').classList.add('on');
 }
 
-function onFileSelected(event) {
-  const files = Array.from(event.target.files);
-  if (!files.length) return;
-  const errEl = document.getElementById('modalError');
-  errEl.style.display = 'none';
+function closeImport(){
+  document.getElementById('importModal').classList.remove('on');
+  loadHome();
+}
 
-  let loaded = 0;
-  let errors = [];
+function handleFiles(files){
+  if(!files||files.length===0)return;
+  var total=files.length;
+  var done=0, errors=[];
 
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = async e => {
-      try {
-        const raw = e.target.result;
-        const clean = raw.replace(/```json|```/g, '').trim();
-        const data = JSON.parse(clean);
-        if (!data.theme || !Array.isArray(data.cards) || data.cards.length === 0) {
-          throw new Error(file.name + ': theme と cards が必要です');
+  Array.from(files).forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var raw=e.target.result.replace(/```json|```/g,'').trim();
+        var data=JSON.parse(raw);
+        if(!data.theme||!Array.isArray(data.cards)||data.cards.length===0){
+          errors.push(file.name+': theme と cards が必要です');
+          done++; checkDone();return;
         }
-        await saveTheme(data);
-      } catch(e) {
-        errors.push(e.message);
-      }
-      loaded++;
-      if (loaded === files.length) {
-        if (errors.length > 0) {
-          errEl.textContent = errors.join('\n');
-          errEl.style.display = 'block';
-        } else {
-          closeModal();
-        }
-        allThemes = await loadFromDB();
-        renderThemeList();
+        dbAdd(data).then(function(){
+          done++; checkDone();
+        }).catch(function(){
+          errors.push(file.name+': 保存エラー');
+          done++; checkDone();
+        });
+      }catch(err){
+        errors.push(file.name+': JSON解析エラー');
+        done++; checkDone();
       }
     };
-    reader.readAsText(file);
+    reader.readAsText(file,'utf-8');
   });
+
+  function checkDone(){
+    if(done<total)return;
+    var errEl=document.getElementById('importError');
+    if(errors.length>0){
+      errEl.textContent=errors.join('\n');
+      errEl.style.display='block';
+    } else {
+      closeImport();
+    }
+  }
 }
 
-// IndexedDB
-const DB_NAME = 'eikaiwaDB2';
-const DB_VER = 1;
-let db2;
-
-function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains('themes')) {
-        d.createObjectStore('themes', { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    req.onsuccess = e => { db2 = e.target.result; res(); };
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function saveTheme(data) {
-  return new Promise((res, rej) => {
-    const tx = db2.transaction('themes', 'readwrite');
-    const req = tx.objectStore('themes').add(data);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function loadFromDB() {
-  return new Promise((res, rej) => {
-    const tx = db2.transaction('themes', 'readonly');
-    const req = tx.objectStore('themes').getAll();
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-// ──────────────────────────────
-// STUDY
-// ──────────────────────────────
-async function startStudy(id) {
-  currentTheme = allThemes.find(t => t.id === id);
-  if (!currentTheme) return;
-  currentIdx = 0;
-  isFlipped = false;
-
-  document.getElementById('studyTitle').textContent = currentTheme.theme;
-  buildStudyDots();
+/* ================================================
+   STUDY
+================================================ */
+function startStudy(id){
+  var found=null;
+  for(var i=0;i<allThemes.length;i++){
+    if(allThemes[i]._id===id){found=allThemes[i];break;}
+  }
+  if(!found)return;
+  currentTheme=found;
+  currentIdx=0;
+  isFlipped=false;
+  document.getElementById('studyTitle').textContent=currentTheme.theme;
+  buildDots();
   renderCard(0);
   showPage('study');
 }
 
-function buildStudyDots() {
-  const total = currentTheme.cards.length;
-  document.getElementById('studyDots').innerHTML =
-    Array.from({length: total}, (_, i) =>
-      `<div class="dot${i === 0 ? ' current' : ''}" id="sdot${i}"></div>`
-    ).join('');
-}
-
-function updateStudyDots(idx) {
-  const total = currentTheme.cards.length;
-  for (let i = 0; i < total; i++) {
-    const d = document.getElementById('sdot' + i);
-    if (!d) continue;
-    d.className = 'dot' + (i < idx ? ' done' : i === idx ? ' current' : '');
+function buildDots(){
+  var total=currentTheme.cards.length;
+  var html='';
+  for(var i=0;i<total;i++){
+    html+='<div class="dot'+(i===0?' current':'') +'" id="sdot'+i+'"></div>';
   }
-  document.getElementById('studyCount').textContent = `${idx + 1} / ${total}`;
+  document.getElementById('studyDots').innerHTML=html;
 }
 
-function renderCard(idx) {
-  const card = currentTheme.cards[idx];
-  if (!card) return;
+function updateDots(idx){
+  var total=currentTheme.cards.length;
+  for(var i=0;i<total;i++){
+    var d=document.getElementById('sdot'+i);
+    if(!d)continue;
+    d.className='dot'+(i<idx?' done':i===idx?' current':'');
+  }
+  document.getElementById('studyCount').textContent=(idx+1)+' / '+total;
+}
 
-  // リセット
-  isFlipped = false;
+function renderCard(idx){
+  var card=currentTheme.cards[idx];
+  if(!card)return;
+  isFlipped=false;
   document.getElementById('flashcard').classList.remove('flipped');
-  document.getElementById('btnFlip').textContent = 'めくる';
-  document.getElementById('btnFlip').style.display = 'block';
-  document.getElementById('btnNext').style.display = 'none';
-
-  // 表面
-  document.getElementById('sceneJa').textContent = card.scene_ja || '';
-  document.getElementById('sceneEn').textContent = card.scene_en || '';
-  document.getElementById('jpSentence').textContent = card.japanese || '';
-
-  // 裏面
-  document.getElementById('enAnswer').value = card.english || '';
-  document.getElementById('wrongEx').textContent = card.wrong_example || '';
-  document.getElementById('noteBox').textContent = card.note || '';
-
-  // textarea高さ自動調整
-  setTimeout(() => {
-    const ta = document.getElementById('enAnswer');
-    ta.style.height = 'auto';
-    ta.style.height = ta.scrollHeight + 'px';
-  }, 100);
-
-  updateStudyDots(idx);
+  document.getElementById('btnFlip').style.display='block';
+  document.getElementById('btnNext').style.display='none';
+  document.getElementById('sceneJa').textContent=card.scene_ja||'';
+  document.getElementById('sceneEn').textContent=card.scene_en||'';
+  document.getElementById('jpSentence').textContent=card.japanese||'';
+  document.getElementById('enAnswer').value=card.english||'';
+  document.getElementById('wrongEx').textContent=card.wrong_example||'';
+  document.getElementById('noteBox').textContent=card.note||'';
+  var ta=document.getElementById('enAnswer');
+  setTimeout(function(){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';},100);
+  updateDots(idx);
 }
 
-function flipCard() {
-  if (!isFlipped) {
-    isFlipped = true;
+function flipCard(){
+  if(!isFlipped){
+    isFlipped=true;
     document.getElementById('flashcard').classList.add('flipped');
-    document.getElementById('btnFlip').style.display = 'none';
-    document.getElementById('btnNext').style.display = 'block';
+    document.getElementById('btnFlip').style.display='none';
+    document.getElementById('btnNext').style.display='block';
   }
 }
 
-function handleFlipBtn() { flipCard(); }
-
-function nextCard() {
+function nextCard(){
   currentIdx++;
-  if (currentIdx >= currentTheme.cards.length) {
+  if(currentIdx>=currentTheme.cards.length){
     showReview();
   } else {
     renderCard(currentIdx);
   }
 }
 
-function backToTop() {
-  showPage('top');
-  renderThemeList();
-}
-
-// ──────────────────────────────
-// REVIEW
-// ──────────────────────────────
-function showReview() {
-  const body = document.getElementById('reviewBody');
-  body.innerHTML = currentTheme.cards.map((c, i) => `
-    <div class="review-card">
-      <div class="review-num">Q${i + 1}</div>
-      <div class="review-scene-ja">🎬 ${c.scene_ja || ''}</div>
-      <div class="review-jp">${c.japanese}</div>
-      <div class="review-en">✅ ${c.english}</div>
-      <div class="review-wrong">❌ ${c.wrong_example}</div>
-    </div>
-  `).join('');
+/* ================================================
+   REVIEW
+================================================ */
+function showReview(){
+  var html='';
+  for(var i=0;i<currentTheme.cards.length;i++){
+    var c=currentTheme.cards[i];
+    html+='<div class="review-card"><div class="review-num">Q'+(i+1)+'</div><div class="review-scene-ja">🎬 '+(c.scene_ja||'')+'</div><div class="review-jp">'+(c.japanese||'')+'</div><div class="review-en">✅ '+(c.english||'')+'</div><div class="review-wrong">❌ '+(c.wrong_example||'')+'</div></div>';
+  }
+  document.getElementById('reviewBody').innerHTML=html;
   showPage('review');
 }
 
-function printPDF() {
-  let el = document.getElementById('printArea');
-  if (el) el.remove();
-
-  const dateStr = new Date().toLocaleDateString('ja-JP');
-  const items = currentTheme.cards.map((c, i) => `
-    <div class="p-item">
-      <div class="p-num">Q${i+1}</div>
-      <div class="p-scene">${c.scene_ja}</div>
-      <div class="p-jp">${c.japanese}</div>
-      <div class="p-en">${c.english}</div>
-      <div class="p-wrong">${c.wrong_example}</div>
-      <div class="p-note">💡 ${c.note}</div>
-    </div>`).join('');
-
-  const printArea = document.createElement('div');
-  printArea.id = 'printArea';
-  printArea.innerHTML = `
-    <div class="p-header">瞬間英作文 ─ ${currentTheme.theme}</div>
-    ${items}
-    <div class="p-footer">${dateStr}</div>`;
-  document.body.appendChild(printArea);
+function printPDF(){
+  var el=document.getElementById('printArea');
+  if(el)el.remove();
+  var dateStr=new Date().toLocaleDateString('ja-JP');
+  var items='';
+  for(var i=0;i<currentTheme.cards.length;i++){
+    var c=currentTheme.cards[i];
+    items+='<div class="p-item"><div class="p-num">Q'+(i+1)+'</div><div class="p-scene">'+(c.scene_ja||'')+'</div><div class="p-jp">'+(c.japanese||'')+'</div><div class="p-en">'+(c.english||'')+'</div><div class="p-wrong">'+(c.wrong_example||'')+'</div><div class="p-note">💡 '+(c.note||'')+'</div></div>';
+  }
+  var div=document.createElement('div');
+  div.id='printArea';
+  div.innerHTML='<div class="p-header">瞬間英作文 ─ '+currentTheme.theme+'</div>'+items+'<div class="p-footer">'+dateStr+'</div>';
+  document.body.appendChild(div);
   window.print();
 }
 
-// ──────────────────────────────
-// PAGE ROUTING
-// ──────────────────────────────
-function showPage(page) {
-  document.getElementById('topPage').style.display    = page === 'top'    ? 'flex' : 'none';
-  document.getElementById('studyPage').style.display  = page === 'study'  ? 'flex' : 'none';
-  document.getElementById('reviewPage').style.display = page === 'review' ? 'flex' : 'none';
+/* ================================================
+   PAGE ROUTING
+================================================ */
+function showPage(page){
+  document.getElementById('topPage').style.display=page==='top'?'flex':'none';
+  document.getElementById('studyPage').style.display=page==='study'?'flex':'none';
+  document.getElementById('reviewPage').style.display=page==='review'?'flex':'none';
+  if(page==='top')loadHome();
 }
 
-// ──────────────────────────────
-// INIT
-// ──────────────────────────────
-initApp();
+/* ================================================
+   INIT
+================================================ */
+var now=new Date();
+document.getElementById('topDate').textContent=now.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+
+openDB().then(function(){
+  loadHome();
+});
 </script>
 </body>
 </html>
