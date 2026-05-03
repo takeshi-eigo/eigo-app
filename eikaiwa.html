@@ -94,6 +94,12 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 .btn-pdf{width:100%;padding:14px;border-radius:12px;border:1.5px solid #2d6a4f;background:#eaf3ee;color:#2d6a4f;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation}
 .btn-home{width:100%;padding:14px;border-radius:12px;border:1.5px solid #e4e1d9;background:#fff;color:#6b6860;font-size:14px;cursor:pointer;touch-action:manipulation}
 
+.btn-speak{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:20px;border:1.5px solid #2d6a4f;background:#eaf3ee;color:#2d6a4f;font-size:12px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.btn-speak:active{opacity:.8}
+.btn-speak-sm{margin-top:6px;margin-bottom:8px}
+.review-en-label{font-size:11px;font-weight:500;color:#2d6a4f;letter-spacing:.08em;margin-bottom:4px}
+.review-en-text{width:100%;font-size:16px;font-weight:500;color:#1c1a17;border:none;outline:none;background:transparent;resize:none;cursor:pointer;padding:0;overflow:hidden;font-family:-apple-system,'Helvetica Neue',sans-serif;line-height:1.6}
+
 /* PRINT */
 @media print{
   @page{size:A4 portrait;margin:10mm}
@@ -170,6 +176,7 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
           <div class="back-section">
             <div class="back-label correct">✓ ネイティブはこう言う</div>
             <textarea class="en-answer" id="enAnswer" readonly onclick="event.stopPropagation();this.select()" rows="2"></textarea>
+            <button class="btn-speak" onclick="event.stopPropagation();speakText(document.getElementById('enAnswer').value)">🔊 読み上げ</button>
           </div>
           <div class="divider"></div>
           <div class="back-section">
@@ -408,7 +415,7 @@ function showReview(){
   var html='';
   for(var i=0;i<currentTheme.cards.length;i++){
     var c=currentTheme.cards[i];
-    html+='<div class="review-card"><div class="review-num">Q'+(i+1)+'</div><div class="review-scene-ja">🎬 '+(c.scene_ja||'')+'</div><div class="review-jp">'+(c.japanese||'')+'</div><div class="review-en">✅ '+(c.english||'')+'</div><div class="review-wrong">❌ '+(c.wrong_example||'')+'</div></div>';
+    html+='<div class="review-card"><div class="review-num">Q'+(i+1)+'</div><div class="review-scene-ja">🎬 '+(c.scene_ja||'')+'</div><div class="review-jp">'+(c.japanese||'')+'</div><div class="review-en-label">✅ ネイティブはこう言う</div><textarea class="review-en-text" readonly onclick="this.select()">'+(c.english||'')+'</textarea><button class="btn-speak btn-speak-sm" onclick="speakText(this.previousElementSibling.value)">🔊 読み上げ</button><div class="review-wrong">❌ '+(c.wrong_example||'')+'</div></div>';
   }
   document.getElementById('reviewBody').innerHTML=html;
   showPage('review');
@@ -438,6 +445,18 @@ function showPage(page){
   document.getElementById('studyPage').style.display=page==='study'?'flex':'none';
   document.getElementById('reviewPage').style.display=page==='review'?'flex':'none';
   if(page==='top')loadHome();
+}
+
+/* ================================================
+   SPEAK
+================================================ */
+function speakText(text){
+  if(!text)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';
+  u.rate=0.9;
+  window.speechSynthesis.speak(u);
 }
 
 /* ================================================
