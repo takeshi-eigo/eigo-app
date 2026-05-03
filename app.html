@@ -125,7 +125,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .vchip.on{background:var(--theme);border-color:var(--theme);color:#fff}
 .vdetail{padding:16px 14px 0}
 .vdhead{margin-bottom:12px}
-.vbig{font-size:24px;font-weight:700;color:#1d1d1f;line-height:1.2}
+.vbig{font-size:24px;font-weight:700;color:#1d1d1f;line-height:1.2;-webkit-user-select:text;user-select:text;cursor:text}
 .vrow{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
 .vph{font-size:13px;color:#888;font-family:'Courier New',monospace}
 .vpos-tag{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--theme-bg);color:var(--theme);font-weight:700}
@@ -138,10 +138,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .ex-toggle{font-size:12px;padding:5px 11px;border-radius:20px;border:1.5px solid #ccc;background:#fff;color:#666;cursor:pointer;touch-action:manipulation;font-weight:600}
 .ex-toggle.on{background:var(--theme);color:#fff;border-color:var(--theme)}
 .ex-list{display:flex;flex-direction:column;gap:8px}
-.expair{border:1px solid #e8e8e8;border-radius:10px;padding:10px 12px;cursor:pointer;touch-action:manipulation}
+.expair{border:1px solid #e8e8e8;border-radius:10px;padding:10px 12px;touch-action:manipulation}
 .expair:active{background:#f8f8f8}
-.exen{font-size:14px;color:#1d1d1f;line-height:1.6;font-weight:500;transition:filter .2s,opacity .2s}
-.exja{font-size:13px;color:#666;margin-top:4px;line-height:1.5;transition:filter .2s,opacity .2s}
+.exen{font-size:14px;color:#1d1d1f;line-height:1.6;font-weight:500;transition:filter .2s,opacity .2s;-webkit-user-select:text;user-select:text;cursor:text}
+.exja{font-size:13px;color:#666;margin-top:4px;line-height:1.5;transition:filter .2s,opacity .2s;-webkit-user-select:text;user-select:text;cursor:text}
 .ex-hidden{opacity:0;user-select:none;pointer-events:none;filter:blur(4px)}
 .quiz-wrap{padding:0 0 16px}
 .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -255,7 +255,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <div class="modal-sub">articlesフォルダ内のJSONファイルを選択してください。<br>複数まとめて選択すれば一括インポートできます。</div>
     <input type="file" id="fileInput" accept=".json" multiple style="display:none" onchange="handleFiles(this.files)">
     <button class="file-pick-btn" onclick="document.getElementById('fileInput').click()">
-      📂 JSONファイルを選択<br><span style="font-size:12px;font-weight:400;opacity:.7">複数選択可</span>
+      📂 JSONファイルを選択<br><span style="font-size:12px;font-weight:400;opacity:.7">複数選択可（全17件を一括選択してOK）</span>
     </button>
     <div class="import-progress" id="importProgress"></div>
     <div class="import-result" id="importResult"></div>
@@ -690,13 +690,24 @@ function renderVocab(idx){
   if(idx!==undefined)vIdx=idx;
   var v=curVD[vIdx];if(!v)return;
   var wrap=document.getElementById('vDetailWrap');
-  var exRows=v.ex.map(function(e,ei){return'<div class="expair" onclick="revealEx('+ei+')" id="exp'+ei+'"><div class="exen" id="exen'+ei+'">'+esc(e.e)+'</div><div class="exja" id="exja'+ei+'">'+esc(e.j)+'</div></div>';}).join('');
-  wrap.innerHTML='<div class="vdetail"><div class="vdhead"><div class="vbig">'+esc(v.word)+'</div><div class="vrow"><span class="vph">'+esc(v.pron)+'</span><span class="vpos-tag">'+esc(v.pos.split('（')[0].substring(0,6))+'</span><button class="spkbtn" onclick="spk(\''+v.word.replace(/'/g,"\\'")+'\')">🔊 発音</button></div><div class="vdef">'+esc(v.def)+'</div></div><div class="divl"></div><div class="ex-head"><div class="vsec">例文（5つ）</div><div class="ex-toggles"><button class="ex-toggle on" id="togEn" onclick="toggleEx(\'en\')">英文</button><button class="ex-toggle on" id="togJa" onclick="toggleEx(\'ja\')">和文</button></div></div><div class="ex-list" id="exList">'+exRows+'</div><div class="divl"></div><div id="quizWrap" class="quiz-wrap"></div><div class="divl"></div><div style="padding-bottom:20px"><div class="vsec">類義語</div><div class="chips">'+v.syns.map(function(s){return'<span class="chip">'+esc(s)+'</span>';}).join('')+'</div><div class="vsec" style="margin-top:10px">対義語</div><div class="chips">'+v.ants.map(function(a){return'<span class="chip chipa">'+esc(a)+'</span>';}).join('')+'</div></div></div>';
+  var exRows=v.ex.map(function(e,ei){return'<div class="expair" id="exp'+ei+'" onclick="revealEx('+ei+')"><div class="exen" id="exen'+ei+'" onclick="selectText(this,event)">'+esc(e.e)+'</div><div class="exja" id="exja'+ei+'" onclick="selectText(this,event)">'+esc(e.j)+'</div></div>';}).join('');
+  wrap.innerHTML='<div class="vdetail"><div class="vdhead"><div class="vbig" onclick=\"selectText(this,event)\">'+esc(v.word)+'</div><div class="vrow"><span class="vph">'+esc(v.pron)+'</span><span class="vpos-tag">'+esc(v.pos.split('（')[0].substring(0,6))+'</span><button class="spkbtn" onclick="spk(\''+v.word.replace(/'/g,"\\'")+'\')">🔊 発音</button></div><div class="vdef">'+esc(v.def)+'</div></div><div class="divl"></div><div class="ex-head"><div class="vsec">例文（5つ）</div><div class="ex-toggles"><button class="ex-toggle on" id="togEn" onclick="toggleEx(\'en\')">英文</button><button class="ex-toggle on" id="togJa" onclick="toggleEx(\'ja\')">和文</button></div></div><div class="ex-list" id="exList">'+exRows+'</div><div class="divl"></div><div id="quizWrap" class="quiz-wrap"></div><div class="divl"></div><div style="padding-bottom:20px"><div class="vsec">類義語</div><div class="chips">'+v.syns.map(function(s){return'<span class="chip">'+esc(s)+'</span>';}).join('')+'</div><div class="vsec" style="margin-top:10px">対義語</div><div class="chips">'+v.ants.map(function(a){return'<span class="chip chipa">'+esc(a)+'</span>';}).join('')+'</div></div></div>';
   applyExVisibility();buildQuiz();
 }
 
 function toggleEx(type){if(type==='en'){exShowEn=!exShowEn;document.getElementById('togEn').className='ex-toggle'+(exShowEn?' on':'');}else{exShowJa=!exShowJa;document.getElementById('togJa').className='ex-toggle'+(exShowJa?' on':'');}applyExVisibility();}
 function applyExVisibility(){curVD[vIdx].ex.forEach(function(_,i){var en=document.getElementById('exen'+i);var ja=document.getElementById('exja'+i);if(en)en.className='exen'+(exShowEn?'':' ex-hidden');if(ja)ja.className='exja'+(exShowJa?'':' ex-hidden');});}
+function selectText(el,ev){
+  ev.stopPropagation();
+  // テキスト全選択
+  if(window.getSelection){
+    var sel=window.getSelection();
+    var range=document.createRange();
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
 function revealEx(i){var en=document.getElementById('exen'+i);var ja=document.getElementById('exja'+i);if(en)en.className='exen';if(ja)ja.className='exja';}
 
 function buildQuiz(){
