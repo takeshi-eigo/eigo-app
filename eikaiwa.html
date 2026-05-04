@@ -450,22 +450,31 @@ function unflipCard(){
   }
 }
 
+var isAnimating=false;
 function nextCard(){
+  if(isAnimating) return;
+  isAnimating=true;
   var card=document.getElementById('flashcard');
+  // アニメクラスをリセットしてから付与
+  card.classList.remove('slide-out-left','slide-in-right','flipped');
+  void card.offsetWidth; // reflow
   card.classList.add('slide-out-left');
   setTimeout(function(){
     currentIdx++;
     if(currentIdx>=currentTheme.cards.length){
+      isAnimating=false;
       showReview();
     } else {
       card.classList.remove('slide-out-left','flipped');
       renderCard(currentIdx);
+      void card.offsetWidth; // reflow
       card.classList.add('slide-in-right');
       setTimeout(function(){
         card.classList.remove('slide-in-right');
-      },250);
+        isAnimating=false;
+      },260);
     }
-  },250);
+  },260);
 }
 
 /* ================================================
