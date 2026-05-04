@@ -43,28 +43,32 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 
 /* STUDY */
 #studyPage{display:none;flex-direction:column;min-height:100vh}
-.study-header{background:#fff;border-bottom:1px solid #eeece7;padding:16px 20px;display:flex;align-items:center;gap:12px}
+.study-header{background:#fff;border-bottom:1px solid #eeece7;padding:10px 20px;display:flex;align-items:center;gap:12px}
 .btn-back{width:36px;height:36px;border-radius:50%;border:1.5px solid #e4e1d9;background:#fff;cursor:pointer;font-size:16px;flex-shrink:0;touch-action:manipulation}
 .study-title{font-size:16px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .study-count{font-size:13px;color:#b0ada4;white-space:nowrap}
-.progress-bar-wrap{background:#fff;padding:0 20px 14px}
+.progress-bar-wrap{background:#fff;padding:0 20px 8px}
 .progress-dots{display:flex;gap:6px}
 .dot{flex:1;height:3px;border-radius:2px;background:#e4e1d9;transition:background .3s}
 .dot.done{background:#2d6a4f}
 .dot.current{background:#b07d3a}
-.card-area{flex:1;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.card-area{flex:1;padding:8px 20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:0}
 .flashcard-wrap{width:100%;perspective:1000px}
-.flashcard{width:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer}
+.flashcard{width:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;min-height:100px}
 .flashcard.flipped{transform:rotateY(180deg)}
-.card-face{width:100%;background:#fff;border-radius:16px;border:1px solid #e4e1d9;box-shadow:0 8px 40px rgba(0,0,0,.10);padding:24px 20px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flashcard.slide-out-left{animation:slideOutLeft .25s ease forwards}
+.flashcard.slide-in-right{animation:slideInRight .25s ease forwards}
+@keyframes slideOutLeft{from{transform:translateX(0);opacity:1}to{transform:translateX(-110%);opacity:0}}
+@keyframes slideInRight{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.card-face{width:100%;background:#fff;border-radius:16px;border:1px solid #e4e1d9;box-shadow:0 8px 40px rgba(0,0,0,.10);padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .card-back{position:absolute;top:0;left:0;transform:rotateY(180deg)}
 .face-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#b0ada4;margin-bottom:14px}
-.scene-block{margin-bottom:18px;padding:12px 14px;background:#f7f6f3;border-radius:10px;border-left:3px solid #2d6a4f}
+.scene-block{margin-bottom:10px;padding:8px 12px;background:#f7f6f3;border-radius:10px;border-left:3px solid #2d6a4f}
 .scene-ja{font-size:13px;color:#6b6860;line-height:1.7;margin-bottom:4px}
 .scene-en{font-size:12px;color:#b0ada4;line-height:1.7;font-style:italic}
 .jp-sentence{font-size:22px;font-weight:500;color:#1c1a17;line-height:1.6;letter-spacing:.02em}
 .tap-hint{margin-top:20px;font-size:12px;color:#b0ada4;text-align:center}
-.back-section{margin-bottom:14px}
+.back-section{margin-bottom:8px}
 .back-section:last-child{margin-bottom:0}
 .back-label{font-size:11px;font-weight:500;letter-spacing:.08em;margin-bottom:6px}
 .back-label.correct{color:#2d6a4f}
@@ -73,10 +77,11 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 .en-answer{font-size:22px;font-weight:500;color:#1c1a17;line-height:1.6;width:100%;border:none;outline:none;background:transparent;resize:none;cursor:pointer;padding:0;overflow:hidden;font-family:-apple-system,'Helvetica Neue',sans-serif}
 .wrong-ex{font-size:14px;color:#b0ada4;text-decoration:line-through;line-height:1.6}
 .note-box{font-size:13px;color:#6b6860;line-height:1.8;padding:10px 12px;background:#fdf3e3;border-radius:8px;border-left:3px solid #b07d3a}
-.divider{height:1px;background:#eeece7;margin:12px 0}
-.study-btns{padding:0 20px 36px;display:flex;flex-direction:column;gap:10px}
-.btn-flip{width:100%;padding:16px;border-radius:12px;border:none;background:#2d6a4f;color:#fff;font-size:15px;font-weight:500;cursor:pointer;touch-action:manipulation}
-.btn-next{width:100%;padding:14px;border-radius:12px;border:1.5px solid #e4e1d9;background:#fff;color:#6b6860;font-size:14px;cursor:pointer;touch-action:manipulation}
+.divider{height:1px;background:#eeece7;margin:6px 0}
+.study-btns{padding:6px 20px 24px;display:flex;flex-direction:column;gap:8px}
+.btn-flip{width:100%;padding:20px;border-radius:14px;border:none;background:#2d6a4f;color:#fff;font-size:19px;font-weight:700;cursor:pointer;touch-action:manipulation;letter-spacing:.05em}
+.btn-next{width:100%;padding:20px;border-radius:14px;border:none;background:#2d6a4f;color:#fff;font-size:19px;font-weight:700;cursor:pointer;touch-action:manipulation;letter-spacing:.05em}
+.btn-back-top{width:100%;padding:20px;border-radius:14px;border:1.5px solid #2d6a4f;background:#fff;color:#2d6a4f;font-size:19px;font-weight:700;cursor:pointer;touch-action:manipulation}
 
 /* REVIEW */
 #reviewPage{display:none;flex-direction:column;min-height:100vh}
@@ -158,10 +163,14 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
   <div class="progress-bar-wrap">
     <div class="progress-dots" id="studyDots"></div>
   </div>
+  <div style="padding:6px 20px 0">
+    <button class="btn-flip" id="btnFlipTop" onclick="flipCard()" style="display:block">めくる</button>
+    <button class="btn-back-top" id="btnBackTop" onclick="unflipCard()" style="display:none">← 表に戻る</button>
+  </div>
   <div class="card-area">
     <div class="flashcard-wrap">
-      <div class="flashcard" id="flashcard" onclick="flipCard()">
-        <div class="card-face">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face" onclick="flipCard()">
           <div class="face-label">💬 日本語</div>
           <div class="scene-block">
             <div class="scene-ja" id="sceneJa"></div>
@@ -170,7 +179,7 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
           <div class="jp-sentence" id="jpSentence"></div>
           <div class="tap-hint">タップして英語を確認 →</div>
         </div>
-        <div class="card-face card-back">
+        <div class="card-face card-back" onclick="handleBackTap(event)" style="cursor:pointer">
           <div class="face-label">🇬🇧 英語</div>
           <div class="back-section">
             <div class="back-label correct">✓ ネイティブはこう言う</div>
@@ -400,6 +409,8 @@ function renderCard(idx){
   document.getElementById('flashcard').classList.remove('flipped');
   document.getElementById('btnFlip').style.display='block';
   document.getElementById('btnNext').style.display='none';
+  document.getElementById('btnFlipTop').style.display='block';
+  document.getElementById('btnBackTop').style.display='none';
   document.getElementById('sceneJa').textContent=card.scene_ja||'';
   document.getElementById('sceneEn').textContent=card.scene_en||'';
   document.getElementById('jpSentence').textContent=card.japanese||'';
@@ -417,16 +428,44 @@ function flipCard(){
     document.getElementById('flashcard').classList.add('flipped');
     document.getElementById('btnFlip').style.display='none';
     document.getElementById('btnNext').style.display='block';
+    document.getElementById('btnFlipTop').style.display='none';
+    document.getElementById('btnBackTop').style.display='block';
+  }
+}
+
+function handleBackTap(e){
+  if(e.target.tagName==='TEXTAREA') return;
+  if(e.target.tagName==='BUTTON') return;
+  nextCard();
+}
+
+function unflipCard(){
+  if(isFlipped){
+    isFlipped=false;
+    document.getElementById('flashcard').classList.remove('flipped');
+    document.getElementById('btnFlip').style.display='block';
+    document.getElementById('btnNext').style.display='none';
+    document.getElementById('btnFlipTop').style.display='block';
+    document.getElementById('btnBackTop').style.display='none';
   }
 }
 
 function nextCard(){
-  currentIdx++;
-  if(currentIdx>=currentTheme.cards.length){
-    showReview();
-  } else {
-    renderCard(currentIdx);
-  }
+  var card=document.getElementById('flashcard');
+  card.classList.add('slide-out-left');
+  setTimeout(function(){
+    currentIdx++;
+    if(currentIdx>=currentTheme.cards.length){
+      showReview();
+    } else {
+      card.classList.remove('slide-out-left','flipped');
+      renderCard(currentIdx);
+      card.classList.add('slide-in-right');
+      setTimeout(function(){
+        card.classList.remove('slide-in-right');
+      },250);
+    }
+  },250);
 }
 
 /* ================================================
