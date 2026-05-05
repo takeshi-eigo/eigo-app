@@ -542,9 +542,9 @@ async function pasteFromClipboard() {
   try {
     const raw = await navigator.clipboard.readText();
     if (raw) {
-      document.getElementById('jsonInput').value = raw;
+      const fixed = fixJSON(raw);
+      document.getElementById('jsonInput').value = fixed;
       onInput();
-      if (!document.getElementById('filename').value) autoName();
       toast('📋 ペーストしました', 'success');
     }
   } catch(e) {
