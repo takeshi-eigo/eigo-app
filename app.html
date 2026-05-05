@@ -539,12 +539,14 @@ function openArticle(id){
     buildVocabPane();
     showArtPane('article');
     showScreen('screenArticle');
+    requestWakeLock();
     window.scrollTo(0,0);
   });
 }
 
 function goHome(){
   showScreen('screenHome');
+  releaseWakeLock();
   window.scrollTo(0,0);
 }
 
@@ -784,6 +786,33 @@ function showToast(msg){
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('./sw.js').catch(function(){});
 }
+
+/* ============ WAKE LOCK（記事表示中のみスリープ防止） ============ */
+var wakeLock=null;
+
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator))return;
+  if(wakeLock)return;
+  try{
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',function(){wakeLock=null;});
+  }catch(e){}
+}
+
+function releaseWakeLock(){
+  if(wakeLock){wakeLock.release();wakeLock=null;}
+}
+
+// バックグラウンド時は解除・復帰時に記事表示中なら再取得
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){
+    if(document.getElementById('screenArticle').classList.contains('on')){
+      requestWakeLock();
+    }
+  }else{
+    releaseWakeLock();
+  }
+});
 
 /* ================================================
    INIT

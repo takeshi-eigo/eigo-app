@@ -221,6 +221,33 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 
 <script>
 /* ================================================
+   WakeLock
+================================================ */
+var wakeLock=null;
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator)) return;
+  try{
+    if(wakeLock) return;
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',function(){wakeLock=null;});
+  }catch(e){}
+}
+function releaseWakeLock(){
+  if(wakeLock){wakeLock.release();wakeLock=null;}
+}
+// タブ復帰時に再取得
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){
+    var page=document.getElementById('studyPage');
+    var review=document.getElementById('reviewPage');
+    if(page&&page.style.display!=='none') requestWakeLock();
+    else if(review&&review.style.display!=='none') requestWakeLock();
+  } else {
+    releaseWakeLock();
+  }
+});
+
+/* ================================================
    IndexedDB - app.htmlと同じ方式
 ================================================ */
 var DB_NAME='eikaiwaDB3', DB_VER=1, DB_STORE='themes';
@@ -513,7 +540,8 @@ function showPage(page){
   document.getElementById('topPage').style.display=page==='top'?'flex':'none';
   document.getElementById('studyPage').style.display=page==='study'?'flex':'none';
   document.getElementById('reviewPage').style.display=page==='review'?'flex':'none';
-  if(page==='top')loadHome();
+  if(page==='top'){loadHome();releaseWakeLock();}
+  else{requestWakeLock();}
 }
 
 /* ================================================
