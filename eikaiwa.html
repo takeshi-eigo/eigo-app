@@ -56,10 +56,8 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 .flashcard-wrap{width:100%;perspective:1000px}
 .flashcard{width:100%;position:relative;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;min-height:100px}
 .flashcard.flipped{transform:rotateY(180deg)}
-.flashcard.slide-out-left{animation:slideOutLeft .25s ease forwards}
-.flashcard.slide-in-right{animation:slideInRight .25s ease forwards}
-@keyframes slideOutLeft{from{transform:translateX(0);opacity:1}to{transform:translateX(-110%);opacity:0}}
-@keyframes slideInRight{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideInRight{from{transform:translateX(40px) rotateY(-5deg);opacity:0}to{transform:translateX(0) rotateY(0);opacity:1}}
+.flashcard.slide-in-right{animation:slideInRight .2s ease forwards}
 .card-face{width:100%;background:#fff;border-radius:16px;border:1px solid #e4e1d9;box-shadow:0 8px 40px rgba(0,0,0,.10);padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .card-back{position:absolute;top:0;left:0;transform:rotateY(180deg)}
 .face-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#b0ada4;margin-bottom:14px}
@@ -477,31 +475,18 @@ function unflipCard(){
   }
 }
 
-var isAnimating=false;
 function nextCard(){
-  if(isAnimating) return;
-  isAnimating=true;
-  var card=document.getElementById('flashcard');
-  // アニメクラスをリセットしてから付与
-  card.classList.remove('slide-out-left','slide-in-right','flipped');
-  void card.offsetWidth; // reflow
-  card.classList.add('slide-out-left');
-  setTimeout(function(){
-    currentIdx++;
-    if(currentIdx>=currentTheme.cards.length){
-      isAnimating=false;
-      showReview();
-    } else {
-      card.classList.remove('slide-out-left','flipped');
-      renderCard(currentIdx);
-      void card.offsetWidth; // reflow
-      card.classList.add('slide-in-right');
-      setTimeout(function(){
-        card.classList.remove('slide-in-right');
-        isAnimating=false;
-      },260);
-    }
-  },260);
+  currentIdx++;
+  if(currentIdx>=currentTheme.cards.length){
+    showReview();
+  } else {
+    var card=document.getElementById('flashcard');
+    card.classList.remove('slide-in-right','flipped');
+    renderCard(currentIdx);
+    void card.offsetWidth;
+    card.classList.add('slide-in-right');
+    setTimeout(function(){card.classList.remove('slide-in-right');},220);
+  }
 }
 
 /* ================================================
