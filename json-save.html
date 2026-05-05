@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>JSON Save</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #00d4aa;
+    --accent2: #0099ff;
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --danger: #ff4d6d;
+    --success: #00d4aa;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  header h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  header span {
+    font-size: 13px;
+    color: var(--text2);
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .main {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* --- Filename row --- */
+  .filename-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .filename-row label {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+  }
+
+  .filename-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    min-width: 0;
+    transition: border-color 0.2s;
+  }
+  .filename-input:focus { border-color: var(--accent); }
+
+  .btn-auto {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 11px;
+    padding: 10px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-auto:active { background: var(--border); }
+
+  /* --- Textarea --- */
+  .textarea-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .textarea-label {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 10px;
+    padding: 1px 6px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+  .badge.valid { color: var(--accent); border-color: var(--accent); }
+  .badge.invalid { color: var(--danger); border-color: var(--danger); }
+
+  textarea {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 14px;
+    resize: none;
+    outline: none;
+    min-height: 260px;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--accent2); }
+  textarea.valid { border-color: var(--accent); }
+  textarea.invalid { border-color: var(--danger); }
+  textarea::placeholder { color: var(--text3); }
+
+  .clear-btn {
+    position: absolute;
+    top: 32px;
+    right: 10px;
+    background: var(--surface2);
+    border: none;
+    border-radius: 6px;
+    color: var(--text3);
+    font-size: 18px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .clear-btn:active { color: var(--danger); }
+
+  /* --- Save button --- */
+  .save-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 16px;
+    cursor: pointer;
+    width: 100%;
+    letter-spacing: -0.2px;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .save-btn:active { transform: scale(0.98); opacity: 0.9; }
+  .save-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+  /* --- Format btn row --- */
+  .format-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .format-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 12px;
+    padding: 9px 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .format-btn:active { background: var(--surface2); color: var(--text); }
+
+  /* --- Toast --- */
+  .toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 20px);
+    left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--accent); color: var(--accent); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+
+
+  /* --- Confirm modal --- */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px calc(env(safe-area-inset-bottom) + 24px);
+    width: 100%;
+    max-width: 600px;
+    animation: slideUp 0.25s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--text2); letter-spacing: 0.3px; text-transform: uppercase; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 6px; }
+  .modal-field input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 13px; padding: 10px 12px; outline: none;
+  }
+  .modal-field input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-cancel {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text2); font-size: 15px;
+    padding: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .modal-save {
+    flex: 2; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 10px; color: #000; font-size: 15px;
+    font-weight: 600; padding: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+
+  /* --- Folder hint --- */
+  .folder-hint {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    min-height: 34px;
+  }
+  .folder-hint.article { color: var(--accent2); border-color: var(--accent2); }
+  .folder-hint.instant { color: var(--accent); border-color: var(--accent); }
+
+  /* --- Stats bar --- */
+  .stats {
+    display: flex;
+    gap: 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .stats span { display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📦</div>
+  <h1>JSON → Dropbox</h1>
+  <span id="clock"></span>
+</header>
+
+<div class="main">
+
+  <!-- Filename -->
+  <div class="filename-row">
+    <label>ファイル名</label>
+    <input class="filename-input" id="filename" type="text" placeholder="article_001.json" value="">
+    <button class="btn-auto" onclick="autoName()">自動</button>
+  </div>
+
+  <!-- Format tools -->
+  <div class="format-row">
+    <button class="format-btn" onclick="formatJSON()">⚙ 整形</button>
+    <button class="format-btn" onclick="minifyJSON()">⚡ 圧縮</button>
+    <button class="format-btn" onclick="pasteFromClipboard()">📋 ペースト</button>
+    <button class="format-btn" onclick="fixJSONBtn()" style="color:#00d4aa;border-color:#00d4aa">🔧 修正</button>
+  </div>
+
+  <!-- Textarea -->
+  <div class="textarea-wrap">
+    <div class="textarea-label">
+      JSON
+      <span class="badge" id="validBadge">—</span>
+    </div>
+    <textarea id="jsonInput" placeholder="ここにGeminiが生成したJSONをペースト…" oninput="onInput()" spellcheck="false"></textarea>
+    <button class="clear-btn" onclick="clearAll()">✕</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <span>📄 <span id="charCount">0</span> chars</span>
+    <span>📏 <span id="lineCount">0</span> lines</span>
+    <span>💾 <span id="sizeCount">0</span> KB</span>
+  </div>
+
+  <!-- Folder hint -->
+  <div class="folder-hint" id="folderHint"></div>
+
+  <!-- Save -->
+  <button class="save-btn" id="saveBtn" onclick="saveToDropbox()" disabled>
+    <span>💾</span> Dropboxに保存
+  </button>
+
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>保存の確認</h2>
+    <div class="modal-field">
+      <label>保存先フォルダ（Dropbox内）</label>
+      <input type="text" id="modalPath" placeholder="Claude English / articles">
+    </div>
+    <div class="modal-field">
+      <label>ファイル名</label>
+      <input type="text" id="modalFilename" placeholder="article.json">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="modal-save" onclick="confirmSave()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.getHours().toString().padStart(2,'0') + ':' +
+    now.getMinutes().toString().padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Auto filename from JSON content
+function autoName() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  let name = '';
+  if (raw) {
+    try {
+      const obj = JSON.parse(raw);
+      // Try common keys
+      const candidates = ['title','id','slug','name','filename','topic','label'];
+      for (const k of candidates) {
+        if (obj[k] && typeof obj[k] === 'string') {
+          name = obj[k].replace(/[^a-zA-Z0-9_\-ぁ-んァ-ン一-龯]/g, '_').slice(0, 40);
+          break;
+        }
+      }
+    } catch(e) {}
+  }
+  if (!name) {
+    const now = new Date();
+    const ts = now.getFullYear().toString().slice(2) +
+      (now.getMonth()+1).toString().padStart(2,'0') +
+      now.getDate().toString().padStart(2,'0') + '_' +
+      now.getHours().toString().padStart(2,'0') +
+      now.getMinutes().toString().padStart(2,'0');
+    name = 'article_' + ts;
+  }
+  document.getElementById('filename').value = name + '.json';
+}
+
+// Validate & update UI
+function validateJSON(text) {
+  if (!text.trim()) return null;
+  try { JSON.parse(text); return true; }
+  catch(e) { return false; }
+}
+
+function onInput() {
+  const text = document.getElementById('jsonInput').value;
+  const valid = validateJSON(text);
+  const ta = document.getElementById('jsonInput');
+  const badge = document.getElementById('validBadge');
+  const btn = document.getElementById('saveBtn');
+
+  if (valid === true) {
+    ta.className = 'valid';
+    badge.textContent = '✓ valid';
+    badge.className = 'badge valid';
+    btn.disabled = false;
+    try {
+      const obj = JSON.parse(text);
+      updateFolderHint(detectType(obj));
+      // Auto-set filename if still showing timestamp pattern
+      const fn = document.getElementById('filename').value;
+      if (!fn || /^article_\d{6}_\d{4}\.json$/.test(fn)) {
+        autoName();
+      }
+    } catch(e) {}
+  } else if (valid === false) {
+    ta.className = 'invalid';
+    badge.textContent = '✗ invalid';
+    badge.className = 'badge invalid';
+    btn.disabled = true;
+    updateFolderHint(null);
+  } else {
+    ta.className = '';
+    badge.textContent = '—';
+    badge.className = 'badge';
+    btn.disabled = true;
+    updateFolderHint(null);
+  }
+
+  // Stats
+  document.getElementById('charCount').textContent = text.length.toLocaleString();
+  document.getElementById('lineCount').textContent = text ? text.split('\n').length : 0;
+  document.getElementById('sizeCount').textContent = (new Blob([text]).size / 1024).toFixed(1);
+}
+
+// Format / Minify
+function formatJSON() {
+  const ta = document.getElementById('jsonInput');
+  try {
+    ta.value = JSON.stringify(JSON.parse(ta.value), null, 2);
+    onInput();
+    toast('✓ 整形しました', 'success');
+  } catch(e) { toast('JSON が不正です', 'error'); }
+}
+
+function minifyJSON() {
+  const ta = document.getElementById('jsonInput');
+  try {
+    ta.value = JSON.stringify(JSON.parse(ta.value));
+    onInput();
+    toast('⚡ 圧縮しました', 'success');
+  } catch(e) { toast('JSON が不正です', 'error'); }
+}
+
+// Normalize smart/curly quotes → straight quotes
+function normalizeQuotes(text) {
+  return text
+    .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'");
+}
+
+// Fix JSON: escape unescaped " inside string values
+// Strategy: parse char by char tracking JSON structure
+function fixJSON(text) {
+  // Step 1: normalize curly quotes
+  text = normalizeQuotes(text);
+
+  // Step 2: escape unescaped quotes inside JSON string values
+  // Walk through the text character by character
+  let result = '';
+  let inString = false;
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (!inString) {
+      if (ch === '"') { inString = true; result += ch; i++; continue; }
+      result += ch; i++; continue;
+    }
+    // inside a string
+    if (ch === '\\') {
+      // escaped char - keep as-is
+      result += ch + (text[i+1] || '');
+      i += 2; continue;
+    }
+    if (ch === '"') {
+      // Could be end of string OR unescaped quote inside value
+      // Peek ahead: if followed by whitespace then : or , or ] or } → it's a closing quote
+      let j = i + 1;
+      while (j < text.length && (text[j] === ' ' || text[j] === '\t' || text[j] === '\n' || text[j] === '\r')) j++;
+      const next = text[j];
+      if (next === ':' || next === ',' || next === '}' || next === ']' || j >= text.length) {
+        // closing quote
+        inString = false; result += ch; i++; continue;
+      }
+      // unescaped quote inside string value → escape it
+      result += '\\"'; i++; continue;
+    }
+    result += ch; i++;
+  }
+  return result;
+}
+
+// Paste from clipboard
+async function pasteFromClipboard() {
+  try {
+    const raw = await navigator.clipboard.readText();
+    if (raw) {
+      document.getElementById('jsonInput').value = raw;
+      onInput();
+      if (!document.getElementById('filename').value) autoName();
+      toast('📋 ペーストしました', 'success');
+    }
+  } catch(e) {
+    document.getElementById('jsonInput').focus();
+    toast('テキストエリアをタップ → 長押しでペースト', '');
+  }
+}
+
+// Fix button
+function fixJSONBtn() {
+  const ta = document.getElementById('jsonInput');
+  if (!ta.value.trim()) { toast('テキストがありません', ''); return; }
+  const fixed = fixJSON(ta.value);
+  ta.value = fixed;
+  onInput();
+  const valid = validateJSON(fixed);
+  if (valid) {
+    toast('✓ 修正しました', 'success');
+  } else {
+    toast('修正しましたが、まだエラーがあります', 'error');
+  }
+}
+
+// Clear
+function clearAll() {
+  document.getElementById('jsonInput').value = '';
+  onInput();
+}
+
+// Open confirm modal
+function saveToDropbox() {
+  const text = document.getElementById('jsonInput').value.trim();
+  try { JSON.parse(text); } catch(e) { toast('JSONが不正です', 'error'); return; }
+
+  // Pre-fill modal
+  let filename = document.getElementById('filename').value.trim();
+  if (!filename) { autoName(); filename = document.getElementById('filename').value; }
+  if (!filename.endsWith('.json')) filename += '.json';
+
+  const hint = document.getElementById('folderHint').textContent;
+  let path = '';
+  if (hint.includes('articles')) path = 'Claude English / articles';
+  else if (hint.includes('瞬間英作文')) path = 'Claude English / 瞬間英作文問題集';
+
+  document.getElementById('modalFilename').value = filename;
+  document.getElementById('modalPath').value = path;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// Close modal on overlay tap
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Confirm and share
+function confirmSave() {
+  const text = document.getElementById('jsonInput').value.trim();
+  let filename = document.getElementById('modalFilename').value.trim();
+  if (!filename.endsWith('.json')) filename += '.json';
+
+  closeModal();
+
+  const blob = new Blob([text], { type: 'application/json' });
+  const file = new File([blob], filename, { type: 'application/json' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], title: filename })
+      .then(() => toast('✓ 共有シートを開きました', 'success'))
+      .catch(err => { if (err.name !== 'AbortError') toast('共有に失敗しました', 'error'); });
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url); toast('📥 ダウンロードしました', 'success');
+  }
+}
+
+// Toast
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2500);
+}
+
+// Init
+autoName();
+</script>
+</body>
+</html>
