@@ -80,7 +80,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 /* article cards */
 .pcard{background:#fff;border:1px solid #e0e0e0;border-radius:12px;margin-bottom:12px;overflow:hidden}
 .section-hdr{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:10px 14px 6px;border-bottom:1px solid #eee;color:var(--theme);background:var(--theme-bg)}
-.pen{padding:14px 14px 8px;font-size:15px;line-height:1.9;color:#1d1d1f}
+.pen{padding:14px 14px 8px;font-size:15px;line-height:1.9;color:#1d1d1f;-webkit-user-select:text;user-select:text;cursor:text}
 .pact{display:flex;gap:7px;padding:8px 14px;background:#f5f5f7}
 .pbtn{font-size:13px;padding:7px 13px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#444;cursor:pointer;font-weight:500;min-height:36px;touch-action:manipulation}
 .pbtn:active{background:#eee}
@@ -490,6 +490,7 @@ function handleFiles(files){
    ARTICLE SCREEN
 ================================================ */
 var currentArt=null;
+var savedArticleScrollY=0;
 var jaOn=true,boldOn=true,speakMode=false,vIdx=0,exShowEn=true,exShowJa=true,quizState=null;
 var curART=[],curVD=[],curGD=[],curVD_MAP={};
 
@@ -555,6 +556,9 @@ function showScreen(id){
 function showArtPane(name){
   document.getElementById('artPaneArticle').classList.toggle('on',name==='article');
   document.getElementById('artPaneVocab').classList.toggle('on',name==='vocab');
+  if(name==='article'&&savedArticleScrollY>0){
+    setTimeout(function(){window.scrollTo(0,savedArticleScrollY);savedArticleScrollY=0;},50);
+  }
   document.getElementById('artTabArticle').classList.toggle('on',name==='article');
   document.getElementById('artTabVocab').classList.toggle('on',name==='vocab');
   if(name==='article'){
@@ -587,7 +591,7 @@ function buildArticlePane(){
       notesHtml=(g.notes||[]).map(function(n){return'<div class="gnote"><b>'+esc(n.t)+'</b><br><br>'+n.b+'</div>';}).join('');
     }
     var bodyId='gb'+i;
-    d.innerHTML='<div class="pen">'+p.en+'</div>'
+    d.innerHTML='<div class="pen" onclick="selectPen(this,event)">'+p.en+'</div>'
       +'<div class="pact"><button class="pbtn" onclick="spk(curART['+i+'].plain)">🔊 読み上げ</button></div>'
       +'<div class="pja">'+p.ja+'</div>'
       +(g?'<div class="gram-toggle" onclick="toggleGram(\''+bodyId+'\',\'gta'+i+'\')">'
@@ -608,7 +612,7 @@ function buildArticlePane(){
     var w=el.getAttribute('data-w');
     if(w&&curVD_MAP[w]!==undefined){
       el.classList.add('linked');
-      el.addEventListener('click',function(ev){ev.stopPropagation();showArtPane('vocab');setTimeout(function(){goToVocab(curVD_MAP[w]);},80);});
+      el.addEventListener('click',function(ev){ev.stopPropagation();savedArticleScrollY=window.scrollY;showArtPane('vocab');setTimeout(function(){goToVocab(curVD_MAP[w]);},80);});
     }else{el.classList.add('nolink');}
   });
   normalWrap.querySelectorAll('.vhl-ja').forEach(function(el){el.classList.add('bold-on');});
@@ -697,6 +701,19 @@ function renderVocab(idx){
 
 function toggleEx(type){if(type==='en'){exShowEn=!exShowEn;document.getElementById('togEn').className='ex-toggle'+(exShowEn?' on':'');}else{exShowJa=!exShowJa;document.getElementById('togJa').className='ex-toggle'+(exShowJa?' on':'');}applyExVisibility();}
 function applyExVisibility(){curVD[vIdx].ex.forEach(function(_,i){var en=document.getElementById('exen'+i);var ja=document.getElementById('exja'+i);if(en)en.className='exen'+(exShowEn?'':' ex-hidden');if(ja)ja.className='exja'+(exShowJa?'':' ex-hidden');});}
+function selectPen(el,ev){
+  // vhl（重要単語）をタップした場合は何もしない（単語詳細へ飛ぶ）
+  if(ev.target.classList.contains('vhl')||ev.target.classList.contains('linked')){return;}
+  // それ以外の部分をタップしたらpen全体を選択
+  if(window.getSelection){
+    var sel=window.getSelection();
+    var range=document.createRange();
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  ev.stopPropagation();
+}
 function selectText(el,ev){
   ev.stopPropagation();
   // テキスト全選択
@@ -729,7 +746,27 @@ function nextQuiz(){var v=curVD[vIdx];var correct=v.syns[Math.floor(Math.random(
    UTILS
 ================================================ */
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function spk(txt){if(!window.speechSynthesis)return;var u=new SpeechSynthesisUtterance(txt);u.lang='en-US';u.rate=0.88;speechSynthesis.cancel();speechSynthesis.speak(u);}
+function spk(txt){
+  if(!window.speechSynthesis)return;
+  var u=new SpeechSynthesisUtterance(txt);
+  u.lang='en-US';
+  u.rate=0.88;
+  var voices=speechSynthesis.getVoices();
+  // Siri Voice 3 を最優先、次にSiri系、次にEnhanced系、最後に通常英語
+  var best=voices.find(function(v){
+    return v.name.includes('Siri') && v.name.includes('3');
+  })||voices.find(function(v){
+    return v.name.includes('Siri') && v.lang.includes('en');
+  })||voices.find(function(v){
+    return v.lang.includes('en-US')&&(v.name.includes('Enhanced')||v.name.includes('Premium'));
+  })||voices.find(function(v){
+    return v.lang.includes('en-US');
+  });
+  if(best)u.voice=best;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+window.speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices();};
 
 function hexToRgba(hex,alpha){
   var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
