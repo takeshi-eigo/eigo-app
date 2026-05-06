@@ -178,6 +178,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 /* ============ TOAST ============ */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
+/* ============ STUDY MENU ============ */
+.menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.menu-overlay.on{display:flex}
+.menu-box{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%}
+.menu-title{font-size:13px;font-weight:700;color:#aaa;text-align:center;margin-bottom:14px;letter-spacing:.05em;text-transform:uppercase}
+.menu-item{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:12px;cursor:pointer;touch-action:manipulation;margin-bottom:8px;background:#f5f5f7}
+.menu-item:active{background:#e8e8e8}
+.menu-item-icon{font-size:28px;flex-shrink:0}
+.menu-item-body{flex:1}
+.menu-item-title{font-size:16px;font-weight:700;color:#1d1d1f}
+.menu-item-desc{font-size:12px;color:#888;margin-top:2px}
+.menu-cancel{width:100%;padding:14px;border-radius:12px;border:none;background:#f5f5f7;color:#c0392b;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-top:4px}
+/* ============ STUDY SCREEN ============ */
+.study-hdr{background:#1d1d1f;padding:14px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px}
+.study-back{padding:7px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;white-space:nowrap}
+.study-hdr-title{font-size:16px;font-weight:800;color:#fff;flex:1}
+.study-body{padding:16px}
+.study-card{background:#fff;border-radius:16px;padding:24px 20px;margin-bottom:16px;border:1px solid #e0e0e0;min-height:160px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.study-q-label{font-size:14px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;background:#1d1d1f;padding:5px 14px;border-radius:20px}
+.study-q-main{font-size:22px;font-weight:800;color:#1d1d1f;line-height:1.35;margin-bottom:6px}
+.study-q-sub{font-size:14px;color:#888;line-height:1.5}
+.study-q-sentence{font-size:16px;color:#1d1d1f;line-height:1.8;font-weight:500}
+.study-blank{font-size:20px;font-weight:800;color:#1a5fa8;border-bottom:3px solid #1a5fa8;padding:0 8px;letter-spacing:.05em}
+.study-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.study-choice{padding:14px 10px;border-radius:12px;border:1.5px solid #e0e0e0;background:#fff;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation;text-align:center;color:#1d1d1f;line-height:1.4}
+.study-choice:active{background:#f0f0f0}
+.study-choice.correct{background:#f0fff4;border-color:#166534;color:#166534}
+.study-choice.wrong{background:#fff0f0;border-color:#c0392b;color:#c0392b}
+.study-feedback{padding:14px 16px;border-radius:12px;text-align:center;font-size:15px;font-weight:700;margin-bottom:16px;display:none}
+.study-feedback.ok{background:#f0fff4;color:#166534}
+.study-feedback.ng{background:#fff0f0;color:#c0392b}
+.study-next{width:100%;padding:14px;border-radius:12px;border:none;background:#1d1d1f;color:#fff;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation;display:none}
+.study-progress{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.study-progress-bar{flex:1;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden}
+.study-progress-fill{height:100%;background:#1d1d1f;border-radius:3px;transition:width .3s}
+.study-progress-text{font-size:13px;font-weight:700;color:#888;white-space:nowrap}
+.study-result{text-align:center;padding:30px 20px}
+.study-result-score{font-size:64px;font-weight:900;color:#1d1d1f;line-height:1}
+.study-result-label{font-size:16px;color:#888;margin-top:8px;margin-bottom:24px}
+.study-result-detail{font-size:14px;color:#555;margin-bottom:24px;line-height:1.8}
+.study-result-btn{width:100%;padding:14px;border-radius:12px;border:none;background:#1d1d1f;color:#fff;font-size:16px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:10px}
+.study-result-btn.sub{background:#f5f5f7;color:#1d1d1f}
+/* flash card */
+.flash-card{background:#fff;border-radius:16px;border:1px solid #e0e0e0;min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:28px 20px;margin-bottom:16px;cursor:pointer;touch-action:manipulation;position:relative;overflow:hidden}
+.flash-card:active{background:#f8f8f8}
+.flash-hint{font-size:12px;color:#bbb;position:absolute;bottom:12px;right:16px}
+.study-spk{background:transparent;border:none;font-size:26px;cursor:pointer;padding:8px;touch-action:manipulation;display:block;margin:8px auto 0}
+.study-selectable{-webkit-user-select:text;user-select:text;cursor:text}
+.study-choice-wrap{display:flex;align-items:center;gap:0;border:1.5px solid #e0e0e0;border-radius:12px;background:#fff;overflow:hidden;margin-bottom:0}
+.study-choice-wrap .study-choice{flex:1;border:none;border-radius:0;margin:0}
+.study-choice-spk{background:transparent;border:none;border-left:1px solid #e0e0e0;font-size:18px;padding:0 12px;cursor:pointer;touch-action:manipulation;height:100%;min-height:50px;flex-shrink:0}
+/* menu btn */
+.menu-trigger{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;padding:6px 10px;border-radius:8px;cursor:pointer;touch-action:manipulation;flex-shrink:0}
 /* ============ EMPTY STATE ============ */
 .empty-state{text-align:center;padding:60px 20px}
 .empty-icon{font-size:60px;margin-bottom:16px}
@@ -192,10 +245,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
   <div class="home-hdr">
     <div class="home-hdr-top">
       <span class="home-hdr-icon">📚</span>
-      <div>
+      <div style="flex:1">
         <div class="home-hdr-title">英語学習アプリ</div>
         <div class="home-hdr-sub">English Article Library</div>
       </div>
+      <button class="menu-trigger" onclick="openStudyMenu()">⋮</button>
     </div>
     <div class="stats-row">
       <div class="stat"><div class="stat-num" id="statArticles">0</div><div class="stat-lbl">記事数</div></div>
@@ -246,6 +300,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <div class="vchip-bar" id="vChipBar"></div>
     <div id="vDetailWrap"></div>
   </div>
+</div>
+
+<!-- ============ STUDY MENU ============ -->
+<div class="menu-overlay" id="studyMenu">
+  <div class="menu-box">
+    <div class="menu-title">学習メニュー</div>
+    <div class="menu-item" onclick="closeStudyMenu();startStudy('quiz')">
+      <div class="menu-item-icon">🧠</div>
+      <div class="menu-item-body">
+        <div class="menu-item-title">単語クイズ</div>
+        <div class="menu-item-desc">類義語・対義語 4択 10問</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="closeStudyMenu();startStudy('fill')">
+      <div class="menu-item-icon">✏️</div>
+      <div class="menu-item-body">
+        <div class="menu-item-title">穴埋め問題</div>
+        <div class="menu-item-desc">英文の重要単語を4択で答える</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="closeStudyMenu();startStudy('flash')">
+      <div class="menu-item-icon">🃏</div>
+      <div class="menu-item-body">
+        <div class="menu-item-title">フラッシュカード</div>
+        <div class="menu-item-desc">単語↔意味の4択</div>
+      </div>
+    </div>
+    <div class="menu-item" onclick="closeStudyMenu();openImport()">
+      <div class="menu-item-icon">📥</div>
+      <div class="menu-item-body">
+        <div class="menu-item-title">記事を追加</div>
+        <div class="menu-item-desc">JSONファイルをインポート</div>
+      </div>
+    </div>
+    <button class="menu-cancel" onclick="closeStudyMenu()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ============ STUDY SCREEN ============ -->
+<div class="screen" id="screenStudy">
+  <div class="study-hdr">
+    <button class="study-back" onclick="exitStudy()">← 戻る</button>
+    <div class="study-hdr-title" id="studyHdrTitle"></div>
+  </div>
+  <div class="study-body" id="studyBody"></div>
 </div>
 
 <!-- ============ IMPORT MODAL ============ -->
@@ -817,6 +916,296 @@ document.addEventListener('visibilitychange',function(){
 /* ================================================
    INIT
 ================================================ */
+/* ================================================
+   STUDY MENU
+================================================ */
+function openStudyMenu(){
+  document.getElementById('studyMenu').classList.add('on');
+}
+function closeStudyMenu(){
+  document.getElementById('studyMenu').classList.remove('on');
+}
+
+/* ================================================
+   STUDY ENGINE
+================================================ */
+var studyMode='',studyQuestions=[],studyIdx=0,studyCorrect=0;
+
+function exitStudy(){
+  showScreen('screenHome');
+  releaseWakeLock();
+}
+
+function startStudy(mode){
+  studyMode=mode;
+  studyIdx=0;
+  studyCorrect=0;
+
+  dbGetAll().then(function(rows){
+    // 全記事のvdをフラット化
+    var allVD=[];
+    rows.forEach(function(a){
+      var vd=Array.isArray(a.vd)?a.vd:(typeof a.vd==='string'?JSON.parse(a.vd):[]);
+      vd.forEach(function(v){allVD.push({v:v,articleTitle:a.title});});
+    });
+
+    if(allVD.length<4){
+      alert('記事をもっと追加してください（最低4単語必要）');return;
+    }
+
+    if(mode==='quiz'){
+      studyQuestions=buildQuizQuestions(allVD,10);
+      document.getElementById('studyHdrTitle').textContent='🧠 単語クイズ';
+    }else if(mode==='fill'){
+      var allART=[];
+      rows.forEach(function(a){
+        var art=Array.isArray(a.art)?a.art:(typeof a.art==='string'?JSON.parse(a.art):[]);
+        var vd=Array.isArray(a.vd)?a.vd:(typeof a.vd==='string'?JSON.parse(a.vd):[]);
+        art.forEach(function(p){allART.push({p:p,vd:vd,articleTitle:a.title||''});});
+      });
+      studyQuestions=buildFillQuestions(allART,allVD,10);
+      document.getElementById('studyHdrTitle').textContent='✏️ 穴埋め問題';
+    }else if(mode==='flash'){
+      studyQuestions=buildFlashQuestions(allVD,10);
+      document.getElementById('studyHdrTitle').textContent='🃏 フラッシュカード';
+    }
+
+    if(studyQuestions.length===0){
+      alert('問題を生成できませんでした。記事を追加してください。');return;
+    }
+
+    showScreen('screenStudy');
+    requestWakeLock();
+    renderStudyQuestion();
+  });
+}
+
+/* ---- 問題生成 ---- */
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+function buildQuizQuestions(allVD,n){
+  var qs=[];
+  var pool=shuffle(allVD).slice(0,Math.min(n*3,allVD.length));
+  pool.forEach(function(item){
+    var v=item.v;
+    // 類義語または対義語どちらかランダム
+    var useSyns=Math.random()>0.5;
+    var answers=useSyns?v.syns:v.ants;
+    if(!answers||answers.length===0){
+      answers=useSyns?v.ants:v.syns;
+    }
+    if(!answers||answers.length===0)return;
+    var correct=answers[Math.floor(Math.random()*answers.length)];
+    // 不正解の選択肢
+    var wrongs=[];
+    allVD.forEach(function(x){
+      if(x.v.word!==v.word){
+        (x.v.syns||[]).forEach(function(s){wrongs.push(s);});
+        (x.v.ants||[]).forEach(function(a){wrongs.push(a);});
+        wrongs.push(x.v.word);
+      }
+    });
+    wrongs=shuffle(wrongs.filter(function(w,i,self){
+      return self.indexOf(w)===i&&w!==correct&&!(answers||[]).includes(w);
+    })).slice(0,3);
+    if(wrongs.length<3)return;
+    var choices=shuffle([correct].concat(wrongs));
+    qs.push({
+      type:'quiz',
+      word:v.word,
+      def:v.def,
+      pron:v.pron,
+      isSyns:useSyns,
+      correct:correct,
+      choices:choices
+    });
+    if(qs.length>=n)return;
+  });
+  return qs.slice(0,n);
+}
+
+function buildFillQuestions(allART,allVD,n){
+  var qs=[];
+  var candidates=[];
+  allART.forEach(function(item){
+    var p=item.p;
+    var vd=item.vd;
+    if(!p.en||!p.plain)return;
+    var vhlWords=[];
+    var re=/<span class="vhl"[^>]*data-w="([^"]+)"[^>]*>([^<]+)<\/span>/g;
+    var m;
+    while((m=re.exec(p.en))!==null){
+      vhlWords.push({word:m[1],display:m[2]});
+    }
+    vhlWords.forEach(function(wObj){
+      var vEntry=vd.find(function(x){return x.word===wObj.word;});
+      if(!vEntry)return;
+      candidates.push({plain:p.plain,word:wObj.word,vd:vEntry,allVD:allVD,articleTitle:item.articleTitle||''});
+    });
+  });
+  candidates=shuffle(candidates);
+  candidates.forEach(function(c){
+    if(qs.length>=n)return;
+    var correct=c.word;
+    var sentence=c.plain.replace(correct,function(){return '___';});
+    // 不正解
+    var wrongs=shuffle(allVD.filter(function(x){return x.v.word!==correct;}))
+      .slice(0,3).map(function(x){return x.v.word;});
+    if(wrongs.length<3)return;
+    var choices=shuffle([correct].concat(wrongs));
+    qs.push({type:'fill',sentence:sentence,correct:correct,choices:choices,def:c.vd.def,articleTitle:c.articleTitle||''});
+  });
+  return qs.slice(0,n);
+}
+
+function buildFlashQuestions(allVD,n){
+  var qs=[];
+  var pool=shuffle(allVD).slice(0,Math.min(n*2,allVD.length));
+  pool.forEach(function(item){
+    if(qs.length>=n)return;
+    var v=item.v;
+    var useWordFirst=Math.random()>0.5;
+    var wrongs=shuffle(allVD.filter(function(x){return x.v.word!==v.word;})).slice(0,3);
+    if(wrongs.length<3)return;
+    if(useWordFirst){
+      // 単語→意味（4択）
+      var choices=shuffle([v.def].concat(wrongs.map(function(x){return x.v.def;})));
+      qs.push({type:'flash_w2d',word:v.word,pron:v.pron,correct:v.def,choices:choices});
+    }else{
+      // 意味→単語（4択）
+      var choices=shuffle([v.word].concat(wrongs.map(function(x){return x.v.word;})));
+      qs.push({type:'flash_d2w',def:v.def,pron:v.pron,correct:v.word,choices:choices});
+    }
+  });
+  return qs.slice(0,n);
+}
+
+/* ---- 画面描画 ---- */
+function renderStudyQuestion(){
+  var body=document.getElementById('studyBody');
+  var q=studyQuestions[studyIdx];
+  if(!q){renderStudyResult();return;}
+
+  var pct=Math.round((studyIdx/studyQuestions.length)*100);
+  var progressHtml='<div class="study-progress">'
+    +'<div class="study-progress-bar"><div class="study-progress-fill" style="width:'+pct+'%"></div></div>'
+    +'<div class="study-progress-text">'+(studyIdx+1)+' / '+studyQuestions.length+'</div>'
+    +'</div>';
+
+  var cardHtml='';
+  if(q.type==='quiz'){
+    cardHtml='<div class="study-card">'
+      +'<div class="study-q-label">'+(q.isSyns?'類義語を選べ':'対義語を選べ')+'</div>'
+      +'<div class="study-q-main study-selectable">'+esc(q.word)+'</div>'
+      +'<div class="study-q-sub study-selectable">'+esc(q.pron)+'</div>'
+      +'<div class="study-q-sub study-selectable" style="margin-top:6px;color:#555">'+esc(q.def)+'</div>'
+      +'<button class="study-spk" onclick="spk(q.word)">🔊</button>'
+      +'</div>';
+  }else if(q.type==='fill'){
+    var parts=q.sentence.split('___');
+    cardHtml='<div class="study-card">'
+      +'<div class="study-q-label">空欄に入る単語を選べ</div>'
+      +'<div class="study-q-sentence study-selectable">'+esc(parts[0]||'')+' <span class="study-blank">___</span> '+esc(parts[1]||'')+'</div>'
+      +'<button class="study-spk" onclick="spk(q.sentence.replace(\'___\',q.correct))">🔊</button>'
+      +(q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'')
+      +'</div>';
+  }else if(q.type==='flash_w2d'){
+    cardHtml='<div class="study-card">'
+      +'<div class="study-q-label">この単語の意味は？</div>'
+      +'<div class="study-q-main study-selectable">'+esc(q.word)+'</div>'
+      +'<div class="study-q-sub study-selectable">'+esc(q.pron)+'</div>'
+      +'<button class="study-spk" onclick="spk(q.word)">🔊</button>'
+      +'</div>';
+  }else if(q.type==='flash_d2w'){
+    cardHtml='<div class="study-card">'
+      +'<div class="study-q-label">この意味の単語は？</div>'
+      +'<div class="study-q-main study-selectable" style="font-size:18px">'+esc(q.def)+'</div>'
+      +'</div>';
+  }
+
+  var choicesHtml='<div class="study-choices">'
+    +q.choices.map(function(c,ci){
+      return '<div class="study-choice-wrap" id="scw'+ci+'">'
+        +'<button class="study-choice study-selectable" onclick="answerStudy('+ci+')" id="sc'+ci+'">'+esc(c)+'</button>'
+        +'<button class="study-choice-spk" onclick="spk(c)" onmousedown="event.stopPropagation()">🔊</button>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+
+  body.innerHTML=progressHtml+cardHtml+choicesHtml
+    +'<div class="study-feedback" id="studyFeedback"></div>'
+    +'<button class="study-next" id="studyNext" onclick="nextStudyQuestion()">次の問題 →</button>';
+
+  window.scrollTo(0,0);
+}
+
+function answerStudy(ci){
+  var q=studyQuestions[studyIdx];
+  var chosen=q.choices[ci];
+  var ok=chosen===q.correct;
+  if(ok)studyCorrect++;
+
+  q.choices.forEach(function(c,i){
+    var btn=document.getElementById('sc'+i);
+    var wrap=document.getElementById('scw'+i);
+    if(!btn)return;
+    btn.disabled=true;
+    if(c===q.correct){
+      btn.className='study-choice correct';
+      if(wrap)wrap.style.borderColor='#166534';
+    }else if(i===ci){
+      btn.className='study-choice wrong';
+      if(wrap)wrap.style.borderColor='#c0392b';
+    }
+  });
+
+  var fb=document.getElementById('studyFeedback');
+  if(fb){
+    fb.style.display='block';
+    fb.className='study-feedback '+(ok?'ok':'ng');
+    if(ok){
+      fb.textContent='✓ 正解！';
+    }else{
+      fb.textContent='✗ 不正解。正解は「'+q.correct+'」';
+    }
+  }
+  var nx=document.getElementById('studyNext');
+  if(nx)nx.style.display='block';
+}
+
+function nextStudyQuestion(){
+  studyIdx++;
+  renderStudyQuestion();
+}
+
+function renderStudyResult(){
+  var body=document.getElementById('studyBody');
+  var total=studyQuestions.length;
+  var pct=Math.round((studyCorrect/total)*100);
+  var emoji=pct>=80?'🎉':pct>=60?'👍':'💪';
+  body.innerHTML='<div class="study-result">'
+    +'<div style="font-size:48px;margin-bottom:8px">'+emoji+'</div>'
+    +'<div class="study-result-score">'+studyCorrect+' / '+total+'</div>'
+    +'<div class="study-result-label">正解率 '+pct+'%</div>'
+    +'<div class="study-result-detail">'+getModeLabel()+' 完了！</div>'
+    +'<button class="study-result-btn" onclick="startStudy(studyMode)">もう一度</button>'
+    +'<button class="study-result-btn sub" onclick="openStudyMenu()">別の学習をする</button>'
+    +'<button class="study-result-btn sub" onclick="exitStudy()">記事一覧に戻る</button>'
+    +'</div>';
+  window.scrollTo(0,0);
+}
+
+function getModeLabel(){
+  if(studyMode==='quiz')return '単語クイズ';
+  if(studyMode==='fill')return '穴埋め問題';
+  if(studyMode==='flash')return 'フラッシュカード';
+  return '';
+}
+
 openDB().then(function(){loadHome();});
 </script>
 </body>
