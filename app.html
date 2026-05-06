@@ -868,6 +868,22 @@ function spk(txt){
   speechSynthesis.speak(u);
 }
 window.speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices();};
+function spkEl(el){
+  var txt=el.getAttribute('data-spk');
+  if(txt)spk(txt);
+}
+function spkStudyQ(){
+  var q=studyQuestions[studyIdx];
+  if(!q)return;
+  if(q.type==='quiz'||q.type==='flash_w2d')spk(q.word);
+  else if(q.type==='flash_d2w')spk(q.def);
+  else if(q.type==='fill')spk(q.sentence.replace('___',q.correct));
+}
+function spkStudyChoice(ci){
+  var q=studyQuestions[studyIdx];
+  if(!q||!q.choices)return;
+  spk(q.choices[ci]);
+}
 
 function hexToRgba(hex,alpha){
   var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
@@ -1021,7 +1037,8 @@ function buildQuizQuestions(allVD,n){
       pron:v.pron,
       isSyns:useSyns,
       correct:correct,
-      choices:choices
+      choices:choices,
+      articleTitle:item.articleTitle||''
     });
     if(qs.length>=n)return;
   });
@@ -1074,11 +1091,11 @@ function buildFlashQuestions(allVD,n){
     if(useWordFirst){
       // 単語→意味（4択）
       var choices=shuffle([v.def].concat(wrongs.map(function(x){return x.v.def;})));
-      qs.push({type:'flash_w2d',word:v.word,pron:v.pron,correct:v.def,choices:choices});
+      qs.push({type:'flash_w2d',word:v.word,pron:v.pron,correct:v.def,choices:choices,articleTitle:item.articleTitle||''});
     }else{
       // 意味→単語（4択）
       var choices=shuffle([v.word].concat(wrongs.map(function(x){return x.v.word;})));
-      qs.push({type:'flash_d2w',def:v.def,pron:v.pron,correct:v.word,choices:choices});
+      qs.push({type:'flash_d2w',def:v.def,pron:v.pron,correct:v.word,choices:choices,articleTitle:item.articleTitle||''});
     }
   });
   return qs.slice(0,n);
@@ -1103,14 +1120,15 @@ function renderStudyQuestion(){
       +'<div class="study-q-main study-selectable">'+esc(q.word)+'</div>'
       +'<div class="study-q-sub study-selectable">'+esc(q.pron)+'</div>'
       +'<div class="study-q-sub study-selectable" style="margin-top:6px;color:#555">'+esc(q.def)+'</div>'
-      +'<button class="study-spk" onclick="spk(q.word)">🔊</button>'
+      +'<button class="study-spk" onclick="spkStudyQ()">🔊</button>'
+      +(q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'')
       +'</div>';
   }else if(q.type==='fill'){
     var parts=q.sentence.split('___');
     cardHtml='<div class="study-card">'
       +'<div class="study-q-label">空欄に入る単語を選べ</div>'
       +'<div class="study-q-sentence study-selectable">'+esc(parts[0]||'')+' <span class="study-blank">___</span> '+esc(parts[1]||'')+'</div>'
-      +'<button class="study-spk" onclick="spk(q.sentence.replace(\'___\',q.correct))">🔊</button>'
+      +'<button class="study-spk" onclick="spkStudyQ()">🔊</button>'
       +(q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'')
       +'</div>';
   }else if(q.type==='flash_w2d'){
@@ -1118,12 +1136,15 @@ function renderStudyQuestion(){
       +'<div class="study-q-label">この単語の意味は？</div>'
       +'<div class="study-q-main study-selectable">'+esc(q.word)+'</div>'
       +'<div class="study-q-sub study-selectable">'+esc(q.pron)+'</div>'
-      +'<button class="study-spk" onclick="spk(q.word)">🔊</button>'
+      +'<button class="study-spk" onclick="spkStudyQ()">🔊</button>'
+      +(q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'')
       +'</div>';
   }else if(q.type==='flash_d2w'){
     cardHtml='<div class="study-card">'
       +'<div class="study-q-label">この意味の単語は？</div>'
       +'<div class="study-q-main study-selectable" style="font-size:18px">'+esc(q.def)+'</div>'
+      +'<button class="study-spk" onclick="spkStudyQ()">🔊</button>'
+      +(q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'')
       +'</div>';
   }
 
@@ -1131,7 +1152,7 @@ function renderStudyQuestion(){
     +q.choices.map(function(c,ci){
       return '<div class="study-choice-wrap" id="scw'+ci+'">'
         +'<button class="study-choice study-selectable" onclick="answerStudy('+ci+')" id="sc'+ci+'">'+esc(c)+'</button>'
-        +'<button class="study-choice-spk" onclick="spk(c)" onmousedown="event.stopPropagation()">🔊</button>'
+        +'<button class="study-choice-spk" onclick="spkStudyChoice('+ci+')" onmousedown="event.stopPropagation()">🔊</button>'
         +'</div>';
     }).join('')
     +'</div>';
