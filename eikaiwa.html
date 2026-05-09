@@ -138,14 +138,36 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
   <div class="theme-list" id="themeList"></div>
 </div>
 
-<!-- DELETE MODAL -->
+<!-- LONG PRESS MENU -->
+<div class="modal-overlay" id="longPressMenu">
+  <div class="modal-box">
+    <div class="modal-title" id="menuThemeName" style="font-size:14px;color:#6b6860;font-weight:400;margin-bottom:16px"></div>
+    <button onclick="openRenameModal()" style="width:100%;padding:16px;border-radius:12px;border:1px solid #e4e1d9;background:#fff;font-size:15px;font-weight:500;color:#1c1a17;cursor:pointer;touch-action:manipulation;margin-bottom:8px;text-align:left">✏️　名前を変更</button>
+    <button onclick="openConfirmDelete()" style="width:100%;padding:16px;border-radius:12px;border:1px solid #ffd5cc;background:#fff8f7;font-size:15px;font-weight:500;color:#c0392b;cursor:pointer;touch-action:manipulation;margin-bottom:8px;text-align:left">🗑️　削除する</button>
+    <button class="btn-close" onclick="closeMenus()">キャンセル</button>
+  </div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="modal-overlay" id="renameModal">
+  <div class="modal-box">
+    <div class="modal-title">✏️ 名前を変更</div>
+    <input type="text" id="renameInput" style="width:100%;padding:12px 14px;border:1.5px solid #e4e1d9;border-radius:10px;font-size:15px;color:#1c1a17;outline:none;margin-bottom:8px" />
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn-close" onclick="closeMenus()" style="flex:1">キャンセル</button>
+      <button onclick="confirmRename()" style="flex:1;padding:14px;border-radius:12px;border:none;background:#2d6a4f;color:#fff;font-size:14px;font-weight:500;cursor:pointer">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
     <div class="modal-title">🗑️ 削除の確認</div>
     <div class="modal-sub">「<span id="deleteThemeName"></span>」を削除しますか？この操作は元に戻せません。</div>
-    <div class="modal-btns" style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn-close" onclick="closeDeleteModal()" style="flex:1">キャンセル</button>
-      <button onclick="confirmDelete()" style="flex:1;padding:14px;border-radius:12px;border:none;background:#c0392b;color:#fff;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation">削除する</button>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-close" onclick="closeMenus()" style="flex:1">キャンセル</button>
+      <button onclick="confirmDelete()" style="flex:1;padding:14px;border-radius:12px;border:none;background:#c0392b;color:#fff;font-size:14px;font-weight:500;cursor:pointer">削除する</button>
     </div>
   </div>
 </div>
@@ -410,18 +432,53 @@ function handleTouchEnd(){
   longPressTimer=null;
 }
 
+var menuTargetId=null;
+var menuTargetName=null;
+
 function showDeleteDialog(id,name){
-  document.getElementById('deleteThemeName').textContent=name;
-  document.getElementById('deleteModal').classList.add('on');
-  document.getElementById('deleteModal').dataset.targetId=id;
+  menuTargetId=id;
+  menuTargetName=name;
+  document.getElementById('menuThemeName').textContent=name;
+  document.getElementById('longPressMenu').classList.add('on');
 }
-function closeDeleteModal(){
+
+function openRenameModal(){
+  document.getElementById('longPressMenu').classList.remove('on');
+  document.getElementById('renameInput').value=menuTargetName;
+  document.getElementById('renameModal').classList.add('on');
+  setTimeout(function(){document.getElementById('renameInput').focus();},300);
+}
+
+function openConfirmDelete(){
+  document.getElementById('longPressMenu').classList.remove('on');
+  document.getElementById('deleteThemeName').textContent=menuTargetName;
+  document.getElementById('deleteModal').classList.add('on');
+}
+
+function closeMenus(){
+  document.getElementById('longPressMenu').classList.remove('on');
+  document.getElementById('renameModal').classList.remove('on');
   document.getElementById('deleteModal').classList.remove('on');
 }
+
+function confirmRename(){
+  var newName=document.getElementById('renameInput').value.trim();
+  if(!newName) return;
+  var tx=db.transaction(DB_STORE,'readwrite');
+  var store=tx.objectStore(DB_STORE);
+  var req=store.get(menuTargetId);
+  req.onsuccess=function(){
+    var data=req.result;
+    data.theme=newName;
+    store.put(data);
+    closeMenus();
+    loadHome();
+  };
+}
+
 function confirmDelete(){
-  var id=parseInt(document.getElementById('deleteModal').dataset.targetId);
-  dbDelete(id).then(function(){
-    closeDeleteModal();
+  dbDelete(menuTargetId).then(function(){
+    closeMenus();
     loadHome();
   });
 }
