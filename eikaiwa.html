@@ -391,7 +391,12 @@ function renderList(){
     list.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-title">'+(q?'該当するテーマがありません':'問題がまだありません')+'</div><div class="empty-sub">'+(q?'別のキーワードで検索してみてください。':'「＋ 問題を追加」ボタンからJSONを追加してください。')+'</div></div>';
     return;
   }
-  var sorted=filtered.slice().reverse();
+  var sorted=filtered.slice().sort(function(a,b){
+    var ca=playCounts[a._id]||0;
+    var cb=playCounts[b._id]||0;
+    if(ca!==cb) return ca-cb; // 回数少ない順
+    return a._id-b._id; // 同じなら追加順
+  });
   var cards=sorted.map(function(t){
     var cnt=playCounts[t._id]||0;
     var unplayed=cnt===0?' unplayed':'';
