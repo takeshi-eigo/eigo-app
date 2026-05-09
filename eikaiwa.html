@@ -138,6 +138,18 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
   <div class="theme-list" id="themeList"></div>
 </div>
 
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-title">🗑️ 削除の確認</div>
+    <div class="modal-sub">「<span id="deleteThemeName"></span>」を削除しますか？この操作は元に戻せません。</div>
+    <div class="modal-btns" style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-close" onclick="closeDeleteModal()" style="flex:1">キャンセル</button>
+      <button onclick="confirmDelete()" style="flex:1;padding:14px;border-radius:12px;border:none;background:#c0392b;color:#fff;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation">削除する</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="importModal">
   <div class="modal-box">
@@ -330,6 +342,15 @@ function incrementCount(themeId){
 
 var playCounts={};
 
+function dbDelete(id){
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction(DB_STORE,'readwrite');
+    var req=tx.objectStore(DB_STORE).delete(id);
+    req.onsuccess=function(){resolve();};
+    req.onerror=reject;
+  });
+}
+
 function loadHome(){
   dbGetAll().then(function(themes){
     allThemes=themes;
@@ -349,13 +370,60 @@ function renderList(){
     return;
   }
   var sorted=filtered.slice().reverse();
-  list.innerHTML=sorted.map(function(t){
+  var cards=sorted.map(function(t){
     var cnt=playCounts[t._id]||0;
     var unplayed=cnt===0?' unplayed':'';
     var badgeClass=cnt===0?' zero':'';
     var badgeText=cnt===0?'未学習':cnt+'回';
-    return '<div class="theme-card'+unplayed+'" onclick="startStudy('+t._id+')"><div class="theme-icon">'+getIcon(t.theme)+'</div><div class="theme-name">'+t.theme+'</div><div class="theme-badge'+badgeClass+'">'+badgeText+'</div></div>';
-  }).join('');
+    var div=document.createElement('div');
+    div.className='theme-card'+unplayed;
+    div.dataset.id=t._id;
+    div.dataset.name=t.theme;
+    div.innerHTML='<div class="theme-icon">'+getIcon(t.theme)+'</div><div class="theme-name">'+t.theme+'</div><div class="theme-badge'+badgeClass+'">'+badgeText+'</div>';
+    div.addEventListener('click',function(){startStudy(t._id);});
+    var timer=null;
+    div.addEventListener('touchstart',function(){timer=setTimeout(function(){showDeleteDialog(t._id,t.theme);},600);},{passive:true});
+    div.addEventListener('touchend',function(){clearTimeout(timer);});
+    div.addEventListener('touchmove',function(){clearTimeout(timer);});
+    return div;
+  });
+  list.innerHTML='';
+  cards.forEach(function(c){list.appendChild(c);});
+}
+
+/* ================================================
+   LONG PRESS DELETE
+================================================ */
+var longPressTimer=null;
+var longPressId=null;
+var longPressName=null;
+
+function handleTouchStart(e,id,name){
+  longPressId=id;
+  longPressName=name;
+  longPressTimer=setTimeout(function(){
+    showDeleteDialog(id,name);
+  },600);
+}
+function handleTouchEnd(){
+  clearTimeout(longPressTimer);
+  longPressTimer=null;
+}
+
+function showDeleteDialog(id,name){
+  document.getElementById('deleteThemeName').textContent=name;
+  document.getElementById('deleteModal').classList.add('on');
+  document.getElementById('deleteModal').dataset.targetId=id;
+}
+function closeDeleteModal(){
+  document.getElementById('deleteModal').classList.remove('on');
+}
+function confirmDelete(){
+  var id=parseInt(document.getElementById('deleteModal').dataset.targetId);
+  dbDelete(id).then(function(){
+    closeDeleteModal();
+    loadHome();
+  });
 }
 
 /* ================================================
