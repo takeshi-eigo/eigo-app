@@ -748,6 +748,197 @@ function doDelete(){
   };
 }
 
+/* ================================================
+   IMPORT
+================================================ */
+function openImport(){
+  document.getElementById('fileInput').value='';
+  document.getElementById('importProgress').style.display='none';
+  document.getElementById('importResult').style.display='none';
+  document.getElementById('importModal').classList.add('on');
+}
+function closeImport(){
+  document.getElementById('importModal').classList.remove('on');
+  loadHome();
+}
+function handleFiles(files){
+  if(!files||files.length===0)return;
+  var total=files.length,done=0,success=0,errors=[];
+  var prog=document.getElementById('importProgress');
+  var res=document.getElementById('importResult');
+  prog.style.display='block';prog.textContent='読み込み中... 0 / '+total;res.style.display='none';
+  Array.from(files).forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var data=JSON.parse(e.target.result);
+        if(!data.id||!data.date||!data.title){errors.push(file.name+': 必須フィールド不足');done++;chk();return;}
+        dbPut(data).then(function(){success++;done++;prog.textContent='読み込み中... '+done+' / '+total;chk();}).catch(function(){errors.push(file.name+': 保存エラー');done++;chk();});
+      }catch(e2){errors.push(file.name+': JSON解析エラー');done++;chk();}
+    };
+    reader.readAsText(file,'utf-8');
+  });
+  function chk(){
+    if(done<total)return;
+    prog.style.display='none';res.style.display='block';
+    if(!errors.length){res.className='import-result ok';res.innerHTML='✅ '+success+'件をインポートしました！<br><span style="font-size:12px">「閉じる」を押すと記事一覧が更新されます</span>';}
+    else{res.className='import-result ng';res.innerHTML='⚠️ '+success+'件成功 / '+errors.length+'件エラー<br>'+errors.join('<br>');}
+  }
+}
+
+/* ================================================
+   STUDY MENU
+================================================ */
+function openStudyMenu(){document.getElementById('studyMenu').classList.add('on');}
+function closeStudyMenu(){document.getElementById('studyMenu').classList.remove('on');}
+
+/* ================================================
+   STUDY ENGINE
+================================================ */
+var studyMode='',studyQuestions=[],studyIdx=0,studyCorrect=0;
+function exitStudy(){showScreen('screenHome');releaseWakeLock();}
+
+function startStudy(mode){
+  studyMode=mode;studyIdx=0;studyCorrect=0;
+  dbGetAll().then(function(rows){
+    var allVD=[];
+    rows.forEach(function(a){
+      var vd=Array.isArray(a.vd)?a.vd:(typeof a.vd==='string'?JSON.parse(a.vd):[]);
+      vd.forEach(function(v){allVD.push({v:v,articleTitle:a.title});});
+    });
+    if(allVD.length<4){alert('記事をもっと追加してください（最低4単語必要）');return;}
+    if(mode==='quiz'){
+      studyQuestions=buildQuizQuestions(allVD,10);
+      document.getElementById('studyHdrTitle').textContent='🧠 単語クイズ';
+    }else if(mode==='fill'){
+      var allART=[];
+      rows.forEach(function(a){
+        var art=Array.isArray(a.art)?a.art:(typeof a.art==='string'?JSON.parse(a.art):[]);
+        var vd=Array.isArray(a.vd)?a.vd:(typeof a.vd==='string'?JSON.parse(a.vd):[]);
+        art.forEach(function(p){allART.push({p:p,vd:vd,articleTitle:a.title||''});});
+      });
+      studyQuestions=buildFillQuestions(allART,allVD,10);
+      document.getElementById('studyHdrTitle').textContent='✏️ 穴埋め問題';
+    }else if(mode==='flash'){
+      studyQuestions=buildFlashQuestions(allVD,10);
+      document.getElementById('studyHdrTitle').textContent='🃏 フラッシュカード';
+    }
+    if(!studyQuestions.length){alert('問題を生成できませんでした。記事を追加してください。');return;}
+    showScreen('screenStudy');requestWakeLock();renderStudyQuestion();
+  });
+}
+
+function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function buildQuizQuestions(allVD,n){
+  var qs=[];
+  var pool=shuffle(allVD);
+  pool.forEach(function(item){
+    if(qs.length>=n)return;
+    var v=item.v;
+    var useSyns=Math.random()>0.5;
+    var answers=useSyns?v.syns:v.ants;
+    if(!answers||!answers.length){answers=useSyns?v.ants:v.syns;}
+    if(!answers||!answers.length)return;
+    var correct=answers[Math.floor(Math.random()*answers.length)];
+    var wrongs=[];
+    allVD.forEach(function(x){
+      if(x.v.word!==v.word){(x.v.syns||[]).forEach(function(s){wrongs.push(s);});(x.v.ants||[]).forEach(function(a){wrongs.push(a);});wrongs.push(x.v.word);}
+    });
+    wrongs=shuffle(wrongs.filter(function(w,i,self){return self.indexOf(w)===i&&w!==correct&&!(answers||[]).includes(w);})).slice(0,3);
+    if(wrongs.length<3)return;
+    qs.push({type:'quiz',word:v.word,def:v.def,pron:v.pron,isSyns:useSyns,correct:correct,choices:shuffle([correct].concat(wrongs)),articleTitle:item.articleTitle||''});
+  });
+  return qs.slice(0,n);
+}
+
+function buildFillQuestions(allART,allVD,n){
+  var qs=[],candidates=[];
+  allART.forEach(function(item){
+    var p=item.p,vd=item.vd;
+    if(!p.en||!p.plain)return;
+    var re=/<span class="vhl"[^>]*data-w="([^"]+)"[^>]*>([^<]+)<\/span>/g,m;
+    while((m=re.exec(p.en))!==null){
+      var vEntry=vd.find(function(x){return x.word===m[1];});
+      if(vEntry)candidates.push({plain:p.plain,word:m[1],vd:vEntry,articleTitle:item.articleTitle||''});
+    }
+  });
+  shuffle(candidates).forEach(function(c){
+    if(qs.length>=n)return;
+    var correct=c.word;
+    var sentence=c.plain.replace(correct,function(){return '___';});
+    var wrongs=shuffle(allVD.filter(function(x){return x.v.word!==correct;})).slice(0,3).map(function(x){return x.v.word;});
+    if(wrongs.length<3)return;
+    qs.push({type:'fill',sentence:sentence,correct:correct,choices:shuffle([correct].concat(wrongs)),def:c.vd.def,articleTitle:c.articleTitle||''});
+  });
+  return qs.slice(0,n);
+}
+
+function buildFlashQuestions(allVD,n){
+  var qs=[];
+  shuffle(allVD).forEach(function(item){
+    if(qs.length>=n)return;
+    var v=item.v;
+    var useW2D=Math.random()>0.5;
+    var wrongs=shuffle(allVD.filter(function(x){return x.v.word!==v.word;})).slice(0,3);
+    if(wrongs.length<3)return;
+    if(useW2D){
+      qs.push({type:'flash_w2d',word:v.word,pron:v.pron,correct:v.def,choices:shuffle([v.def].concat(wrongs.map(function(x){return x.v.def;}))),articleTitle:item.articleTitle||''});
+    }else{
+      qs.push({type:'flash_d2w',def:v.def,pron:v.pron,correct:v.word,choices:shuffle([v.word].concat(wrongs.map(function(x){return x.v.word;}))),articleTitle:item.articleTitle||''});
+    }
+  });
+  return qs.slice(0,n);
+}
+
+function renderStudyQuestion(){
+  var body=document.getElementById('studyBody');
+  var q=studyQuestions[studyIdx];
+  if(!q){renderStudyResult();return;}
+  var pct=Math.round((studyIdx/studyQuestions.length)*100);
+  var progressHtml='<div class="study-progress"><div class="study-progress-bar"><div class="study-progress-fill" style="width:'+pct+'%"></div></div><div class="study-progress-text">'+(studyIdx+1)+' / '+studyQuestions.length+'</div></div>';
+  var titleHtml=q.articleTitle?'<div style="font-size:11px;color:#bbb;margin-top:10px;text-align:center">📰 '+esc(q.articleTitle.substring(0,40))+(q.articleTitle.length>40?'…':'')+'</div>':'';
+  var cardHtml='';
+  if(q.type==='quiz'){
+    cardHtml='<div class="study-card"><div class="study-q-label">'+(q.isSyns?'類義語を選べ':'対義語を選べ')+'</div><div class="study-q-main study-selectable">'+esc(q.word)+'</div><div class="study-q-sub study-selectable">'+esc(q.pron)+'</div><div class="study-q-sub study-selectable" style="margin-top:6px;color:#555">'+esc(q.def)+'</div><button class="study-spk" onclick="spkStudyQ()">🔊</button>'+titleHtml+'</div>';
+  }else if(q.type==='fill'){
+    var parts=q.sentence.split('___');
+    cardHtml='<div class="study-card"><div class="study-q-label">空欄に入る単語を選べ</div><div class="study-q-sentence study-selectable">'+esc(parts[0]||'')+' <span class="study-blank">___</span> '+esc(parts[1]||'')+'</div><button class="study-spk" onclick="spkStudyQ()">🔊</button>'+titleHtml+'</div>';
+  }else if(q.type==='flash_w2d'){
+    cardHtml='<div class="study-card"><div class="study-q-label">この単語の意味は？</div><div class="study-q-main study-selectable">'+esc(q.word)+'</div><div class="study-q-sub study-selectable">'+esc(q.pron)+'</div><button class="study-spk" onclick="spkStudyQ()">🔊</button>'+titleHtml+'</div>';
+  }else if(q.type==='flash_d2w'){
+    cardHtml='<div class="study-card"><div class="study-q-label">この意味の単語は？</div><div class="study-q-main study-selectable" style="font-size:18px">'+esc(q.def)+'</div><button class="study-spk" onclick="spkStudyQ()">🔊</button>'+titleHtml+'</div>';
+  }
+  var choicesHtml='<div class="study-choices">'+q.choices.map(function(c,ci){
+    return '<div class="study-choice-wrap" id="scw'+ci+'"><button class="study-choice study-selectable" onclick="answerStudy('+ci+')" id="sc'+ci+'">'+esc(c)+'</button><button class="study-choice-spk" onclick="spkStudyChoice('+ci+')" onmousedown="event.stopPropagation()">🔊</button></div>';
+  }).join('')+'</div>';
+  body.innerHTML=progressHtml+cardHtml+choicesHtml+'<div class="study-feedback" id="studyFeedback"></div><button class="study-next" id="studyNext" onclick="nextStudyQuestion()">次の問題 →</button>';
+  window.scrollTo(0,0);
+}
+
+function spkStudyQ(){
+  var q=studyQuestions[studyIdx];if(!q)return;
+  if(q.type==='quiz'||q.type==='flash_w2d')spk(q.word);
+  else if(q.type==='flash_d2w')spk(q.def);
+  else if(q.type==='fill')spk(q.sentence.replace('___',q.correct));
+}
+function spkStudyChoice(ci){var q=studyQuestions[studyIdx];if(!q||!q.choices)return;spk(q.choices[ci]);}
+
+/* ================================================
+   WAKE LOCK
+================================================ */
+var wakeLock=null;
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator))return;
+  if(wakeLock)return;
+  try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',function(){wakeLock=null;});}catch(e){}
+}
+function releaseWakeLock(){if(wakeLock){wakeLock.release();wakeLock=null;}}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){if(document.getElementById('screenArticle').classList.contains('on'))requestWakeLock();}
+  else{releaseWakeLock();}
+});
+
 openDB().then(function(){loadHome();});
 </script>
 </body>
