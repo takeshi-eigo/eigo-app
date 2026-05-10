@@ -276,6 +276,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <div style="flex:1">
         <div class="home-hdr-title">英語学習アプリ</div>
         <div class="home-hdr-sub">English Article Library</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.04em">ver. 1.5.0</div>
       </div>
       <button class="menu-trigger" onclick="openStudyMenu()">⋮</button>
     </div>
@@ -576,7 +577,7 @@ function renderArticleList(articles){
       var dd=parseInt(a.date.substring(8,10));
       var mm=parseInt(a.date.substring(5,7));
       var badgeClass=BADGE_COLORS[a.badge]||'badge-mlb';
-      return '<div class="art-row" onclick="openArticle(\''+a.id+'\')" ontouchstart="startLp(\''+a.id+'\')" ontouchend="cancelLp()" ontouchmove="cancelLp()">'+'<div class="art-date">'+mm+'月'+dd+'日</div>'+'<div class="art-right"><span class="art-badge '+badgeClass+'">'+esc(a.badgeLabel)+'</span>'+'<div class="art-title">'+esc(a.title)+'</div>'+'<div class="art-source">'+esc(a.source||'')+'</div></div>'+'<div class="art-arrow-icon">›</div></div>'
+      return '<div class="art-row" onclick="openArticle(\''+a.id+'\')">'+'<div class="art-date">'+mm+'月'+dd+'日</div>'+'<div class="art-right">'+'<span class="art-badge '+badgeClass+'">'+esc(a.badgeLabel)+'</span>'+'<div class="art-title">'+esc(a.title)+'</div>'+'<div class="art-source">'+esc(a.source||'')+'</div>'+'</div>'+'<button class="art-opt" onclick="event.stopPropagation();openEditModal(\''+a.id+'\')" >⋮</button>'+'</div>'
     }).join('');
 
     var card=document.createElement('div');
