@@ -715,7 +715,20 @@ function speakText(text){
   window.speechSynthesis.cancel();
   var u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';
-  u.rate=0.9;
+  u.rate=1.25;
+  // Enhanced（高品質）な英語音声を優先して選択
+  var voices=window.speechSynthesis.getVoices();
+  var preferred=null;
+  // 優先順: Enhanced > Premium > 通常のen-US
+  for(var i=0;i<voices.length;i++){
+    var v=voices[i];
+    if(!v.lang.startsWith('en')) continue;
+    if(v.name.indexOf('Enhanced')>=0||v.name.indexOf('Premium')>=0){
+      preferred=v; break;
+    }
+    if(!preferred && v.lang==='en-US') preferred=v;
+  }
+  if(preferred) u.voice=preferred;
   window.speechSynthesis.speak(u);
 }
 
