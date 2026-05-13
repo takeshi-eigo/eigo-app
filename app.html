@@ -276,7 +276,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <div style="flex:1">
         <div class="home-hdr-title">英語学習アプリ</div>
         <div class="home-hdr-sub">English Article Library</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.04em">ver. 1.5.0</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.04em">ver. 1.6.0</div>
       </div>
       <button class="menu-trigger" onclick="openStudyMenu()">⋮</button>
     </div>
@@ -514,8 +514,29 @@ function applyFilter(){
   var query=(document.getElementById('searchInput')||{value:''}).value.trim().toLowerCase();
   var filtered=allArticles.filter(function(a){
     var tagMatch=currentTag==='all'||a.badge===currentTag;
-    var textMatch=!query||a.title.toLowerCase().includes(query)||(a.source||'').toLowerCase().includes(query)||a.date.includes(query)||(a.badgeLabel||'').toLowerCase().includes(query);
-    return tagMatch&&textMatch;
+    if(!query)return tagMatch;
+    // タイトル・ソース・日付・バッジ
+    if(a.title.toLowerCase().includes(query))return tagMatch;
+    if((a.source||'').toLowerCase().includes(query))return tagMatch;
+    if(a.date.includes(query))return tagMatch;
+    if((a.badgeLabel||'').toLowerCase().includes(query))return tagMatch;
+    // 単語（word・def）を検索
+    try{
+      var vd=Array.isArray(a.vd)?a.vd:JSON.parse(a.vd||'[]');
+      for(var i=0;i<vd.length;i++){
+        if((vd[i].word||'').toLowerCase().includes(query))return tagMatch;
+        if((vd[i].def||'').toLowerCase().includes(query))return tagMatch;
+      }
+    }catch(e){}
+    // 記事本文（plainテキスト）を検索
+    try{
+      var art=Array.isArray(a.art)?a.art:JSON.parse(a.art||'[]');
+      for(var j=0;j<art.length;j++){
+        if((art[j].plain||'').toLowerCase().includes(query))return tagMatch;
+        if((art[j].ja||'').toLowerCase().includes(query))return tagMatch;
+      }
+    }catch(e){}
+    return false;
   });
   renderArticleList(filtered);
 }
@@ -1024,13 +1045,37 @@ function renderVocab(idx){
   if(idx!==undefined)vIdx=idx;
   var v=curVD[vIdx];if(!v)return;
   var wrap=document.getElementById('vDetailWrap');
-  var exRows=v.ex.map(function(e,ei){return'<div class="expair" id="exp'+ei+'"><div class="exen study-selectable" id="exen'+ei+'" onclick="selectText(this,event)">'+esc(e.e)+'</div><div class="exja study-selectable" id="exja'+ei+'" onclick="selectText(this,event)">'+esc(e.j)+'</div></div>';}).join('');
+  var exRows=v.ex.map(function(e,ei){return'<div class="expair" id="exp'+ei+'"><div class="exen study-selectable" id="exen'+ei+'" onclick="tapExEn('+ei+',event)">'+esc(e.e)+'</div><div class="exja study-selectable" id="exja'+ei+'" onclick="tapExJa('+ei+',event)">'+esc(e.j)+'</div></div>';}).join('');
   wrap.innerHTML='<div class="vdetail"><div class="vdhead"><div class="vbig study-selectable" onclick="selectText(this,event)">'+esc(v.word)+'</div><div class="vrow"><span class="vph study-selectable">'+esc(v.pron)+'</span><span class="vpos-tag">'+esc(v.pos.split('（')[0].substring(0,6))+'</span><button class="spkbtn" onclick="spk(\''+v.word.replace(/'/g,"\\'")+'\')">🔊 発音</button></div><div class="vdef">'+esc(v.def)+'</div></div><div class="divl"></div><div class="ex-head"><div class="vsec">例文（5つ）</div><div class="ex-toggles"><button class="ex-toggle on" id="togEn" onclick="toggleEx(\'en\')">英文</button><button class="ex-toggle on" id="togJa" onclick="toggleEx(\'ja\')">和文</button></div></div><div class="ex-list" id="exList">'+exRows+'</div><div class="divl"></div><div id="quizWrap" class="quiz-wrap"></div><div class="divl"></div><div style="padding-bottom:20px"><div class="vsec">類義語</div><div class="chips">'+v.syns.map(function(s){return'<span class="chip">'+esc(s)+'</span>';}).join('')+'</div><div class="vsec" style="margin-top:10px">対義語</div><div class="chips">'+v.ants.map(function(a){return'<span class="chip chipa">'+esc(a)+'</span>';}).join('')+'</div></div></div>';
   applyExVisibility();buildQuiz();
 }
 function toggleEx(type){if(type==='en'){exShowEn=!exShowEn;document.getElementById('togEn').className='ex-toggle'+(exShowEn?' on':'');}else{exShowJa=!exShowJa;document.getElementById('togJa').className='ex-toggle'+(exShowJa?' on':'');}applyExVisibility();}
 function applyExVisibility(){curVD[vIdx].ex.forEach(function(_,i){var en=document.getElementById('exen'+i);var ja=document.getElementById('exja'+i);if(en)en.className='exen study-selectable'+(exShowEn?'':' ex-hidden');if(ja)ja.className='exja study-selectable'+(exShowJa?'':' ex-hidden');});}
 function revealEx(i){var en=document.getElementById('exen'+i);var ja=document.getElementById('exja'+i);if(en)en.className='exen study-selectable';if(ja)ja.className='exja study-selectable';}
+function tapExEn(i,ev){
+  var en=document.getElementById('exen'+i);
+  if(!en)return;
+  if(en.classList.contains('ex-hidden')){
+    // 非表示 → この1文だけ表示
+    en.className='exen study-selectable';
+    ev.stopPropagation();
+  }else{
+    // 表示中 → テキスト選択
+    selectText(en,ev);
+  }
+}
+function tapExJa(i,ev){
+  var ja=document.getElementById('exja'+i);
+  if(!ja)return;
+  if(ja.classList.contains('ex-hidden')){
+    // 非表示 → この1文だけ表示
+    ja.className='exja study-selectable';
+    ev.stopPropagation();
+  }else{
+    // 表示中 → テキスト選択
+    selectText(ja,ev);
+  }
+}
 
 function buildQuiz(){
   var v=curVD[vIdx];if(!v||!v.syns||!v.syns.length){if(document.getElementById('quizWrap'))document.getElementById('quizWrap').innerHTML='';return;}
