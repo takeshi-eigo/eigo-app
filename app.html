@@ -17,7 +17,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .screen.on{display:block}
 /* ============ HOME SCREEN ============ */
 .home-hdr{background:#1d1d1f;padding:20px 16px 14px;position:sticky;top:0;z-index:100}
-.search-bar{display:flex;gap:8px;margin-top:12px}
+.search-bar{display:flex;gap:8px;margin-top:12px;align-items:center;position:relative}
+.search-clear{background:rgba(255,255,255,.25);border:none;color:#fff;font-size:14px;font-weight:700;padding:8px 10px;border-radius:8px;cursor:pointer;touch-action:manipulation;flex-shrink:0;-webkit-user-select:none;user-select:none}
+.search-clear:active{background:rgba(255,255,255,.4)}
 .search-input{flex:1;padding:10px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:14px;outline:none;-webkit-appearance:none}
 .search-input::placeholder{color:rgba(255,255,255,.4)}
 .search-input:focus{background:rgba(255,255,255,.2)}
@@ -142,7 +144,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .expair:active{background:#f8f8f8}
 .exen{font-size:14px;color:#1d1d1f;line-height:1.6;font-weight:500;transition:filter .2s,opacity .2s;-webkit-user-select:text;user-select:text;cursor:text}
 .exja{font-size:13px;color:#666;margin-top:4px;line-height:1.5;transition:filter .2s,opacity .2s;-webkit-user-select:text;user-select:text;cursor:text}
-.ex-hidden{opacity:0;user-select:none;pointer-events:none;filter:blur(4px)}
+.ex-hidden{opacity:0.15;user-select:none;pointer-events:auto;filter:blur(6px);cursor:pointer}
 .quiz-wrap{padding:0 0 16px}
 .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .quiz-score{font-size:12px;color:#aaa;font-weight:600}
@@ -286,7 +288,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <div class="stat"><div class="stat-num" id="statMonths">0</div><div class="stat-lbl">ヶ月分</div></div>
     </div>
     <div class="search-bar">
-      <input class="search-input" id="searchInput" type="search" placeholder="🔍 記事を検索..." oninput="applyFilter()">
+      <input class="search-input" id="searchInput" type="search" placeholder="🔍 記事を検索..." oninput="applyFilter();updateClearBtn()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none">✕</button>
     </div>
     <div class="tag-bar" id="tagBar">
       <div class="tag-chip on" data-tag="all" onclick="selectTag('all')">すべて</div>
@@ -510,6 +513,15 @@ function selectTag(tag){
   applyFilter();
 }
 
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').style.display='none';
+  applyFilter();
+}
+function updateClearBtn(){
+  var val=document.getElementById('searchInput').value;
+  document.getElementById('searchClear').style.display=val?'block':'none';
+}
 function applyFilter(){
   var query=(document.getElementById('searchInput')||{value:''}).value.trim().toLowerCase();
   var filtered=allArticles.filter(function(a){
