@@ -2,465 +2,307 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TOEIC Part 5 練習</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TOEIC Part 5 トレーニング</title>
 <style>
-  :root {
-    --bg: #0f0f13;
-    --surface: #1a1a22;
-    --surface2: #22222e;
-    --border: rgba(255,255,255,0.08);
-    --text: #f0eee8;
-    --muted: #888;
-    --accent: #4f8ef7;
-    --accent2: #7c5cbf;
-    --correct: #3dba7e;
-    --wrong: #e05252;
-    --warn: #e8a030;
-    --font: 'Georgia', serif;
-    --mono: 'Courier New', monospace;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+:root{
+  --bg:#0f0f13;--surface:#1a1a22;--surface2:#22222e;--surface3:#2a2a38;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0eee8;--muted:#888;--muted2:#aaa;
+  --accent:#4f8ef7;--accent2:#7c5cbf;
+  --correct:#3dba7e;--wrong:#e05252;--warn:#e8a030;
+  --font:'Georgia',serif;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
 
-  /* ── SCREENS ── */
-  .screen { display: none; flex-direction: column; min-height: 100vh; }
-  .screen.active { display: flex; }
+/* ── HEADER ── */
+.hdr{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.hdr-back{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;padding:0 4px;line-height:1}
+.hdr-back:hover{color:var(--text)}
+.hdr-title{font-size:17px;font-family:var(--sans);font-weight:600;flex:1}
+.hdr-action{background:none;border:1px solid var(--border2);border-radius:8px;
+  color:var(--muted2);font-size:13px;font-family:var(--sans);padding:6px 14px;cursor:pointer}
+.hdr-action:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* ── START SCREEN ── */
-  #screen-start {
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    text-align: center;
-  }
-  .logo-area { margin-bottom: 2.5rem; }
-  .logo-badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    padding: 4px 14px;
-    border-radius: 2px;
-    margin-bottom: 1rem;
-    font-family: sans-serif;
-  }
-  .logo-title {
-    font-size: clamp(28px, 6vw, 48px);
-    font-weight: normal;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-    margin-bottom: 0.5rem;
-  }
-  .logo-sub {
-    font-size: 15px;
-    color: var(--muted);
-    font-family: sans-serif;
-  }
-  .start-info {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 2rem;
-    max-width: 380px;
-    width: 100%;
-  }
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    font-size: 14px;
-    font-family: sans-serif;
-    border-bottom: 1px solid var(--border);
-  }
-  .info-row:last-child { border-bottom: none; }
-  .info-label { color: var(--muted); }
-  .info-val { font-weight: bold; color: var(--text); }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 14px 40px;
-    font-size: 16px;
-    font-family: sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    margin-bottom: 1rem;
-  }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-secondary {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 24px;
-    font-size: 14px;
-    font-family: sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-  .file-hint { font-size: 12px; color: var(--muted); margin-top: 0.75rem; font-family: sans-serif; }
-  #file-input { display: none; }
-  .file-loaded {
-    font-size: 13px;
-    color: var(--correct);
-    margin-top: 0.5rem;
-    font-family: sans-serif;
-  }
+/* ── HOME SCREEN ── */
+#screen-home{padding:0}
+.home-hero{
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  padding:32px 20px 24px;text-align:center;border-bottom:1px solid var(--border);
+}
+.hero-badge{
+  display:inline-block;background:var(--accent);color:#fff;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  padding:3px 12px;border-radius:2px;margin-bottom:12px;font-family:var(--sans);
+}
+.hero-title{font-size:28px;font-weight:normal;line-height:1.2;margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);font-family:var(--sans)}
+.home-body{padding:16px;flex:1}
+.section-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;margin-top:8px;
+}
+.section-title{font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;font-family:var(--sans)}
+.btn-add{
+  background:var(--accent);color:#fff;border:none;border-radius:8px;
+  padding:8px 16px;font-size:13px;font-family:var(--sans);cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-add:hover{opacity:0.85}
+.tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tile{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:16px;cursor:pointer;transition:all .15s;position:relative;
+  min-height:120px;display:flex;flex-direction:column;
+}
+.tile:hover{border-color:var(--border2);transform:translateY(-1px)}
+.tile:active{transform:scale(0.97)}
+.tile-icon{font-size:24px;margin-bottom:8px}
+.tile-name{font-size:14px;font-family:var(--sans);font-weight:600;
+  line-height:1.3;margin-bottom:auto;padding-bottom:10px}
+.tile-meta{display:flex;flex-direction:column;gap:3px}
+.tile-date{font-size:10px;color:var(--muted);font-family:var(--sans)}
+.tile-count{font-size:10px;color:var(--muted);font-family:var(--sans)}
+.tile-count span{color:var(--accent);font-weight:600}
+.tile-demo{border-style:dashed;border-color:var(--accent);opacity:0.7}
+.tile-demo .tile-icon{opacity:0.7}
+.empty-state{
+  text-align:center;padding:40px 20px;color:var(--muted);font-family:var(--sans);font-size:14px;
+}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4}
 
-  /* ── QUIZ SCREEN ── */
-  #screen-quiz {
-    padding: 0;
-    flex-direction: column;
-  }
-  .quiz-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    flex-shrink: 0;
-  }
-  .q-counter {
-    font-size: 13px;
-    color: var(--muted);
-    font-family: sans-serif;
-  }
-  .q-counter strong { color: var(--text); font-size: 16px; }
-  .timer-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .timer-num {
-    font-size: 28px;
-    font-weight: bold;
-    font-family: var(--mono);
-    min-width: 44px;
-    text-align: center;
-    transition: color 0.3s;
-  }
-  .timer-num.warn { color: var(--warn); }
-  .timer-num.danger { color: var(--wrong); }
-  .timer-bar-wrap {
-    width: 120px;
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .timer-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.9s linear, background 0.3s;
-  }
-  .timer-bar.warn { background: var(--warn); }
-  .timer-bar.danger { background: var(--wrong); }
-  .score-live {
-    font-size: 13px;
-    color: var(--muted);
-    font-family: sans-serif;
-    text-align: right;
-  }
-  .score-live strong { color: var(--correct); }
+/* Long-press context menu */
+.ctx-overlay{
+  display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);
+  align-items:center;justify-content:center;
+}
+.ctx-overlay.open{display:flex}
+.ctx-menu{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:16px;
+  width:280px;overflow:hidden;
+}
+.ctx-header{padding:16px;border-bottom:1px solid var(--border);text-align:center}
+.ctx-header p{font-size:14px;font-family:var(--sans);color:var(--muted2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctx-btn{
+  width:100%;background:none;border:none;border-bottom:1px solid var(--border);
+  padding:16px;font-size:15px;font-family:var(--sans);color:var(--text);
+  cursor:pointer;text-align:center;display:block;
+}
+.ctx-btn:last-child{border-bottom:none}
+.ctx-btn:hover{background:var(--surface3)}
+.ctx-btn.danger{color:var(--wrong)}
+.ctx-btn.cancel{color:var(--muted)}
 
-  .quiz-body {
-    flex: 1;
-    padding: 2rem 1.5rem;
-    overflow-y: auto;
-    max-width: 680px;
-    width: 100%;
-    margin: 0 auto;
-  }
-  .q-sentence {
-    font-size: clamp(16px, 3vw, 20px);
-    line-height: 1.8;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .blank {
-    display: inline-block;
-    min-width: 120px;
-    border-bottom: 2px solid var(--accent);
-    text-align: center;
-    color: var(--accent);
-    font-style: italic;
-  }
-  .choices {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .choice-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    text-align: left;
-    cursor: pointer;
-    font-size: 15px;
-    font-family: var(--font);
-    color: var(--text);
-    transition: all 0.12s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .choice-btn:hover { border-color: var(--accent); background: var(--surface2); }
-  .choice-btn:active { transform: scale(0.99); }
-  .choice-btn.selected { border-color: var(--accent); background: rgba(79,142,247,0.12); }
-  .choice-btn.correct { border-color: var(--correct); background: rgba(61,186,126,0.12); }
-  .choice-btn.wrong { border-color: var(--wrong); background: rgba(224,82,82,0.1); }
-  .choice-btn.timeout { border-color: var(--warn); background: rgba(232,160,48,0.1); }
-  .choice-label {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--surface2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-family: sans-serif;
-    flex-shrink: 0;
-  }
+/* Edit overlay */
+.edit-overlay{
+  display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);
+  align-items:center;justify-content:center;padding:20px;
+}
+.edit-overlay.open{display:flex}
+.edit-box{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:16px;
+  padding:20px;width:100%;max-width:320px;
+}
+.edit-box h3{font-size:16px;font-family:var(--sans);margin-bottom:12px;font-weight:600}
+.edit-input{
+  width:100%;background:var(--surface);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 12px;font-size:15px;font-family:var(--sans);
+  color:var(--text);margin-bottom:12px;
+}
+.edit-input:focus{outline:none;border-color:var(--accent)}
+.edit-row{display:flex;gap:10px}
+.edit-row button{flex:1;border:none;border-radius:8px;padding:10px;
+  font-size:14px;font-family:var(--sans);cursor:pointer}
+.edit-cancel{background:var(--surface3);color:var(--muted2)}
+.edit-ok{background:var(--accent);color:#fff}
 
-  /* progress bar bottom */
-  .progress-foot {
-    height: 3px;
-    background: var(--surface2);
-    flex-shrink: 0;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    transition: width 0.4s ease;
-  }
+/* ── QUIZ SCREEN ── */
+#screen-quiz{background:var(--bg)}
+.quiz-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  background:var(--surface);flex-shrink:0;
+}
+.q-counter{font-size:13px;color:var(--muted);font-family:var(--sans)}
+.q-counter strong{color:var(--text);font-size:16px}
+.timer-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.timer-num{
+  font-size:28px;font-weight:bold;font-family:'Courier New',monospace;
+  min-width:44px;text-align:center;transition:color .3s;
+}
+.timer-num.warn{color:var(--warn)}
+.timer-num.danger{color:var(--wrong)}
+.timer-bar-wrap{width:100px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.timer-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .9s linear,background .3s}
+.timer-bar.warn{background:var(--warn)}
+.timer-bar.danger{background:var(--wrong)}
+.score-live{font-size:13px;color:var(--muted);font-family:var(--sans);text-align:right}
+.score-live strong{color:var(--correct)}
+.quiz-body{
+  flex:1;padding:20px 16px;overflow-y:auto;
+  max-width:680px;width:100%;margin:0 auto;
+}
+.q-sentence{
+  font-size:clamp(16px,3vw,20px);line-height:1.9;margin-bottom:24px;
+  padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+.blank{
+  display:inline-block;min-width:110px;border-bottom:2px solid var(--accent);
+  text-align:center;color:var(--accent);font-style:italic;
+}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;text-align:left;cursor:pointer;
+  font-size:15px;font-family:var(--font);color:var(--text);
+  transition:all .12s;display:flex;align-items:center;gap:12px;width:100%;
+}
+.choice-btn:hover{border-color:var(--border2);background:var(--surface2)}
+.choice-btn:active{transform:scale(0.99)}
+.choice-btn.selected{border-color:var(--accent);background:rgba(79,142,247,0.12)}
+.choice-label{
+  width:26px;height:26px;border-radius:50%;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-family:var(--sans);flex-shrink:0;
+}
+.progress-foot{height:3px;background:var(--surface2);flex-shrink:0}
+.progress-fill{height:100%;background:var(--accent);transition:width .4s ease}
 
-  /* ── RESULT SCREEN ── */
-  #screen-result {
-    padding: 1rem;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  .result-header {
-    text-align: center;
-    padding: 2rem 1rem 1.5rem;
-  }
-  .result-score-big {
-    font-size: clamp(40px, 10vw, 72px);
-    font-weight: bold;
-    color: var(--accent);
-  }
-  .result-label { font-size: 14px; color: var(--muted); font-family: sans-serif; margin-bottom: 1.5rem; }
-  .result-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    max-width: 480px;
-    margin: 0 auto 2rem;
-  }
-  .result-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem;
-    text-align: center;
-  }
-  .result-card .rc-val {
-    font-size: 22px;
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-  .result-card .rc-lbl { font-size: 11px; color: var(--muted); font-family: sans-serif; }
-  .rc-correct { color: var(--correct); }
-  .rc-wrong { color: var(--wrong); }
-  .rc-timeout { color: var(--warn); }
-
-  .review-title {
-    font-size: 18px;
-    margin: 1.5rem 0 1rem;
-    max-width: 680px;
-    margin-left: auto;
-    margin-right: auto;
-    font-family: sans-serif;
-    font-weight: 500;
-    color: var(--muted);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .review-list {
-    max-width: 680px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-bottom: 3rem;
-  }
-  .review-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-  }
-  .review-item.r-correct { border-left: 3px solid var(--correct); }
-  .review-item.r-wrong { border-left: 3px solid var(--wrong); }
-  .review-item.r-timeout { border-left: 3px solid var(--warn); }
-
-  .ri-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-  }
-  .ri-qnum { font-size: 12px; color: var(--muted); font-family: sans-serif; }
-  .ri-status {
-    font-size: 11px;
-    font-family: sans-serif;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-  }
-  .ri-status.correct { background: rgba(61,186,126,0.15); color: var(--correct); }
-  .ri-status.wrong { background: rgba(224,82,82,0.12); color: var(--wrong); }
-  .ri-status.timeout { background: rgba(232,160,48,0.12); color: var(--warn); }
-
-  .ri-sentence {
-    font-size: 15px;
-    line-height: 1.7;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    position: relative;
-    padding-right: 2rem;
-    user-select: text;
-  }
-  .ri-sentence-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .speak-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 18px;
-    padding: 2px 4px;
-    border-radius: 4px;
-    flex-shrink: 0;
-    transition: color 0.15s;
-    line-height: 1;
-    margin-top: 2px;
-  }
-  .speak-btn:hover { color: var(--accent); }
-  .speak-btn.speaking { color: var(--accent); animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-  .ri-answer-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    font-family: sans-serif;
-    font-size: 13px;
-    flex-wrap: wrap;
-  }
-  .ri-answer-row span { display: flex; align-items: center; gap: 5px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-  .dot-correct { background: var(--correct); }
-  .dot-wrong { background: var(--wrong); }
-  .dot-timeout { background: var(--warn); }
-
-  .ri-explanation {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    font-family: sans-serif;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border);
-  }
-  .ri-explanation-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .result-actions {
-    max-width: 480px;
-    margin: 0 auto 2rem;
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 0 1rem;
-  }
-
-  /* demo questions */
-  .demo-note {
-    font-size: 12px;
-    color: var(--warn);
-    font-family: sans-serif;
-    margin-top: 0.5rem;
-  }
+/* ── RESULT SCREEN ── */
+#screen-result{padding:0;overflow-y:auto}
+.result-top{
+  text-align:center;padding:28px 16px 20px;
+  border-bottom:1px solid var(--border);
+}
+.result-score-big{font-size:clamp(48px,12vw,80px);font-weight:bold;color:var(--accent)}
+.result-label{font-size:13px;color:var(--muted);font-family:var(--sans);margin-bottom:16px}
+.result-cards{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  max-width:360px;margin:0 auto 20px;
+}
+.result-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;
+}
+.rc-val{font-size:22px;font-weight:bold;margin-bottom:4px}
+.rc-lbl{font-size:10px;color:var(--muted);font-family:var(--sans)}
+.rc-correct{color:var(--correct)}.rc-wrong{color:var(--wrong)}.rc-timeout{color:var(--warn)}
+.result-actions{display:flex;gap:10px;justify-content:center;margin-bottom:0;padding:0 16px 20px}
+.btn-primary{
+  background:var(--accent);color:#fff;border:none;border-radius:8px;
+  padding:12px 28px;font-size:15px;font-family:var(--sans);cursor:pointer;
+}
+.btn-primary:hover{opacity:.85}
+.btn-outline{
+  background:transparent;color:var(--muted2);border:1px solid var(--border2);
+  border-radius:8px;padding:12px 20px;font-size:15px;font-family:var(--sans);cursor:pointer;
+}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.review-section-title{
+  font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.08em;font-family:var(--sans);
+  padding:12px 16px 8px;border-top:1px solid var(--border);
+}
+.review-list{
+  padding:0 16px 80px;display:flex;flex-direction:column;gap:14px;
+  max-width:680px;margin:0 auto;
+}
+.review-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;border-left:3px solid transparent;
+}
+.review-item.r-correct{border-left-color:var(--correct)}
+.review-item.r-wrong{border-left-color:var(--wrong)}
+.review-item.r-timeout{border-left-color:var(--warn)}
+.ri-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ri-qnum{font-size:11px;color:var(--muted);font-family:var(--sans)}
+.ri-status{
+  font-size:10px;font-family:var(--sans);padding:3px 10px;border-radius:20px;font-weight:700;letter-spacing:.5px;
+}
+.ri-status.correct{background:rgba(61,186,126,.15);color:var(--correct)}
+.ri-status.wrong{background:rgba(224,82,82,.12);color:var(--wrong)}
+.ri-status.timeout{background:rgba(232,160,48,.12);color:var(--warn)}
+.ri-sentence-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.ri-sentence{
+  font-size:15px;line-height:1.7;flex:1;cursor:pointer;user-select:text;
+}
+.ri-translation{
+  font-size:13px;color:var(--muted2);font-family:var(--sans);line-height:1.6;
+  margin-bottom:10px;padding:8px 10px;background:var(--surface2);
+  border-radius:6px;display:flex;align-items:flex-start;gap:8px;
+}
+.ri-translation-text{flex:1}
+.speak-btn{
+  background:none;border:none;cursor:pointer;color:var(--muted);
+  font-size:17px;padding:2px 4px;border-radius:4px;flex-shrink:0;
+  transition:color .15s;line-height:1;
+}
+.speak-btn:hover{color:var(--accent)}
+.speak-btn.speaking{color:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ri-answer-row{
+  display:flex;gap:12px;margin-bottom:8px;font-family:var(--sans);font-size:12px;flex-wrap:wrap;
+}
+.ri-answer-row span{display:flex;align-items:center;gap:4px}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-correct{background:var(--correct)}.dot-wrong{background:var(--wrong)}.dot-timeout{background:var(--warn)}
+.ri-explanation{
+  font-size:13px;color:var(--muted2);font-family:var(--sans);line-height:1.6;
+  padding-top:8px;border-top:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.ri-explanation-text{flex:1}
 </style>
 </head>
 <body>
 
-<!-- ═══ START ═══ -->
-<div id="screen-start" class="screen active">
-  <div class="logo-area">
-    <div class="logo-badge">TOEIC Part 5</div>
-    <h1 class="logo-title">瞬間文法判断<br>トレーニング</h1>
-    <p class="logo-sub">30問 · 20秒/問 · 時間切れ強制次問</p>
+<!-- ═══ HOME ═══ -->
+<div id="screen-home" class="screen active">
+  <div class="home-hero">
+    <div class="hero-badge">TOEIC Part 5</div>
+    <h1 class="hero-title">瞬間文法判断<br>トレーニング</h1>
+    <p class="hero-sub">30問 · 20秒/問 · 時間切れ強制次問</p>
   </div>
+  <div class="home-body">
+    <div class="section-hdr">
+      <span class="section-title">問題集ライブラリ</span>
+      <button class="btn-add" onclick="document.getElementById('file-input').click()">
+        ＋ 追加
+      </button>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="importJSON(event)">
+    <div class="tile-grid" id="tile-grid"></div>
+  </div>
+</div>
 
-  <div class="start-info">
-    <div class="info-row">
-      <span class="info-label">問題数</span>
-      <span class="info-val">30問</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">制限時間</span>
-      <span class="info-val">20秒 / 問</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">解説</span>
-      <span class="info-val">全問終了後</span>
-    </div>
-    <div class="info-row">
-      <span class="info-label">データ</span>
-      <span class="info-val">JSONインポート</span>
+<!-- Context Menu -->
+<div class="ctx-overlay" id="ctx-overlay" onclick="closeCtx()">
+  <div class="ctx-menu" onclick="event.stopPropagation()">
+    <div class="ctx-header"><p id="ctx-title"></p></div>
+    <button class="ctx-btn" onclick="ctxRename()">✏️ タイトル変更</button>
+    <button class="ctx-btn" onclick="ctxChangeDate()">📅 日付変更</button>
+    <button class="ctx-btn danger" onclick="ctxDelete()">🗑 削除</button>
+    <button class="ctx-btn cancel" onclick="closeCtx()">キャンセル</button>
+  </div>
+</div>
+
+<!-- Edit Overlay -->
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-box">
+    <h3 id="edit-title">タイトル変更</h3>
+    <input type="text" class="edit-input" id="edit-input" placeholder="">
+    <div class="edit-row">
+      <button class="edit-cancel" onclick="closeEdit()">キャンセル</button>
+      <button class="edit-ok" onclick="confirmEdit()">変更</button>
     </div>
   </div>
-
-  <button class="btn-primary" onclick="document.getElementById('file-input').click()">
-    📂 JSONファイルを読み込む
-  </button>
-  <input type="file" id="file-input" accept=".json" onchange="loadJSON(event)">
-  <div id="file-status" class="file-loaded" style="display:none"></div>
-
-  <button class="btn-secondary" id="demo-btn" onclick="startDemo()" style="margin-top:0.5rem">
-    サンプル問題で試す
-  </button>
-  <p class="file-hint">JSONはGeminiで生成してください（Gem説明は別途提供）</p>
 </div>
 
 <!-- ═══ QUIZ ═══ -->
@@ -469,55 +311,86 @@
     <div class="q-counter">問題 <strong id="q-num">1</strong> / 30</div>
     <div class="timer-wrap">
       <div class="timer-num" id="timer-num">20</div>
-      <div class="timer-bar-wrap">
-        <div class="timer-bar" id="timer-bar"></div>
-      </div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
     </div>
-    <div class="score-live">正解 <strong id="live-score">0</strong></div>
+    <div class="score-live">進捗 <strong id="q-done">0</strong>/30</div>
   </div>
-
   <div class="quiz-body">
     <p class="q-sentence" id="q-sentence"></p>
     <div class="choices" id="choices"></div>
   </div>
-
-  <div class="progress-foot">
-    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-  </div>
+  <div class="progress-foot"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
 </div>
 
 <!-- ═══ RESULT ═══ -->
 <div id="screen-result" class="screen">
-  <div class="result-header">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goHome()">←</button>
+    <span class="hdr-title" id="result-set-name"></span>
+    <button class="hdr-action" onclick="restartCurrent()">再挑戦</button>
+  </div>
+  <div class="result-top">
     <div class="result-score-big" id="r-score"></div>
     <div class="result-label">/ 30問正解</div>
     <div class="result-cards">
-      <div class="result-card">
-        <div class="rc-val rc-correct" id="r-correct">0</div>
-        <div class="rc-lbl">正解</div>
-      </div>
-      <div class="result-card">
-        <div class="rc-val rc-wrong" id="r-wrong">0</div>
-        <div class="rc-lbl">不正解</div>
-      </div>
-      <div class="result-card">
-        <div class="rc-val rc-timeout" id="r-timeout">0</div>
-        <div class="rc-lbl">時間切れ</div>
-      </div>
-    </div>
-    <div class="result-actions">
-      <button class="btn-primary" onclick="restart()">もう一度</button>
-      <button class="btn-secondary" onclick="goHome()">トップへ</button>
+      <div class="result-card"><div class="rc-val rc-correct" id="r-correct">0</div><div class="rc-lbl">正解</div></div>
+      <div class="result-card"><div class="rc-val rc-wrong" id="r-wrong">0</div><div class="rc-lbl">不正解</div></div>
+      <div class="result-card"><div class="rc-val rc-timeout" id="r-timeout">0</div><div class="rc-lbl">時間切れ</div></div>
     </div>
   </div>
-
-  <div class="review-title">全問解説</div>
+  <div class="review-section-title">全問解説</div>
   <div class="review-list" id="review-list"></div>
 </div>
 
 <script>
+// ═══ IndexedDB ═══
+const DB_NAME = 'toeic_part5';
+const DB_VER = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('sets')) {
+        d.createObjectStore('sets', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; res(); };
+    req.onerror = e => rej(e);
+  });
+}
+function dbGetAll() {
+  return new Promise((res, rej) => {
+    const tx = db.transaction('sets', 'readonly');
+    const req = tx.objectStore('sets').getAll();
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = e => rej(e);
+  });
+}
+function dbPut(obj) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction('sets', 'readwrite');
+    const req = tx.objectStore('sets').put(obj);
+    req.onsuccess = () => res();
+    req.onerror = e => rej(e);
+  });
+}
+function dbDelete(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction('sets', 'readwrite');
+    const req = tx.objectStore('sets').delete(id);
+    req.onsuccess = () => res();
+    req.onerror = e => rej(e);
+  });
+}
+
+// ═══ State ═══
 const TOTAL = 30;
 const TIME_LIMIT = 20;
+let sets = [];
+let currentSetId = null;
 let questions = [];
 let current = 0;
 let answers = [];
@@ -525,68 +398,177 @@ let timer = null;
 let timeLeft = TIME_LIMIT;
 let locked = false;
 let speaking = null;
+let ctxTargetId = null;
+let editMode = null;
 
-const DEMO_QUESTIONS = [
-  { sentence: "The new marketing strategy ------- designed to attract younger consumers.", blank_index: 3, choices: ["was", "were", "be", "been"], answer: 0, explanation: "主語 'The new marketing strategy' は単数形なので be動詞は was が正解。were は複数形、be/been は助動詞なしでは使えない。", category: "文法" },
-  { sentence: "Sales figures for the third quarter ------- all expectations.", blank_index: 4, choices: ["exceed", "exceeded", "exceeding", "to exceed"], answer: 1, explanation: "文全体の述語動詞が必要。過去の文脈（for the third quarter）なので過去形 exceeded が正解。", category: "文法" },
-  { sentence: "Employees are encouraged to submit their ------- by the end of the week.", blank_index: 6, choices: ["suggest", "suggested", "suggestion", "suggestions"], answer: 3, explanation: "their の後は名詞が必要。複数形の suggestions が自然。suggest は動詞、suggested は形容詞/過去形。", category: "品詞" },
-  { sentence: "The report must be submitted ------- noon on Friday.", blank_index: 6, choices: ["until", "by", "during", "since"], answer: 1, explanation: "期限を表すには by（〜までに）が正解。until は継続、during は期間中、since は起点を示す。", category: "語彙" },
-  { sentence: "Mr. Tanaka is ------- for overseeing the entire production process.", blank_index: 3, choices: ["responsible", "responsibility", "responsibly", "respond"], answer: 0, explanation: "be動詞の後で 'for' を伴う形容詞 responsible が正解。responsible for ～ で「〜に責任がある」という意味。", category: "品詞" },
-  { sentence: "The conference room is available ------- 2 PM and 4 PM tomorrow.", blank_index: 5, choices: ["from", "between", "among", "within"], answer: 1, explanation: "2つの時点を結ぶには between A and B が正解。from は起点のみ、among は3つ以上、within は期間内。", category: "語彙" },
-  { sentence: "All participants are ------- to bring a valid ID to the event.", blank_index: 3, choices: ["requiring", "required", "require", "requirement"], answer: 1, explanation: "are の後に過去分詞 required で受動態を形成。'are required to do' で「〜することを求められている」。", category: "文法" },
-  { sentence: "The ------- of the new product line exceeded initial projections.", blank_index: 1, choices: ["launch", "launching", "launched", "to launch"], answer: 0, explanation: "The の後に名詞が必要。launch（名詞：発売）が正解。launching は動名詞も可能だが、冠詞 The + 名詞の形が最も自然。", category: "品詞" },
-  { sentence: "Please ensure that all invoices are processed ------- before the audit.", blank_index: 6, choices: ["accurate", "accuracy", "accurately", "accuracies"], answer: 2, explanation: "動詞 processed を修飾する副詞 accurately が正解。accurate は形容詞、accuracy/accuracies は名詞。", category: "品詞" },
-  { sentence: "The team decided to ------- the project deadline by two weeks.", blank_index: 5, choices: ["extend", "extension", "extensive", "extensively"], answer: 0, explanation: "to 不定詞の後は動詞の原形。extend（延長する）が正解。extension は名詞、extensive は形容詞、extensively は副詞。", category: "品詞" },
-  { sentence: "Customers who purchase three or more items will receive a ------- discount.", blank_index: 8, choices: ["special", "specially", "specialize", "specialty"], answer: 0, explanation: "名詞 discount を修飾する形容詞 special が正解。specially は副詞、specialize は動詞、specialty は名詞。", category: "品詞" },
-  { sentence: "The new software update will be ------- to all users next month.", blank_index: 6, choices: ["available", "availability", "availably", "avail"], answer: 0, explanation: "be動詞の後は形容詞または名詞。'be available to' で「〜に利用可能な」という意味の形容詞 available が正解。", category: "品詞" },
-  { sentence: "The manager ------- the staff about the changes before they were announced.", blank_index: 1, choices: ["notified", "notify", "notification", "notifying"], answer: 0, explanation: "主語 The manager に対する述語動詞が必要。過去形 notified が正解。notify は現在形、notification は名詞。", category: "文法" },
-  { sentence: "Workers should report any safety hazards ------- to their supervisor.", blank_index: 6, choices: ["immediate", "immediately", "immediacy", "immediated"], answer: 1, explanation: "動詞 report を修飾する副詞 immediately（すぐに）が正解。immediate は形容詞、immediacy は名詞。", category: "品詞" },
-  { sentence: "The financial ------- showed a significant improvement over the previous year.", blank_index: 2, choices: ["statement", "state", "stated", "stating"], answer: 0, explanation: "The の後に名詞が必要。financial statement（財務諸表）という複合名詞が正解。", category: "語彙" },
-  { sentence: "All employees are expected to ------- with the company's code of conduct.", blank_index: 5, choices: ["comply", "compliance", "complying", "complied"], answer: 0, explanation: "to 不定詞の後は動詞の原形。comply with ～（〜に従う）が正解。compliance は名詞。", category: "語彙" },
-  { sentence: "The ------- of the merger will be announced at the shareholder meeting.", blank_index: 1, choices: ["outcome", "outcoming", "outcomed", "outcomes"], answer: 0, explanation: "The の後に単数名詞 outcome（結果）が正解。また outcomes（複数）も文法的には可能だが、冠詞 The と単数扱いが自然。", category: "語彙" },
-  { sentence: "Applicants ------- submit their resumes along with three references.", blank_index: 1, choices: ["must", "mustn't", "might", "should have"], answer: 0, explanation: "「提出しなければならない」という義務を表すには must が最も適切。should も可能だが、must が最も強い義務を表す。", category: "文法" },
-  { sentence: "The seminar will cover topics ------- to international trade regulations.", blank_index: 5, choices: ["relevant", "relevance", "relevantly", "relevanted"], answer: 0, explanation: "topics を修飾する形容詞 relevant が正解。relevant to ～ で「〜に関連した」。relevance は名詞。", category: "品詞" },
-  { sentence: "The company's annual revenue has ------- by 15% over the past three years.", blank_index: 5, choices: ["grown", "grow", "growing", "grew"], answer: 0, explanation: "has の後は過去分詞 grown が正解（現在完了形）。grow は原形、growing は現在分詞、grew は過去形。", category: "文法" },
-  { sentence: "Please submit your expense report ------- the accounting department.", blank_index: 5, choices: ["to", "for", "at", "with"], answer: 0, explanation: "submit A to B（AをBに提出する）の形。to が正解。for は目的、at は場所、with は伴いを示す。", category: "語彙" },
-  { sentence: "The product recall was issued ------- a manufacturing defect was discovered.", blank_index: 6, choices: ["after", "since", "although", "unless"], answer: 0, explanation: "「製造上の欠陥が発見された後」という時間関係を表す after が正解。since は原因/起点、although は逆接、unless は条件。", category: "語彙" },
-  { sentence: "Ms. Yamamoto has been ------- as the new department head.", blank_index: 3, choices: ["appointed", "appoint", "appointing", "appointment"], answer: 0, explanation: "has been の後に過去分詞 appointed で受動態（現在完了受動態）。「〜に任命された」という意味。", category: "文法" },
-  { sentence: "The ------- deadline for submitting applications is January 31st.", blank_index: 1, choices: ["final", "finally", "finalize", "finality"], answer: 0, explanation: "名詞 deadline を修飾する形容詞 final が正解。finally は副詞、finalize は動詞、finality は名詞。", category: "品詞" },
-  { sentence: "Customers can track their orders ------- on the company's website.", blank_index: 5, choices: ["directly", "direct", "direction", "directed"], answer: 0, explanation: "動詞 track を修飾する副詞 directly（直接）が正解。direct は形容詞/動詞、direction は名詞。", category: "品詞" },
-  { sentence: "The new policy applies to all staff ------- of their position or seniority.", blank_index: 6, choices: ["regardless", "regarding", "regard", "regarded"], answer: 0, explanation: "regardless of ～（〜に関係なく）というイディオム。regardless が正解。regarding は「〜に関して」、regard は動詞/名詞。", category: "語彙" },
-  { sentence: "The quarterly report ------- that profits have increased by 20%.", blank_index: 3, choices: ["indicates", "indication", "indicated", "indicative"], answer: 0, explanation: "主語 The quarterly report に対する現在形の述語動詞 indicates が正解。indication は名詞、indicative は形容詞。", category: "文法" },
-  { sentence: "All new employees will ------- a comprehensive orientation program.", blank_index: 4, choices: ["undergo", "undergone", "undergoing", "underwent"], answer: 0, explanation: "will の後は動詞の原形 undergo が正解。undergone は過去分詞、undergoing は現在分詞、underwent は過去形。", category: "文法" },
-  { sentence: "The construction project is expected to be ------- by the end of next year.", blank_index: 7, choices: ["completed", "complete", "completing", "completion"], answer: 0, explanation: "be動詞の後に過去分詞 completed で受動態。「完成される予定」という意味。complete は形容詞/動詞の原形、completion は名詞。", category: "文法" },
-  { sentence: "Employees are ------- for maintaining confidentiality of client information.", blank_index: 2, choices: ["responsible", "responsibility", "respond", "responsive"], answer: 0, explanation: "be動詞の後の形容詞 responsible が正解。responsible for ～ で「〜に責任がある」。responsibility は名詞、respond は動詞。", category: "品詞" }
-];
+// ═══ Init ═══
+async function init() {
+  await openDB();
+  sets = await dbGetAll();
+  renderTiles();
+}
 
-function loadJSON(event) {
+// ═══ TILES ═══
+function renderTiles() {
+  const grid = document.getElementById('tile-grid');
+  grid.innerHTML = '';
+  const userSets = sets.filter(s => !s.isDemo);
+  if (userSets.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">📂</div>
+        <p>問題集がありません</p>
+        <p style="margin-top:6px;font-size:12px">「＋ 追加」からJSONをインポートしてください</p>
+      </div>`;
+  }
+  // Demo tile always at end
+  userSets.forEach(s => grid.appendChild(makeTile(s)));
+  grid.appendChild(makeDemoTile());
+}
+
+function makeTile(s) {
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.dataset.id = s.id;
+  const dateStr = new Date(s.addedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+  tile.innerHTML = `
+    <div class="tile-icon">📝</div>
+    <div class="tile-name">${esc(s.name)}</div>
+    <div class="tile-meta">
+      <div class="tile-date">追加: ${dateStr}</div>
+      <div class="tile-count">実施: <span>${s.playCount || 0}回</span></div>
+    </div>`;
+  tile.addEventListener('click', () => startSet(s.id));
+  // Long press
+  let pressTimer = null;
+  tile.addEventListener('pointerdown', () => {
+    pressTimer = setTimeout(() => openCtx(s.id), 600);
+  });
+  tile.addEventListener('pointerup', () => clearTimeout(pressTimer));
+  tile.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+  return tile;
+}
+
+function makeDemoTile() {
+  const tile = document.createElement('div');
+  tile.className = 'tile tile-demo';
+  tile.innerHTML = `
+    <div class="tile-icon">🎯</div>
+    <div class="tile-name">サンプル問題</div>
+    <div class="tile-meta">
+      <div class="tile-date">内蔵デモ</div>
+      <div class="tile-count">30問</div>
+    </div>`;
+  tile.addEventListener('click', startDemo);
+  return tile;
+}
+
+// ═══ IMPORT ═══
+async function importJSON(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      questions = Array.isArray(data) ? data : data.questions;
-      document.getElementById('file-status').style.display = 'block';
-      document.getElementById('file-status').textContent = `✓ ${file.name} 読み込み完了（${questions.length}問）`;
-      document.getElementById('demo-btn').style.display = 'none';
-      setTimeout(() => startQuiz(), 800);
-    } catch {
-      alert('JSONの読み込みに失敗しました。形式を確認してください。');
-    }
-  };
-  reader.readAsText(file);
+  const text = await file.text();
+  try {
+    const data = JSON.parse(text);
+    const qs = Array.isArray(data) ? data : data.questions;
+    if (!qs || qs.length === 0) { alert('問題が見つかりませんでした'); return; }
+    const id = 'set_' + Date.now();
+    const name = file.name.replace(/\.json$/, '');
+    const obj = { id, name, questions: qs, addedAt: Date.now(), playCount: 0 };
+    await dbPut(obj);
+    sets = await dbGetAll();
+    renderTiles();
+  } catch (e) {
+    alert('JSONの読み込みに失敗しました: ' + e.message);
+  }
+  event.target.value = '';
+}
+
+// ═══ CONTEXT MENU ═══
+function openCtx(id) {
+  ctxTargetId = id;
+  const s = sets.find(x => x.id === id);
+  document.getElementById('ctx-title').textContent = s ? s.name : '';
+  document.getElementById('ctx-overlay').classList.add('open');
+}
+function closeCtx() {
+  document.getElementById('ctx-overlay').classList.remove('open');
+  ctxTargetId = null;
+}
+function ctxRename() {
+  closeCtx();
+  const s = sets.find(x => x.id === ctxTargetId) || sets.find(x => x.id === ctxTargetId);
+  const target = sets.find(x => x.id === ctxTargetId);
+  document.getElementById('edit-title').textContent = 'タイトル変更';
+  document.getElementById('edit-input').type = 'text';
+  document.getElementById('edit-input').value = target ? target.name : '';
+  editMode = 'rename';
+  document.getElementById('edit-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('edit-input').focus(), 100);
+}
+function ctxChangeDate() {
+  closeCtx();
+  const target = sets.find(x => x.id === ctxTargetId);
+  document.getElementById('edit-title').textContent = '日付変更';
+  document.getElementById('edit-input').type = 'date';
+  if (target) {
+    const d = new Date(target.addedAt);
+    document.getElementById('edit-input').value = d.toISOString().slice(0, 10);
+  }
+  editMode = 'date';
+  document.getElementById('edit-overlay').classList.add('open');
+}
+async function ctxDelete() {
+  closeCtx();
+  const target = sets.find(x => x.id === ctxTargetId);
+  if (!target) return;
+  if (!confirm(`「${target.name}」を削除しますか？`)) return;
+  await dbDelete(ctxTargetId);
+  sets = await dbGetAll();
+  renderTiles();
+}
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  editMode = null;
+}
+async function confirmEdit() {
+  const val = document.getElementById('edit-input').value.trim();
+  if (!val) return;
+  const target = sets.find(x => x.id === ctxTargetId);
+  if (!target) { closeEdit(); return; }
+  if (editMode === 'rename') {
+    target.name = val;
+  } else if (editMode === 'date') {
+    target.addedAt = new Date(val).getTime();
+  }
+  await dbPut(target);
+  sets = await dbGetAll();
+  renderTiles();
+  closeEdit();
+}
+
+// ═══ START QUIZ ═══
+async function startSet(id) {
+  const s = sets.find(x => x.id === id);
+  if (!s) return;
+  currentSetId = id;
+  questions = s.questions.slice(0, TOTAL);
+  while (questions.length < TOTAL && s.questions.length > 0) {
+    questions = questions.concat(s.questions).slice(0, TOTAL);
+  }
+  document.getElementById('result-set-name').textContent = s.name;
+  startQuiz();
 }
 
 function startDemo() {
-  questions = DEMO_QUESTIONS;
+  currentSetId = null;
+  questions = DEMO_QUESTIONS.slice(0, TOTAL);
+  document.getElementById('result-set-name').textContent = 'サンプル問題';
   startQuiz();
 }
 
 function startQuiz() {
-  current = 0;
-  answers = [];
-  locked = false;
+  current = 0; answers = []; locked = false;
   showScreen('screen-quiz');
   showQuestion();
 }
@@ -595,14 +577,13 @@ function showQuestion() {
   if (current >= TOTAL) { showResult(); return; }
   const q = questions[current];
   locked = false;
-
   document.getElementById('q-num').textContent = current + 1;
-  document.getElementById('live-score').textContent = answers.filter(a => a.status === 'correct').length;
+  document.getElementById('q-done').textContent = current;
   document.getElementById('progress-fill').style.width = (current / TOTAL * 100) + '%';
 
   const parts = q.sentence.split('-------');
-  const sentenceHTML = parts[0] + '<span class="blank">_______</span>' + (parts[1] || '');
-  document.getElementById('q-sentence').innerHTML = sentenceHTML;
+  document.getElementById('q-sentence').innerHTML =
+    parts[0] + '<span class="blank">_______</span>' + (parts[1] || '');
 
   const choicesEl = document.getElementById('choices');
   choicesEl.innerHTML = '';
@@ -610,11 +591,10 @@ function showQuestion() {
   q.choices.forEach((c, i) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-label">${labels[i]}</span>${c}`;
+    btn.innerHTML = `<span class="choice-label">${labels[i]}</span>${esc(c)}`;
     btn.onclick = () => select(i);
     choicesEl.appendChild(btn);
   });
-
   startTimer();
 }
 
@@ -625,10 +605,7 @@ function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimerUI();
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      handleTimeout();
-    }
+    if (timeLeft <= 0) { clearInterval(timer); handleTimeout(); }
   }, 1000);
 }
 
@@ -636,20 +613,17 @@ function updateTimerUI() {
   const el = document.getElementById('timer-num');
   const bar = document.getElementById('timer-bar');
   el.textContent = timeLeft;
-  const pct = (timeLeft / TIME_LIMIT * 100);
-  bar.style.width = pct + '%';
-  el.className = 'timer-num' + (timeLeft <= 5 ? ' danger' : timeLeft <= 8 ? ' warn' : '');
-  bar.className = 'timer-bar' + (timeLeft <= 5 ? ' danger' : timeLeft <= 8 ? ' warn' : '');
+  bar.style.width = (timeLeft / TIME_LIMIT * 100) + '%';
+  const cls = timeLeft <= 5 ? ' danger' : timeLeft <= 8 ? ' warn' : '';
+  el.className = 'timer-num' + cls;
+  bar.className = 'timer-bar' + cls;
 }
 
 function handleTimeout() {
   if (locked) return;
   locked = true;
-  const q = questions[current];
-  answers.push({ status: 'timeout', chosen: -1, correct: q.answer });
-  const btns = document.querySelectorAll('.choice-btn');
-  btns[q.answer].classList.add('timeout');
-  setTimeout(nextQuestion, 600);
+  answers.push({ status: 'timeout', chosen: -1, correct: questions[current].answer });
+  setTimeout(nextQuestion, 400);
 }
 
 function select(i) {
@@ -657,64 +631,71 @@ function select(i) {
   locked = true;
   clearInterval(timer);
   const q = questions[current];
-  const btns = document.querySelectorAll('.choice-btn');
   const isCorrect = i === q.answer;
-  btns[i].classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) btns[q.answer].classList.add('correct');
+  const btns = document.querySelectorAll('.choice-btn');
+  btns[i].classList.add('selected');
   answers.push({ status: isCorrect ? 'correct' : 'wrong', chosen: i, correct: q.answer });
-  setTimeout(nextQuestion, 700);
+  setTimeout(nextQuestion, 400);
 }
 
-function nextQuestion() {
-  current++;
-  if (current >= TOTAL) { showResult(); return; }
-  showQuestion();
-}
+function nextQuestion() { current++; showQuestion(); }
 
-function showResult() {
+// ═══ RESULT ═══
+async function showResult() {
   clearInterval(timer);
+  // Update play count
+  if (currentSetId) {
+    const s = sets.find(x => x.id === currentSetId);
+    if (s) { s.playCount = (s.playCount || 0) + 1; await dbPut(s); sets = await dbGetAll(); }
+  }
   showScreen('screen-result');
   const correct = answers.filter(a => a.status === 'correct').length;
-  const wrong = answers.filter(a => a.status === 'wrong').length;
+  const wrong   = answers.filter(a => a.status === 'wrong').length;
   const timeout = answers.filter(a => a.status === 'timeout').length;
-  document.getElementById('r-score').textContent = correct;
+  document.getElementById('r-score').textContent   = correct;
   document.getElementById('r-correct').textContent = correct;
-  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-wrong').textContent   = wrong;
   document.getElementById('r-timeout').textContent = timeout;
 
   const labels = ['A', 'B', 'C', 'D'];
   const list = document.getElementById('review-list');
   list.innerHTML = '';
 
-  questions.slice(0, TOTAL).forEach((q, i) => {
+  questions.forEach((q, i) => {
     const ans = answers[i];
     const cls = ans.status;
     const statusText = cls === 'correct' ? '正解' : cls === 'wrong' ? '不正解' : '時間切れ';
-
-    const parts = q.sentence.split('-------');
-    const filled = parts[0] + `<strong style="color:var(--correct)">${q.choices[q.answer]}</strong>` + (parts[1] || '');
+    const filledSentence = q.sentence.replace('-------', `<strong style="color:var(--correct)">${esc(q.choices[q.answer])}</strong>`);
 
     const item = document.createElement('div');
     item.className = `review-item r-${cls}`;
+
+    const translationHTML = q.translation
+      ? `<div class="ri-translation">
+           <span class="ri-translation-text">${esc(q.translation)}</span>
+           <button class="speak-btn" onclick="speakText('ja','${escAttr(q.translation)}','spk-t-${i}')" id="spk-t-${i}">🔊</button>
+         </div>` : '';
+
     item.innerHTML = `
       <div class="ri-meta">
-        <span class="ri-qnum">Q${i + 1} ${q.category || ''}</span>
+        <span class="ri-qnum">Q${i+1}${q.category ? ' · '+q.category : ''}</span>
         <span class="ri-status ${cls}">${statusText}</span>
       </div>
       <div class="ri-sentence-row">
-        <div class="ri-sentence" id="sent-${i}" onclick="selectAll('sent-${i}')">${filled}</div>
-        <button class="speak-btn" onclick="speakText(${i})" id="spk-${i}" title="読み上げ">🔊</button>
+        <div class="ri-sentence" id="sent-${i}" onclick="selectAll('sent-${i}')">${filledSentence}</div>
+        <button class="speak-btn" onclick="speakText('en','${escAttr(q.sentence.replace('-------',q.choices[q.answer]))}','spk-s-${i}')" id="spk-s-${i}">🔊</button>
       </div>
+      ${translationHTML}
       <div class="ri-answer-row">
-        <span><span class="dot dot-correct"></span>正解: ${labels[q.answer]}. ${q.choices[q.answer]}</span>
-        ${ans.status !== 'correct' && ans.chosen >= 0 ? `<span><span class="dot dot-wrong"></span>あなた: ${labels[ans.chosen]}. ${q.choices[ans.chosen]}</span>` : ''}
+        <span><span class="dot dot-correct"></span>正解: ${labels[q.answer]}. ${esc(q.choices[q.answer])}</span>
+        ${ans.status !== 'correct' && ans.chosen >= 0
+          ? `<span><span class="dot dot-wrong"></span>選択: ${labels[ans.chosen]}. ${esc(q.choices[ans.chosen])}</span>` : ''}
         ${ans.status === 'timeout' ? `<span><span class="dot dot-timeout"></span>時間切れ</span>` : ''}
       </div>
-      <div class="ri-explanation-row">
-        <div class="ri-explanation">${q.explanation}</div>
-        <button class="speak-btn" onclick="speakExplanation(${i})" id="spk-ex-${i}" title="解説を読み上げ">🔊</button>
-      </div>
-    `;
+      <div class="ri-explanation">
+        <span class="ri-explanation-text">${esc(q.explanation)}</span>
+        <button class="speak-btn" onclick="speakText('ja','${escAttr(q.explanation)}','spk-e-${i}')" id="spk-e-${i}">🔊</button>
+      </div>`;
     list.appendChild(item);
   });
 }
@@ -728,17 +709,8 @@ function selectAll(id) {
   sel.addRange(range);
 }
 
-let currentUtterance = null;
-function speakText(i) {
-  const q = questions[i];
-  const text = q.sentence.replace('-------', q.choices[q.answer]);
-  speak(text, `spk-${i}`);
-}
-function speakExplanation(i) {
-  speak(questions[i].explanation, `spk-ex-${i}`);
-}
-function speak(text, btnId) {
-  if (!('speechSynthesis' in window)) { alert('音声合成が使用できません'); return; }
+function speakText(lang, text, btnId) {
+  if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const btn = document.getElementById(btnId);
   if (speaking === btnId) {
@@ -750,12 +722,9 @@ function speak(text, btnId) {
   speaking = btnId;
   if (btn) btn.className = 'speak-btn speaking';
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = text.match(/[\u3040-\u30ff\u4e00-\u9fff]/) ? 'ja-JP' : 'en-US';
-  utter.rate = 0.9;
-  utter.onend = () => {
-    speaking = null;
-    if (btn) btn.className = 'speak-btn';
-  };
+  utter.lang = lang === 'ja' ? 'ja-JP' : 'en-US';
+  utter.rate = lang === 'ja' ? 1.0 : 0.9;
+  utter.onend = () => { speaking = null; if (btn) btn.className = 'speak-btn'; };
   window.speechSynthesis.speak(utter);
 }
 
@@ -763,17 +732,52 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-function restart() {
-  if (questions.length > 0) startQuiz();
+function goHome() { showScreen('screen-home'); renderTiles(); }
+function restartCurrent() {
+  if (currentSetId) startSet(currentSetId); else startDemo();
+}
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+  return String(str||'').replace(/'/g,'&apos;').replace(/"/g,'&quot;');
 }
 
-function goHome() {
-  showScreen('screen-start');
-  document.getElementById('file-status').style.display = 'none';
-  document.getElementById('demo-btn').style.display = 'inline-block';
-  questions = [];
-}
+// ═══ DEMO DATA ═══
+const DEMO_QUESTIONS = [
+  {sentence:"The new marketing strategy ------- designed to attract younger consumers.",choices:["was","were","be","been"],answer:0,translation:"新しいマーケティング戦略は、若い消費者を引きつけるために設計されました。",explanation:"主語 'The new marketing strategy' は単数形なので be動詞は was が正解。were は複数形、be/been は助動詞なしでは使えない。",category:"文法"},
+  {sentence:"Sales figures for the third quarter ------- all expectations.",choices:["exceed","exceeded","exceeding","to exceed"],answer:1,translation:"第3四半期の売上数字はすべての予測を上回りました。",explanation:"文全体の述語動詞が必要。過去の文脈（for the third quarter）なので過去形 exceeded が正解。",category:"文法"},
+  {sentence:"Employees are encouraged to submit their ------- by the end of the week.",choices:["suggest","suggested","suggestion","suggestions"],answer:3,translation:"従業員は週末までに提案を提出するよう奨励されています。",explanation:"their の後は名詞が必要。複数形の suggestions が自然。suggest は動詞、suggested は形容詞/過去形。",category:"品詞"},
+  {sentence:"The report must be submitted ------- noon on Friday.",choices:["until","by","during","since"],answer:1,translation:"レポートは金曜日の正午までに提出されなければなりません。",explanation:"期限を表すには by（〜までに）が正解。until は継続、during は期間中、since は起点を示す。",category:"語彙"},
+  {sentence:"Mr. Tanaka is ------- for overseeing the entire production process.",choices:["responsible","responsibility","responsibly","respond"],answer:0,translation:"田中氏は生産プロセス全体を監督する責任があります。",explanation:"be動詞の後で 'for' を伴う形容詞 responsible が正解。responsible for ～ で「〜に責任がある」。",category:"品詞"},
+  {sentence:"The conference room is available ------- 2 PM and 4 PM tomorrow.",choices:["from","between","among","within"],answer:1,translation:"会議室は明日の午後2時から4時の間に利用できます。",explanation:"2つの時点を結ぶには between A and B が正解。from は起点のみ、among は3つ以上、within は期間内。",category:"語彙"},
+  {sentence:"All participants are ------- to bring a valid ID to the event.",choices:["requiring","required","require","requirement"],answer:1,translation:"すべての参加者はイベントに有効なIDを持参することが求められています。",explanation:"are の後に過去分詞 required で受動態を形成。'are required to do' で「〜することを求められている」。",category:"文法"},
+  {sentence:"The ------- of the new product line exceeded initial projections.",choices:["launch","launching","launched","to launch"],answer:0,translation:"新製品ラインの発売は当初の予測を上回りました。",explanation:"The の後に名詞が必要。launch（名詞：発売）が正解。",category:"品詞"},
+  {sentence:"Please ensure that all invoices are processed ------- before the audit.",choices:["accurate","accuracy","accurately","accuracies"],answer:2,translation:"すべての請求書が監査前に正確に処理されるよう確認してください。",explanation:"動詞 processed を修飾する副詞 accurately が正解。accurate は形容詞、accuracy は名詞。",category:"品詞"},
+  {sentence:"The team decided to ------- the project deadline by two weeks.",choices:["extend","extension","extensive","extensively"],answer:0,translation:"チームはプロジェクトの締め切りを2週間延長することを決定しました。",explanation:"to 不定詞の後は動詞の原形。extend（延長する）が正解。extension は名詞、extensive は形容詞。",category:"品詞"},
+  {sentence:"Customers who purchase three or more items will receive a ------- discount.",choices:["special","specially","specialize","specialty"],answer:0,translation:"3点以上ご購入のお客様は特別割引を受けられます。",explanation:"名詞 discount を修飾する形容詞 special が正解。specially は副詞、specialize は動詞。",category:"品詞"},
+  {sentence:"The new software update will be ------- to all users next month.",choices:["available","availability","availably","avail"],answer:0,translation:"新しいソフトウェアのアップデートは来月すべてのユーザーが利用できるようになります。",explanation:"be動詞の後は形容詞。'be available to' で「〜に利用可能な」という意味。",category:"品詞"},
+  {sentence:"The manager ------- the staff about the changes before they were announced.",choices:["notified","notify","notification","notifying"],answer:0,translation:"マネージャーは変更が発表される前にスタッフに通知しました。",explanation:"主語 The manager に対する述語動詞が必要。過去形 notified が正解。",category:"文法"},
+  {sentence:"Workers should report any safety hazards ------- to their supervisor.",choices:["immediate","immediately","immediacy","immediated"],answer:1,translation:"作業員は安全上の危険をすぐに上司に報告しなければなりません。",explanation:"動詞 report を修飾する副詞 immediately（すぐに）が正解。immediate は形容詞。",category:"品詞"},
+  {sentence:"The financial ------- showed a significant improvement over the previous year.",choices:["statement","state","stated","stating"],answer:0,translation:"財務諸表は前年に比べて大幅な改善を示しました。",explanation:"The の後に名詞が必要。financial statement（財務諸表）が正解。",category:"語彙"},
+  {sentence:"All employees are expected to ------- with the company's code of conduct.",choices:["comply","compliance","complying","complied"],answer:0,translation:"すべての従業員は会社の行動規範に従うことが期待されています。",explanation:"to 不定詞の後は動詞の原形。comply with ～（〜に従う）が正解。",category:"語彙"},
+  {sentence:"The ------- of the merger will be announced at the shareholder meeting.",choices:["outcome","outcoming","outcomed","outcomes"],answer:0,translation:"合併の結果は株主総会で発表される予定です。",explanation:"The の後に単数名詞 outcome（結果）が正解。",category:"語彙"},
+  {sentence:"Applicants ------- submit their resumes along with three references.",choices:["must","mustn't","might","should have"],answer:0,translation:"応募者は履歴書を3つの推薦書とともに提出しなければなりません。",explanation:"「提出しなければならない」という義務を表すには must が最も適切。",category:"文法"},
+  {sentence:"The seminar will cover topics ------- to international trade regulations.",choices:["relevant","relevance","relevantly","relevanted"],answer:0,translation:"セミナーでは国際貿易規制に関連するトピックを取り上げます。",explanation:"topics を修飾する形容詞 relevant が正解。relevant to ～ で「〜に関連した」。",category:"品詞"},
+  {sentence:"The company's annual revenue has ------- by 15% over the past three years.",choices:["grown","grow","growing","grew"],answer:0,translation:"同社の年間収益は過去3年間で15%成長しました。",explanation:"has の後は過去分詞 grown が正解（現在完了形）。",category:"文法"},
+  {sentence:"Please submit your expense report ------- the accounting department.",choices:["to","for","at","with"],answer:0,translation:"経費報告書を経理部門に提出してください。",explanation:"submit A to B（AをBに提出する）の形。to が正解。",category:"語彙"},
+  {sentence:"The product recall was issued ------- a manufacturing defect was discovered.",choices:["after","since","although","unless"],answer:0,translation:"製造上の欠陥が発見された後、製品回収が発令されました。",explanation:"「製造上の欠陥が発見された後」という時間関係を表す after が正解。",category:"語彙"},
+  {sentence:"Ms. Yamamoto has been ------- as the new department head.",choices:["appointed","appoint","appointing","appointment"],answer:0,translation:"山本さんが新しい部門長に任命されました。",explanation:"has been の後に過去分詞 appointed で受動態（現在完了受動態）。",category:"文法"},
+  {sentence:"The ------- deadline for submitting applications is January 31st.",choices:["final","finally","finalize","finality"],answer:0,translation:"申請書提出の最終締め切りは1月31日です。",explanation:"名詞 deadline を修飾する形容詞 final が正解。finally は副詞。",category:"品詞"},
+  {sentence:"Customers can track their orders ------- on the company's website.",choices:["directly","direct","direction","directed"],answer:0,translation:"お客様は会社のウェブサイトで直接注文を追跡できます。",explanation:"動詞 track を修飾する副詞 directly（直接）が正解。",category:"品詞"},
+  {sentence:"The new policy applies to all staff ------- of their position or seniority.",choices:["regardless","regarding","regard","regarded"],answer:0,translation:"新しいポリシーは役職や年功序列に関係なく、すべてのスタッフに適用されます。",explanation:"regardless of ～（〜に関係なく）というイディオム。",category:"語彙"},
+  {sentence:"The quarterly report ------- that profits have increased by 20%.",choices:["indicates","indication","indicated","indicative"],answer:0,translation:"四半期報告書は利益が20%増加したことを示しています。",explanation:"主語 The quarterly report に対する現在形の述語動詞 indicates が正解。",category:"文法"},
+  {sentence:"All new employees will ------- a comprehensive orientation program.",choices:["undergo","undergone","undergoing","underwent"],answer:0,translation:"すべての新入社員は包括的なオリエンテーションプログラムを受けます。",explanation:"will の後は動詞の原形 undergo が正解。",category:"文法"},
+  {sentence:"The construction project is expected to be ------- by the end of next year.",choices:["completed","complete","completing","completion"],answer:0,translation:"建設プロジェクトは来年末までに完成する見込みです。",explanation:"be動詞の後に過去分詞 completed で受動態。",category:"文法"},
+  {sentence:"Employees are ------- for maintaining confidentiality of client information.",choices:["responsible","responsibility","respond","responsive"],answer:0,translation:"従業員はクライアント情報の機密を維持する責任があります。",explanation:"be動詞の後の形容詞 responsible が正解。responsible for ～ で「〜に責任がある」。",category:"品詞"}
+];
+
+init();
 </script>
 </body>
 </html>
