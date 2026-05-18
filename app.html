@@ -119,6 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .speak-card{margin-bottom:12px}
 .speak-label{font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;padding:0 2px}
 .speak-ta{width:100%;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:16px;line-height:1.85;color:#1d1d1f;background:#fff;border:1.5px solid #ccd;border-radius:10px;padding:12px 13px;resize:none;outline:none;overflow:hidden;-webkit-appearance:none}
+.speak-ta-full{min-height:60vh;overflow-y:auto;white-space:pre-wrap;border-radius:12px}
 .speak-ta:focus{border-color:var(--theme);background:#fafeff}
 /* vocab */
 .vchip-bar{display:flex;overflow-x:auto;gap:7px;padding:10px 14px;background:#f5f5f7;border-bottom:1px solid #eee;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -278,7 +279,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <div style="flex:1">
         <div class="home-hdr-title">英語学習アプリ</div>
         <div class="home-hdr-sub">English Article Library</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.04em">ver. 1.6.1</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.04em">ver. 1.6.2</div>
       </div>
       <button class="menu-trigger" onclick="openStudyMenu()">⋮</button>
     </div>
@@ -982,17 +983,17 @@ function buildArticlePane(){
   normalWrap.querySelectorAll('.vhl-ja').forEach(function(el){el.classList.add('bold-on');});
   var speakWrap=document.createElement('div');speakWrap.id='articleSpeak';speakWrap.className='speak-mode';
   var banner=document.createElement('div');banner.className='speak-banner';
-  banner.innerHTML='<div><div class="speak-banner-text">🎧 英文のみモード</div><div class="speak-banner-hint">段落をタップ → 全選択 → Speak</div></div><button class="speak-close" onclick="toggleSpeakMode()">× 閉じる</button>';
+  banner.innerHTML='<div><div class="speak-banner-text">🎧 英文のみモード</div><div class="speak-banner-hint">テキストをタップ → 全選択 → Speak</div></div><button class="speak-close" onclick="toggleSpeakMode()">× 閉じる</button>';
   speakWrap.appendChild(banner);
-  curART.forEach(function(p,i){
-    if(p.section){var sl=document.createElement('div');sl.style.cssText='font-size:11px;font-weight:800;color:var(--theme);text-transform:uppercase;margin:12px 2px 4px;letter-spacing:.06em';sl.textContent='— '+p.section+' —';speakWrap.appendChild(sl);}
-    var card=document.createElement('div');card.className='speak-card';
-    var label=document.createElement('div');label.className='speak-label';label.textContent='Paragraph '+(i+1);card.appendChild(label);
-    var ta=document.createElement('textarea');ta.className='speak-ta';ta.readOnly=true;ta.value=p.plain;
-    ta.addEventListener('focus',function(){var self=this;setTimeout(function(){self.select();},50);});
-    ta.addEventListener('click',function(){this.select();});
-    card.appendChild(ta);speakWrap.appendChild(card);
-  });
+  // 全文を1つのtextareaに結合（段落間は空行）
+  var fullText=curART.map(function(p){return p.plain;}).join('\n\n');
+  var ta=document.createElement('textarea');
+  ta.className='speak-ta speak-ta-full';
+  ta.readOnly=true;
+  ta.value=fullText;
+  ta.addEventListener('focus',function(){var self=this;setTimeout(function(){self.select();},50);});
+  ta.addEventListener('click',function(){this.select();});
+  speakWrap.appendChild(ta);
   c.appendChild(normalWrap);c.appendChild(speakWrap);
 }
 
@@ -1023,7 +1024,7 @@ function toggleSpeakMode(){
   document.getElementById('btnSpeak').className='cbtn'+(speakMode?' on':'');
   document.getElementById('articleNormal').style.display=speakMode?'none':'block';
   document.getElementById('articleSpeak').classList.toggle('on',speakMode);
-  if(speakMode){setTimeout(function(){document.querySelectorAll('.speak-ta').forEach(function(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';});var first=document.querySelector('.speak-ta');if(first){first.focus();first.select();}},80);}
+  if(speakMode){setTimeout(function(){var ta=document.querySelector('.speak-ta');if(ta){ta.focus();ta.select();}},80);}
 }
 
 function selectPen(el,ev){
