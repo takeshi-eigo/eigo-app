@@ -66,7 +66,7 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
 .face-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#b0ada4;margin-bottom:14px}
 .scene-block{margin-bottom:10px;padding:8px 12px;background:#f7f6f3;border-radius:10px;border-left:3px solid #2d6a4f}
 .scene-ja{font-size:13px;color:#6b6860;line-height:1.7;margin-bottom:4px}
-.scene-en{font-size:12px;color:#b0ada4;line-height:1.7;font-style:italic}
+.scene-en{font-size:12px;color:#b0ada4;line-height:1.7;font-style:italic;width:100%;border:none;outline:none;background:transparent;resize:none;cursor:pointer;padding:0;overflow:hidden;font-family:-apple-system,'Helvetica Neue',sans-serif;}
 .jp-sentence{font-size:22px;font-weight:500;color:#1c1a17;line-height:1.6;letter-spacing:.02em}
 .tap-hint{margin-top:20px;font-size:12px;color:#b0ada4;text-align:center}
 .back-section{margin-bottom:8px}
@@ -209,7 +209,7 @@ body{background:#f7f6f3;color:#1c1a17;font-family:-apple-system,'Helvetica Neue'
           <div class="face-label">💬 日本語</div>
           <div class="scene-block">
             <div class="scene-ja" id="sceneJa"></div>
-            <div class="scene-en" id="sceneEn"></div>
+            <textarea class="scene-en" id="sceneEn" readonly onclick="event.stopPropagation();this.select()" rows="2"></textarea>
           </div>
           <div class="jp-sentence" id="jpSentence"></div>
           <div class="tap-hint">タップして英語を確認 →</div>
@@ -613,7 +613,8 @@ function renderCard(idx){
   document.getElementById('btnFlipTop').style.display='block';
   document.getElementById('btnBackTop').style.display='none';
   document.getElementById('sceneJa').textContent=card.scene_ja||'';
-  document.getElementById('sceneEn').textContent=card.scene_en||'';
+  document.getElementById('sceneEn').value=card.scene_en||'';
+  setTimeout(function(){var ta=document.getElementById('sceneEn');ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';},50);
   document.getElementById('jpSentence').textContent=card.japanese||'';
   document.getElementById('enAnswer').value=card.english||'';
   document.getElementById('wrongEx').textContent=card.wrong_example||'';
@@ -715,20 +716,7 @@ function speakText(text){
   window.speechSynthesis.cancel();
   var u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';
-  u.rate=1.1;
-  // Enhanced（高品質）な英語音声を優先して選択
-  var voices=window.speechSynthesis.getVoices();
-  var preferred=null;
-  // 優先順: Enhanced > Premium > 通常のen-US
-  for(var i=0;i<voices.length;i++){
-    var v=voices[i];
-    if(!v.lang.startsWith('en')) continue;
-    if(v.name.indexOf('Enhanced')>=0||v.name.indexOf('Premium')>=0){
-      preferred=v; break;
-    }
-    if(!preferred && v.lang==='en-US') preferred=v;
-  }
-  if(preferred) u.voice=preferred;
+  u.rate=0.9;
   window.speechSynthesis.speak(u);
 }
 
