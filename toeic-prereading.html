@@ -64,12 +64,34 @@ main{width:100%;max-width:760px;padding:20px 16px 60px;flex:1;}
 .prog-info{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--text-muted);}
 .prog-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;margin:0 12px;overflow:hidden;}
 .prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s;}
-.timer-strip{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;}
+.timer-strip{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;position:sticky;top:0;z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.4);}
 .timer-num{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;min-width:52px;line-height:1;}
 .timer-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
 .timer-bar{height:100%;border-radius:4px;background:var(--accent2);transition:width .9s linear,background .5s;}
 .timer-status{font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
-.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.set-overlay{
+  display:none;position:absolute;inset:0;
+  background:rgba(10,14,26,.92);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  border-radius:var(--radius);
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;
+  z-index:10;
+  text-align:center;
+  padding:24px;
+}
+.set-overlay.show{display:flex;}
+.set-overlay .ov-icon{font-size:2.4rem;}
+.set-overlay .ov-msg{font-size:.9rem;color:var(--text-muted);line-height:1.6;}
+.btn-reveal-ov{
+  background:var(--success);color:#fff;border:none;
+  padding:12px 28px;border-radius:10px;
+  font-size:.9rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;transition:all .2s;margin-top:4px;
+}
+.btn-reveal-ov:hover{background:#059669;}
 .set-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 .badge{display:inline-block;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);padding:3px 9px;border-radius:20px;}
 .set-num{font-family:'DM Mono',monospace;font-size:.76rem;color:var(--text-dim);}
@@ -184,6 +206,11 @@ main{width:100%;max-width:760px;padding:20px 16px 60px;flex:1;}
     <div class="timer-status" id="timer-status">先読み中</div>
   </div>
   <div class="set-card">
+    <div class="set-overlay" id="set-overlay">
+      <div class="ov-icon">⏱</div>
+      <div class="ov-msg">先読みタイム終了！<br>正解・解説を確認しよう。</div>
+      <button class="btn-reveal-ov" onclick="revealAnswers()">📖 正解・解説を見る</button>
+    </div>
     <div class="set-header">
       <span class="badge" id="q-badge">Part 3</span>
       <span class="set-num" id="set-num">Set 1</span>
@@ -553,6 +580,7 @@ function renderSet(){
   document.getElementById('phase-badge').textContent='先読み';
   document.getElementById('btn-reveal').className='btn-reveal';
   document.getElementById('btn-next').className='btn-next';
+  document.getElementById('set-overlay').className='set-overlay';
   document.getElementById('timer-status').textContent='先読み中';
   document.getElementById('timer-display').style.color='var(--text)';
   document.getElementById('timer-bar').style.background='var(--accent2)';
@@ -605,10 +633,14 @@ function onTimerEnd(manual){
   document.getElementById('timer-status').textContent='確認フェーズ';
   document.getElementById('phase-badge').className='phase-badge review';
   document.getElementById('phase-badge').textContent='答え合わせ';
-  document.getElementById('btn-reveal').className='btn-reveal show';
+  // 問題をオーバーレイで隠す
+  document.getElementById('set-overlay').className='set-overlay show';
+  // ページトップにスクロール
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 function revealAnswers(){
   document.getElementById('btn-reveal').className='btn-reveal';
+  document.getElementById('set-overlay').className='set-overlay'; // オーバーレイを閉じる
   const set=sessionSets[curIdx];
   set.questions.forEach((q,i)=>{
     document.getElementById(`qja-${i}`).classList.add('revealed');
