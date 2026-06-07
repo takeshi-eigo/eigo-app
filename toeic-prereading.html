@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEIC Part3/4 速読トレーナー</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+:root{
+  --bg:#0a0e1a;--surface:#111827;--surface2:#1a2236;--border:#2a3a5c;
+  --accent:#3b82f6;--accent2:#06b6d4;--danger:#ef4444;--warning:#f59e0b;
+  --success:#10b981;--text:#e2e8f0;--text-dim:#64748b;--text-muted:#94a3b8;
+  --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+header{width:100%;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);}
+.logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.05em;color:var(--accent2);}
+.logo span{color:var(--accent);}
+.btn-icon{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:6px 12px;border-radius:8px;font-size:.76rem;cursor:pointer;transition:all .2s;font-family:'Noto Sans JP',sans-serif;}
+.btn-icon:hover{border-color:var(--accent);color:var(--accent);}
+
+main{width:100%;max-width:760px;padding:20px 16px 60px;flex:1;}
+.screen{display:none;}.screen.active{display:block;}
+
+/* ── LIBRARY (home) ── */
+.lib-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.lib-header h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;}
+.sort-bar{display:flex;gap:6px;flex-wrap:wrap;}
+.sort-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);padding:5px 11px;border-radius:20px;font-size:.72rem;cursor:pointer;transition:all .15s;font-family:'Noto Sans JP',sans-serif;}
+.sort-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:.88rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .2s;box-shadow:0 0 16px rgba(59,130,246,.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(59,130,246,.5);}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:10px;font-size:.86rem;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .2s;padding:10px 18px;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+/* problem set cards */
+.deck-list{display:flex;flex-direction:column;gap:12px;}
+.deck-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .2s;}
+.deck-card:hover{border-color:var(--accent2);}
+.deck-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+.deck-name{font-size:.97rem;font-weight:700;color:var(--text);line-height:1.4;flex:1;}
+.deck-meta{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;}
+.deck-meta-item{font-size:.74rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+.deck-meta-item span{font-family:'DM Mono',monospace;color:var(--text-muted);}
+.deck-actions{display:flex;gap:8px;margin-top:12px;}
+.deck-btn-start{flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.86rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .2s;}
+.deck-btn-start:hover{background:#2563eb;}
+.deck-btn-edit{padding:10px 14px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;font-size:.8rem;cursor:pointer;transition:all .2s;font-family:'Noto Sans JP',sans-serif;}
+.deck-btn-edit:hover{border-color:var(--accent);color:var(--accent);}
+.deck-btn-del{padding:10px 14px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;font-size:.8rem;cursor:pointer;transition:all .2s;font-family:'Noto Sans JP',sans-serif;}
+.deck-btn-del:hover{border-color:var(--danger);color:var(--danger);}
+.deck-badge{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:12px;white-space:nowrap;}
+.badge-default{background:rgba(6,182,212,.12);color:var(--accent2);border:1px solid rgba(6,182,212,.2);}
+.badge-custom{background:rgba(168,85,247,.12);color:#c4b5fd;border:1px solid rgba(168,85,247,.2);}
+
+.empty-lib{text-align:center;padding:48px 20px;color:var(--text-dim);}
+.empty-lib .e-icon{font-size:2.5rem;margin-bottom:12px;}
+.empty-lib p{font-size:.88rem;line-height:1.7;margin-bottom:20px;}
+
+/* ── QUIZ ── */
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.prog-info{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--text-muted);}
+.prog-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;margin:0 12px;overflow:hidden;}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s;}
+.timer-strip{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;}
+.timer-num{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;min-width:52px;line-height:1;}
+.timer-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.timer-bar{height:100%;border-radius:4px;background:var(--accent2);transition:width .9s linear,background .5s;}
+.timer-status{font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+.set-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.badge{display:inline-block;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent2);background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);padding:3px 9px;border-radius:20px;}
+.set-num{font-family:'DM Mono',monospace;font-size:.76rem;color:var(--text-dim);}
+.phase-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 10px;border-radius:20px;margin-left:auto;}
+.phase-badge.prereading{background:rgba(6,182,212,.12);color:var(--accent2);border:1px solid rgba(6,182,212,.25);}
+.phase-badge.review{background:rgba(16,185,129,.12);color:var(--success);border:1px solid rgba(16,185,129,.25);}
+.q-block{margin-bottom:18px;}
+.q-block:last-child{margin-bottom:0;}
+.q-divider{border:none;border-top:1px dashed var(--border);margin:16px 0;}
+.q-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:8px;}
+.q-text{font-size:.96rem;line-height:1.7;color:var(--text);font-weight:500;margin-bottom:6px;}
+.q-ja{font-size:.8rem;color:var(--text-dim);line-height:1.5;margin-bottom:10px;display:none;}
+.q-ja.revealed{display:block;}
+.choices{display:flex;flex-direction:column;gap:7px;}
+.choice-item{display:flex;align-items:flex-start;gap:11px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.86rem;line-height:1.5;}
+.choice-lbl{font-family:'DM Mono',monospace;font-size:.86rem;color:var(--accent);min-width:18px;padding-top:1px;flex-shrink:0;}
+.choice-inner{display:flex;flex-direction:column;gap:3px;}
+.choice-en{color:var(--text);}
+.choice-ja{font-size:.74rem;color:var(--text-dim);display:none;}
+.choice-ja.revealed{display:block;}
+.choice-item.correct-ans{border-color:var(--success);background:rgba(16,185,129,.1);}
+.choice-item.correct-ans .choice-lbl{color:var(--success);}
+.q-review{display:none;margin-top:10px;}
+.q-review.revealed{display:block;}
+.explanation-box{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 13px;font-size:.8rem;color:var(--text-muted);line-height:1.6;margin-bottom:8px;}
+.explanation-box strong{color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px;}
+.vocab-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;}
+.vocab-box strong{color:var(--accent2);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:7px;}
+.vocab-list{display:flex;flex-direction:column;gap:5px;}
+.vocab-item{display:flex;align-items:baseline;gap:8px;}
+.vocab-word{font-family:'DM Mono',monospace;font-size:.83rem;color:var(--accent);}
+.vocab-pos{font-size:.67rem;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);padding:1px 5px;border-radius:3px;}
+.vocab-meaning{font-size:.79rem;color:var(--text-muted);}
+.btn-reveal{width:100%;padding:13px;background:var(--success);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;display:none;transition:all .2s;margin-bottom:10px;}
+.btn-reveal.show{display:block;}
+.btn-next{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;display:none;transition:all .2s;}
+.btn-next.show{display:block;}
+
+/* ── RESULT ── */
+.result-hero{text-align:center;padding:28px 0 20px;}
+.result-score-ring{width:130px;height:130px;position:relative;margin:0 auto 14px;}
+.result-score-ring svg{transform:rotate(-90deg);}
+.result-score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+.result-score-num .big{font-size:2rem;font-weight:500;}
+.result-score-num .small{font-size:.75rem;color:var(--text-dim);}
+.result-hero h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:6px;}
+.result-hero p{color:var(--text-muted);font-size:.84rem;}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;}
+.result-cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 8px;text-align:center;}
+.result-cell .rc-num{font-family:'DM Mono',monospace;font-size:1.3rem;}
+.result-cell .rc-lbl{font-size:.68rem;color:var(--text-dim);margin-top:4px;}
+.result-actions{display:flex;gap:10px;margin-top:4px;}
+.history-list{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.history-list h3{padding:10px 14px;font-size:.73rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);border-bottom:1px solid var(--border);}
+.h-set{padding:10px 14px;border-bottom:1px solid var(--border);}
+.h-set:last-child{border-bottom:none;}
+.h-set-hdr{display:flex;justify-content:space-between;margin-bottom:4px;}
+.h-set-lbl{font-size:.74rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.h-set-note{font-family:'DM Mono',monospace;font-size:.76rem;}
+.h-q-row{font-size:.76rem;color:var(--text-muted);padding:2px 0;line-height:1.4;}
+
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;width:100%;max-width:480px;margin:auto;}
+.modal h2{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin-bottom:14px;}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.form-group input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-family:'Noto Sans JP',sans-serif;font-size:.9rem;transition:border-color .2s;}
+.form-group input:focus{outline:none;border-color:var(--accent);}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.modal-actions .btn-primary{flex:1;padding:10px;font-size:.86rem;}
+.modal-actions .btn-secondary{flex:none;padding:10px 16px;font-size:.86rem;}
+
+/* import modal */
+.file-drop-area{display:block;background:var(--surface2);border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;}
+.file-drop-area:hover{border-color:var(--accent);}
+.file-drop-area input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">TOEIC <span>速読</span>トレーナー</div>
+  <div id="header-right"></div>
+</header>
+<main>
+
+<!-- LIBRARY (home) -->
+<div id="screen-home" class="screen active">
+  <div class="lib-header">
+    <h2>📚 問題集ライブラリ</h2>
+    <button class="btn-primary" onclick="openImportModal()">＋ 問題集を追加</button>
+  </div>
+  <div class="sort-bar" style="margin-bottom:16px;">
+    <button class="sort-btn active" onclick="setSort('date',this)">追加日</button>
+    <button class="sort-btn" onclick="setSort('name',this)">名前</button>
+    <button class="sort-btn" onclick="setSort('plays',this)">取組回数</button>
+  </div>
+  <div class="deck-list" id="deck-list"></div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <span class="prog-info" id="prog-label">1 / 5</span>
+    <div class="prog-bar-wrap"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+    <span class="prog-info" id="score-label">Set 1</span>
+  </div>
+  <div class="timer-strip">
+    <div class="timer-num" id="timer-display">30</div>
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
+    <div class="timer-status" id="timer-status">先読み中</div>
+  </div>
+  <div class="set-card">
+    <div class="set-header">
+      <span class="badge" id="q-badge">Part 3</span>
+      <span class="set-num" id="set-num">Set 1</span>
+      <span class="phase-badge prereading" id="phase-badge">先読み</span>
+    </div>
+    <div id="questions-container"></div>
+  </div>
+  <button class="btn-reveal" id="btn-reveal" onclick="revealAnswers()">📖 正解・解説を見る</button>
+  <button class="btn-next" id="btn-next" onclick="nextSet()">次のセット →</button>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <div class="result-hero">
+    <div class="result-score-ring">
+      <svg width="130" height="130" viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r="56" fill="none" stroke="var(--border)" stroke-width="9"/>
+        <circle id="result-ring-fg" cx="65" cy="65" r="56" fill="none" stroke="var(--success)" stroke-width="9" stroke-linecap="round" stroke-dasharray="351.9" stroke-dashoffset="351.9" style="transition:stroke-dashoffset 1s ease"/>
+      </svg>
+      <div class="result-score-num">
+        <span class="big" id="res-sets-done">0</span>
+        <span class="small">セット</span>
+      </div>
+    </div>
+    <h2 id="res-title">お疲れ様でした！</h2>
+    <p id="res-msg"></p>
+  </div>
+  <div class="result-grid">
+    <div class="result-cell"><div class="rc-num" id="res-total">0</div><div class="rc-lbl">総セット</div></div>
+    <div class="result-cell"><div class="rc-num" id="res-completed">0</div><div class="rc-lbl">時間内完読</div></div>
+    <div class="result-cell"><div class="rc-num" id="res-timeout">0</div><div class="rc-lbl">タイムアウト</div></div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-secondary" onclick="showScreen('home')">ライブラリへ</button>
+    <button class="btn-primary" onclick="replayDeck()">もう一度</button>
+  </div>
+  <div class="history-list"><h3>セットログ</h3><div id="result-history-items"></div></div>
+</div>
+
+</main>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="modal-import">
+<div class="modal">
+  <h2>📂 問題集を追加</h2>
+  <div class="form-group">
+    <label>問題集の名前</label>
+    <input type="text" id="import-deck-name" placeholder="例：Part3基本 Vol.1">
+  </div>
+  <div class="form-group" style="margin-bottom:4px;">
+    <label>JSONファイルを選択</label>
+    <label class="file-drop-area" id="file-drop-area">
+      <input type="file" id="import-file-input" accept=".json,application/json" onchange="handleFileSelect(event)">
+      <div style="font-size:2rem;margin-bottom:6px;">📄</div>
+      <div style="font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:3px;">タップしてJSONファイルを選択</div>
+      <div style="font-size:.73rem;color:var(--text-dim);" id="file-selected-name">ファイル未選択</div>
+    </label>
+  </div>
+  <div id="import-status" style="font-size:.82rem;margin-top:10px;min-height:18px;"></div>
+  <div class="modal-actions">
+    <button class="btn-secondary" onclick="closeImportModal()">キャンセル</button>
+    <button class="btn-primary" id="btn-do-import" onclick="executeImport()" disabled style="opacity:.4;">追加する</button>
+  </div>
+</div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="modal-overlay" id="modal-rename">
+<div class="modal">
+  <h2>✏️ 問題集名を変更</h2>
+  <div class="form-group">
+    <label>新しい名前</label>
+    <input type="text" id="rename-input" placeholder="問題集の名前">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-secondary" onclick="closeRenameModal()">キャンセル</button>
+    <button class="btn-primary" onclick="executeRename()">変更する</button>
+  </div>
+</div>
+</div>
+
+<!-- SETTINGS MODAL (per quiz) -->
+<div class="modal-overlay" id="modal-settings">
+<div class="modal">
+  <h2 id="settings-deck-title">トレーニング設定</h2>
+  <div class="form-group">
+    <label>先読み時間（秒）</label>
+    <input type="number" id="cfg-time" value="30" min="10" max="90" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:.9rem;width:100%;">
+  </div>
+  <div class="form-group">
+    <label>出題セット数</label>
+    <input type="number" id="cfg-count" value="5" min="1" max="30" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:.9rem;width:100%;">
+  </div>
+  <div class="form-group">
+    <label>パート</label>
+    <select id="cfg-part" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-family:'Noto Sans JP',sans-serif;font-size:.88rem;">
+      <option value="all">Part 3 + 4</option>
+      <option value="3">Part 3のみ</option>
+      <option value="4">Part 4のみ</option>
+    </select>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-secondary" onclick="closeSettingsModal()">キャンセル</button>
+    <button class="btn-primary" onclick="startQuizFromSettings()">▶ スタート</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STORAGE  key: deckライブラリ全体を1つのキーで管理
+// deck = { id, name, createdAt, plays, sets:[ {id,part,questions:[...]} ] }
+// ═══════════════════════════════════════════
+const LIB_KEY='toeic_lib_v1';
+let _mLib=null;
+function _lsOk(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true;}catch(e){return false;}}
+const USE_LS=_lsOk();
+function loadLib(){
+  if(USE_LS){try{const v=JSON.parse(localStorage.getItem(LIB_KEY));if(Array.isArray(v))return v;}catch(e){}}
+  return _mLib||[];
+}
+function saveLib(d){_mLib=d;if(USE_LS){try{localStorage.setItem(LIB_KEY,JSON.stringify(d));}catch(e){}}}
+
+// ═══════════════════════════════════════════
+// DEFAULT DECK
+// ═══════════════════════════════════════════
+const DEFAULT_DECK={
+  id:'default',
+  name:'サンプル問題集（デフォルト）',
+  createdAt: Date.now()-1000,
+  plays:0,
+  sets:[
+    {id:1,part:3,questions:[
+      {q:"What is the main purpose of the conversation?",qJa:"会話の主な目的は何ですか？",choices:["To discuss a new product launch","To resolve a billing issue","To schedule a job interview","To negotiate a contract"],choicesJa:["新製品の発売について話し合うため","請求の問題を解決するため","就職面接を日程調整するため","契約を交渉するため"],correct:1,explanation:"目的問題。I'm calling because / The reason I'm here is... に注目。billing（請求）＋resolve（解決）の組み合わせが正解のキー。",vocab:[{word:"billing",pos:"n.",meaning:"請求、課金"},{word:"resolve",pos:"v.",meaning:"解決する"},{word:"negotiate",pos:"v.",meaning:"交渉する"}]},
+      {q:"What does the woman offer to do?",qJa:"女性は何をすると申し出ていますか？",choices:["Issue a full refund","Transfer the call to a supervisor","Send a replacement item","Waive the delivery fee"],choicesJa:["全額返金を行う","上司に電話を転送する","代替品を送る","配送料を免除する"],correct:0,explanation:"提案問題。I can / Would you like me to... の後の行動に注目。issue a refund（返金する）が正解。",vocab:[{word:"issue",pos:"v.",meaning:"発行する・返金を行う"},{word:"refund",pos:"n.",meaning:"返金、払い戻し"},{word:"waive",pos:"v.",meaning:"（料金を）免除する"}]},
+      {q:"What will the man most likely do next?",qJa:"男性は次に何をすると思われますか？",choices:["Check his email","Call back later","Provide his order number","Visit the store in person"],choicesJa:["メールを確認する","後でかけ直す","注文番号を伝える","直接店舗を訪問する"],correct:2,explanation:"次の行動問題。会話末尾の返答に集中。order number（注文番号）の提示を求められる流れ。",vocab:[{word:"order number",pos:"n.",meaning:"注文番号"},{word:"in person",pos:"adv.",meaning:"直接、本人が出向いて"}]}
+    ]},
+    {id:2,part:4,questions:[
+      {q:"Who is the intended audience for this announcement?",qJa:"このアナウンスの対象は誰ですか？",choices:["Newly hired employees","Senior management team","Conference attendees","External business partners"],choicesJa:["新入社員","上級管理職チーム","会議参加者","社外のビジネスパートナー"],correct:0,explanation:"対象者問題。Welcome / As you begin your career here / orientation などの語から新入社員向けと判断。",vocab:[{word:"intended",pos:"adj.",meaning:"意図された、対象とされた"},{word:"orientation",pos:"n.",meaning:"新人研修"},{word:"announcement",pos:"n.",meaning:"告知"}]},
+      {q:"What are listeners asked to do after the orientation?",qJa:"参加者はオリエンテーション後に何をするよう求められていますか？",choices:["Sign a confidentiality agreement","Complete an online training module","Meet with their direct supervisors","Submit copies of their ID documents"],choicesJa:["守秘義務契約書に署名する","オンライン研修を修了する","直属の上司と面談する","身分証明書のコピーを提出する"],correct:2,explanation:"指示問題。you will be asked to / please make sure... の後に注目。supervisor（上司）との面談が正解。",vocab:[{word:"confidentiality",pos:"n.",meaning:"機密性、守秘義務"},{word:"supervisor",pos:"n.",meaning:"上司、監督者"},{word:"submit",pos:"v.",meaning:"提出する"}]},
+      {q:"What does the speaker say about the dress code?",qJa:"話し手は服装規定についてどのように述べていますか？",choices:["It is formally enforced at all times","It varies depending on each department","It is business casual every Friday","It was recently revised company-wide"],choicesJa:["常に正式に実施されている","部署によって異なる","毎週金曜日はビジネスカジュアル","最近全社的に見直された"],correct:2,explanation:"詳細情報問題。dress code＋Friday＋business casual の3語の組み合わせが正解のキー。",vocab:[{word:"dress code",pos:"n.",meaning:"服装規定"},{word:"enforce",pos:"v.",meaning:"施行する、強制する"},{word:"revise",pos:"v.",meaning:"改訂する"}]}
+    ]}
+  ]
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentSort='date';
+let currentDeckId=null;
+let pendingFileData=null;
+let renamingDeckId=null;
+let sessionSets=[],curIdx=0,completedInTime=0,timedOutCount=0;
+let timerInterval=null,timeLeft=30,timeLimit=30;
+let sessionLog=[];
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+(function(){
+  const lib=loadLib();
+  if(!lib.length){saveLib([DEFAULT_DECK]);}
+  renderLibrary();
+  document.getElementById('header-right').innerHTML='<button class="btn-icon" onclick="showScreen(\'home\')">ライブラリ</button>';
+})();
+
+// ═══════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name==='home')renderLibrary();
+}
+
+// ═══════════════════════════════════════════
+// LIBRARY
+// ═══════════════════════════════════════════
+function setSort(key,btn){
+  currentSort=key;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLibrary();
+}
+
+function renderLibrary(){
+  let lib=[...loadLib()];
+  if(currentSort==='name') lib.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+  else if(currentSort==='plays') lib.sort((a,b)=>b.plays-a.plays);
+  else lib.sort((a,b)=>b.createdAt-a.createdAt);
+
+  const el=document.getElementById('deck-list');
+  if(!lib.length){
+    el.innerHTML=`<div class="empty-lib"><div class="e-icon">📭</div><p>問題集がありません。<br>「＋ 問題集を追加」からJSONファイルをインポートしてください。</p></div>`;
+    return;
+  }
+  el.innerHTML=lib.map(deck=>{
+    const sets=deck.sets||[];
+    const date=new Date(deck.createdAt);
+    const dateStr=`${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`;
+    const isDefault=deck.id==='default';
+    return `<div class="deck-card" id="deckcard-${deck.id}">
+      <div class="deck-card-top">
+        <div class="deck-name">${escHtml(deck.name)}</div>
+        <span class="deck-badge ${isDefault?'badge-default':'badge-custom'}">${isDefault?'DEFAULT':'CUSTOM'}</span>
+      </div>
+      <div class="deck-meta">
+        <div class="deck-meta-item">📋 <span>${sets.length}</span>セット</div>
+        <div class="deck-meta-item">🔁 <span>${deck.plays||0}</span>回</div>
+        <div class="deck-meta-item">📅 <span>${dateStr}</span></div>
+      </div>
+      <div class="deck-actions">
+        <button class="deck-btn-start" onclick="openSettingsModal('${deck.id}')">▶ スタート</button>
+        <button class="deck-btn-edit" onclick="openRenameModal('${deck.id}')">✏️</button>
+        <button class="deck-btn-del" onclick="deleteDeck('${deck.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════════════
+// DECK ACTIONS
+// ═══════════════════════════════════════════
+function deleteDeck(id){
+  const lib=loadLib();
+  const deck=lib.find(d=>d.id===id);
+  if(!deck)return;
+  if(!window.confirm(`「${deck.name}」を削除しますか？`))return;
+  saveLib(lib.filter(d=>d.id!==id));
+  renderLibrary();
+}
+
+let renameDeckId=null;
+function openRenameModal(id){
+  const deck=loadLib().find(d=>d.id===id);
+  if(!deck)return;
+  renameDeckId=id;
+  document.getElementById('rename-input').value=deck.name;
+  document.getElementById('modal-rename').classList.add('open');
+  setTimeout(()=>document.getElementById('rename-input').focus(),100);
+}
+function closeRenameModal(){document.getElementById('modal-rename').classList.remove('open');}
+function executeRename(){
+  const name=document.getElementById('rename-input').value.trim();
+  if(!name){alert('名前を入力してください。');return;}
+  const lib=loadLib();
+  const deck=lib.find(d=>d.id===renameDeckId);
+  if(deck){deck.name=name;saveLib(lib);}
+  closeRenameModal();
+  renderLibrary();
+}
+
+// ═══════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════
+function openImportModal(){
+  pendingFileData=null;
+  document.getElementById('import-deck-name').value='';
+  document.getElementById('file-selected-name').textContent='ファイル未選択';
+  document.getElementById('import-status').textContent='';
+  document.getElementById('file-drop-area').style.borderColor='var(--border)';
+  document.getElementById('btn-do-import').disabled=true;
+  document.getElementById('btn-do-import').style.opacity='.4';
+  document.getElementById('import-file-input').value='';
+  document.getElementById('modal-import').classList.add('open');
+}
+function closeImportModal(){document.getElementById('modal-import').classList.remove('open');}
+
+function handleFileSelect(e){
+  const file=e.target.files&&e.target.files[0];
+  const statusEl=document.getElementById('import-status');
+  if(!file)return;
+  document.getElementById('file-selected-name').textContent=file.name;
+  // ファイル名から問題集名を自動入力（未入力の場合）
+  const nameInput=document.getElementById('import-deck-name');
+  if(!nameInput.value.trim()){
+    nameInput.value=file.name.replace(/\.json$/i,'');
+  }
+  statusEl.style.color='var(--text-muted)';
+  statusEl.textContent='読み込み中...';
+  const reader=new FileReader();
+  reader.onerror=()=>{statusEl.style.color='var(--danger)';statusEl.textContent='⚠ 読み込み失敗。';};
+  reader.onload=function(ev){
+    const raw=(ev.target||reader).result;
+    let data;
+    try{data=JSON.parse(raw);}
+    catch(err){statusEl.style.color='var(--danger)';statusEl.textContent='⚠ JSONエラー: '+err.message;return;}
+    if(!Array.isArray(data)){statusEl.style.color='var(--danger)';statusEl.textContent='⚠ 配列形式のJSONを選択してください。';return;}
+    pendingFileData=data;
+    document.getElementById('file-drop-area').style.borderColor='var(--success)';
+    statusEl.style.color='var(--success)';
+    statusEl.textContent='✅ '+data.length+'セット読み込み済み。名前を確認して「追加する」を押してください。';
+    document.getElementById('btn-do-import').disabled=false;
+    document.getElementById('btn-do-import').style.opacity='1';
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function executeImport(){
+  if(!pendingFileData){alert('ファイルを選択してください。');return;}
+  const name=document.getElementById('import-deck-name').value.trim()||'問題集 '+(loadLib().length+1);
+  const lib=loadLib();
+  const newDeck={
+    id:'deck_'+Date.now(),
+    name,
+    createdAt:Date.now(),
+    plays:0,
+    sets:pendingFileData
+  };
+  lib.push(newDeck);
+  saveLib(lib);
+  closeImportModal();
+  renderLibrary();
+  alert(`「${name}」を追加しました（${pendingFileData.length}セット）。`);
+}
+
+// ═══════════════════════════════════════════
+// SETTINGS → START
+// ═══════════════════════════════════════════
+function openSettingsModal(deckId){
+  currentDeckId=deckId;
+  const deck=loadLib().find(d=>d.id===deckId);
+  if(!deck)return;
+  document.getElementById('settings-deck-title').textContent='▶ '+deck.name;
+  document.getElementById('cfg-count').max=deck.sets.length;
+  document.getElementById('cfg-count').value=Math.min(5,deck.sets.length);
+  document.getElementById('modal-settings').classList.add('open');
+}
+function closeSettingsModal(){document.getElementById('modal-settings').classList.remove('open');}
+
+function startQuizFromSettings(){
+  closeSettingsModal();
+  const deck=loadLib().find(d=>d.id===currentDeckId);
+  if(!deck)return;
+  timeLimit=parseInt(document.getElementById('cfg-time').value)||30;
+  const count=parseInt(document.getElementById('cfg-count').value)||5;
+  const part=document.getElementById('cfg-part').value||'all';
+  let pool=part==='all'?deck.sets:deck.sets.filter(s=>String(s.part)===part);
+  if(!pool.length){alert('該当パートの問題がありません。');return;}
+  pool=[...pool].sort(()=>Math.random()-.5);
+  sessionSets=pool.slice(0,Math.min(count,pool.length));
+  curIdx=0;completedInTime=0;timedOutCount=0;sessionLog=[];
+  // 取組回数をインクリメント
+  const lib=loadLib();
+  const d=lib.find(x=>x.id===currentDeckId);
+  if(d){d.plays=(d.plays||0)+1;saveLib(lib);}
+  showScreen('quiz');
+  renderSet();
+}
+
+function replayDeck(){openSettingsModal(currentDeckId);}
+
+// ═══════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════
+function renderSet(){
+  const set=sessionSets[curIdx];
+  const total=sessionSets.length;
+  document.getElementById('prog-label').textContent=`${curIdx+1} / ${total}`;
+  document.getElementById('score-label').textContent=`Set ${curIdx+1}`;
+  document.getElementById('prog-bar').style.width=`${(curIdx/total)*100}%`;
+  document.getElementById('q-badge').textContent=`Part ${set.part}`;
+  document.getElementById('set-num').textContent=`Set ${curIdx+1} — Q${curIdx*3+1}〜${curIdx*3+3}`;
+  document.getElementById('phase-badge').className='phase-badge prereading';
+  document.getElementById('phase-badge').textContent='先読み';
+  document.getElementById('btn-reveal').className='btn-reveal';
+  document.getElementById('btn-next').className='btn-next';
+  document.getElementById('timer-status').textContent='先読み中';
+  document.getElementById('timer-display').style.color='var(--text)';
+  document.getElementById('timer-bar').style.background='var(--accent2)';
+
+  document.getElementById('questions-container').innerHTML=set.questions.map((q,i)=>`
+    ${i>0?'<hr class="q-divider">':''}
+    <div class="q-block" id="qblock-${i}">
+      <div class="q-label">Q${i+1}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="q-ja" id="qja-${i}">${q.qJa||''}</div>
+      <div class="choices">
+        ${q.choices.map((c,j)=>`
+          <div class="choice-item" id="choice-${i}-${j}">
+            <span class="choice-lbl">${'ABCD'[j]}</span>
+            <div class="choice-inner">
+              <span class="choice-en">${c}</span>
+              <span class="choice-ja" id="cja-${i}-${j}">${(q.choicesJa&&q.choicesJa[j])||''}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="q-review" id="review-${i}">
+        <div class="explanation-box"><strong>💡 解説</strong>${q.explanation||''}</div>
+        ${q.vocab&&q.vocab.length?`<div class="vocab-box"><strong>📖 重要単語</strong><div class="vocab-list">${q.vocab.map(v=>`<div class="vocab-item"><span class="vocab-word">${v.word}</span><span class="vocab-pos">${v.pos}</span><span class="vocab-meaning">${v.meaning}</span></div>`).join('')}</div></div>`:''}
+      </div>
+    </div>`).join('');
+  startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft=timeLimit;
+  updateTimerUI(timeLeft);
+  timerInterval=setInterval(()=>{timeLeft--;updateTimerUI(timeLeft);if(timeLeft<=0){clearInterval(timerInterval);onTimerEnd(false);}},1000);
+}
+function updateTimerUI(t){
+  document.getElementById('timer-display').textContent=t;
+  document.getElementById('timer-bar').style.width=((t/timeLimit)*100)+'%';
+  const col=t<=5?'var(--danger)':t<=10?'var(--warning)':'var(--accent2)';
+  document.getElementById('timer-bar').style.background=col;
+  document.getElementById('timer-display').style.color=t<=5?'var(--danger)':t<=10?'var(--warning)':'var(--text)';
+}
+function onTimerEnd(manual){
+  clearInterval(timerInterval);
+  if(manual)completedInTime++;else timedOutCount++;
+  sessionLog.push({set:sessionSets[curIdx],completed:manual});
+  document.getElementById('timer-display').textContent='✓';
+  document.getElementById('timer-display').style.color='var(--success)';
+  document.getElementById('timer-bar').style.width='100%';
+  document.getElementById('timer-bar').style.background='var(--success)';
+  document.getElementById('timer-status').textContent='確認フェーズ';
+  document.getElementById('phase-badge').className='phase-badge review';
+  document.getElementById('phase-badge').textContent='答え合わせ';
+  document.getElementById('btn-reveal').className='btn-reveal show';
+}
+function revealAnswers(){
+  document.getElementById('btn-reveal').className='btn-reveal';
+  const set=sessionSets[curIdx];
+  set.questions.forEach((q,i)=>{
+    document.getElementById(`qja-${i}`).classList.add('revealed');
+    q.choices.forEach((_,j)=>{document.getElementById(`cja-${i}-${j}`).classList.add('revealed');});
+    document.getElementById(`choice-${i}-${q.correct}`).classList.add('correct-ans');
+    document.getElementById(`review-${i}`).classList.add('revealed');
+  });
+  document.getElementById('btn-next').className='btn-next show';
+  document.getElementById('btn-next').textContent=curIdx+1<sessionSets.length?'次のセット →':'結果を見る';
+}
+function nextSet(){curIdx++;if(curIdx>=sessionSets.length)showResult();else renderSet();}
+
+// ═══════════════════════════════════════════
+// RESULT
+// ═══════════════════════════════════════════
+function showResult(){
+  clearInterval(timerInterval);
+  const total=sessionSets.length;
+  const pct=total>0?Math.round((completedInTime/total)*100):0;
+  document.getElementById('res-sets-done').textContent=completedInTime;
+  document.getElementById('res-total').textContent=total;
+  document.getElementById('res-completed').textContent=completedInTime;
+  document.getElementById('res-timeout').textContent=timedOutCount;
+  setTimeout(()=>{document.getElementById('result-ring-fg').style.strokeDashoffset=351.9*(1-completedInTime/total);},100);
+  const title=pct>=80?'Great speed!':pct>=50?'Good effort!':'Keep going!';
+  const msg=pct>=80?'制限時間内に読み切れています。':'先読みのスピードをさらに上げよう。';
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-msg').textContent=msg;
+  document.getElementById('result-history-items').innerHTML=sessionLog.map((e,si)=>
+    `<div class="h-set">
+      <div class="h-set-hdr">
+        <span class="h-set-lbl">Part ${e.set.part} — Set ${si+1}</span>
+        <span class="h-set-note" style="color:${e.completed?'var(--success)':'var(--warning)'}">${e.completed?'✓ 完読':'⏱ TLE'}</span>
+      </div>
+      ${e.set.questions.map((q,qi)=>`<div class="h-q-row">Q${qi+1}: ${q.q}</div>`).join('')}
+    </div>`).join('');
+  showScreen('result');
+}
+
+// ── modal close on overlay click ──
+window.addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal-import'))closeImportModal();
+  if(e.target===document.getElementById('modal-rename'))closeRenameModal();
+  if(e.target===document.getElementById('modal-settings'))closeSettingsModal();
+});
+// rename: Enter key
+document.getElementById('rename-input').addEventListener('keydown',e=>{if(e.key==='Enter')executeRename();});
+</script>
+</body>
+</html>
