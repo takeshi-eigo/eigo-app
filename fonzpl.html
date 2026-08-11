@@ -138,6 +138,10 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .pl-row.k-ebitda{background:var(--accent-tint)}
 .pl-row.k-ebitda .nm{font-weight:800;color:var(--accent-ink)}
 .pl-row.k-ebitda .amt{color:var(--accent-ink);font-size:15.5px}
+.pl-row.k-ebitda .amt.neg{color:var(--neg)}
+.pl-row.k-fl{background:var(--surface-2)}
+.pl-row.k-fl .nm{font-weight:700}
+.pl-row.k-fl .amt{font-weight:700}
 .pl-row.indent .nm{padding-left:12px;font-weight:400;color:var(--ink-soft)}
 .pl-row.indent .amt{font-weight:500}
 
@@ -231,6 +235,7 @@ const PL_LAYOUT = [
   {a:'純売上高', role:'sales'},
   {a:'売上原価', role:'cost'},
   {a:'人件費', role:'cost'},
+  {a:'FL合計', role:'fl'},
   {a:'消耗品費', role:'cost'},
   {a:'水道光熱費', role:'cost'},
   {a:'求人広告費', role:'cost'},
@@ -255,7 +260,7 @@ function fyRaw(store, fy, acct){
   if(!yobj) return null;
   return yobj[ai]||null;
 }
-function monthly(store, y, acct){
+function monthlyBase(store, y, acct){
   y=+y;
   if(state.mode==='fy'){ const a=fyRaw(store,y,acct); return a?a.slice():null; }
   const prev=fyRaw(store,y-1,acct), cur=fyRaw(store,y,acct);
@@ -263,6 +268,16 @@ function monthly(store, y, acct){
   const jfm = prev ? [prev[9],prev[10],prev[11]] : [null,null,null];
   const ad  = cur  ? cur.slice(0,9) : [null,null,null,null,null,null,null,null,null];
   return jfm.concat(ad);
+}
+function monthly(store, y, acct){
+  if(acct==='FL合計'){
+    const a=monthlyBase(store,y,'売上原価'), b=monthlyBase(store,y,'人件費');
+    if(!a && !b) return null;
+    const out=[];
+    for(let i=0;i<12;i++){ const x=a?a[i]:null, z=b?b[i]:null; out.push((x==null&&z==null)?null:((x||0)+(z||0))); }
+    return out;
+  }
+  return monthlyBase(store,y,acct);
 }
 function annualOf(store,y,acct){ const m=monthly(store,y,acct); return m?sum(m):null; }
 function storeHasYear(store,y){
@@ -280,12 +295,12 @@ function fmtAmt(v){
 function pctNum(v){ if(v==null||isNaN(v)) return '–'; const neg=v<0; return (neg?'−':'')+Math.abs(Math.round(v*10)/10).toFixed(1)+'%'; }
 function pctStr(v, base){ if(v==null||base==null||!base) return '–'; return pctNum(v/base*100); }
 function yoyPct(cur, prev){ if(cur==null||prev==null||prev<=0) return null; return (cur-prev)/prev*100; }
-function yoyStr(cur, prev){ const p=yoyPct(cur,prev); if(p==null) return '–'; return (p>=0?'+':'−')+Math.abs(Math.round(p*10)/10).toFixed(1)+'%'; }
+function yoyStr(cur, prev){ const p=yoyPct(cur,prev); if(p==null) return '–'; const r=p+100; return (r<0?'−':'')+Math.abs(Math.round(r*10)/10).toFixed(1)+'%'; }
 function isNeg(v){ return (v||0)<0; }
 // populated leading months (based on 純売上高 non-zero) for in-progress years
 function popMonths(store,y){ const s=monthly(store,y,'純売上高'); if(!s) return 0; let n=0; for(let i=0;i<12;i++) if((s[i]||0)!==0) n=i+1; return n; }
 function sliceYoY(store,y,acct,lo,hi){ const p=popMonths(store,y); const cur=monthly(store,y,acct), prev=monthly(store,y-1,acct); if(!cur||!prev) return null; const hiP=Math.min(hi,p); if(hiP<=lo) return null; return yoyPct(sum(cur.slice(lo,hiP)), sum(prev.slice(lo,hiP))); }
-function sliceYoYStr(store,y,acct,lo,hi){ const p=sliceYoY(store,y,acct,lo,hi); if(p==null) return '–'; return (p>=0?'+':'−')+Math.abs(Math.round(p*10)/10).toFixed(1)+'%'; }
+function sliceYoYStr(store,y,acct,lo,hi){ const p=sliceYoY(store,y,acct,lo,hi); if(p==null) return '–'; const r=p+100; return (r<0?'−':'')+Math.abs(Math.round(r*10)/10).toFixed(1)+'%'; }
 function sliceNeg(store,y,acct,lo,hi){ const p=sliceYoY(store,y,acct,lo,hi); return (p!=null&&p<0)?'neg':''; }
 
 // value shown for (current value, sales-base, prev-year value) under the active mode
@@ -344,7 +359,7 @@ wireSeg('.seg.mode button', b=>{ state.mode=b.dataset.mode; fillYears(); render(
 // ---------- render ----------
 const view=document.getElementById('view');
 function periodSfx(){ return state.mode==='fy'?'年度':'年'; }
-function dispLabel(){ return state.val==='amt'?'単位：千円':(state.val==='pct'?'対売上％':'前年比（増減率）'); }
+function dispLabel(){ return state.val==='amt'?'単位：千円':(state.val==='pct'?'対売上％':'前年比（対前年）'); }
 
 function render(){
   document.getElementById('rowcount').textContent = state.store ? state.store+' / '+(state.year||'')+periodSfx() : DB.stores.length+'部門';
@@ -416,7 +431,7 @@ function renderPL(){
     const primary   = state.val==='yoy' ? sliceYoYStr(st,y,r.a,0,12) : valStr(a, salesA);
     const primCls   = state.val==='yoy' ? sliceNeg(st,y,r.a,0,12) : (isNeg(a)?'neg':'');
     const secondary = state.val==='amt' ? pctStr(a,salesA) : fmtAmt(a);
-    const cls={sales:'k-sales',op:'k-op',ebitda:'k-ebitda',cost:'indent'}[r.role]||'';
+    const cls={sales:'k-sales',op:'k-op',ebitda:'k-ebitda',cost:'indent',fl:'k-fl'}[r.role]||'';
     let mg='';
     if(m){
       let cells='';
@@ -458,7 +473,8 @@ function renderPL(){
 
 function renderTrend(){
   const st=state.store;
-  const opts=DB.accounts.map(a=>`<option value="${a}" ${a===state.trendAcct?'selected':''}>${a}</option>`).join('');
+  const TA=(()=>{ const arr=DB.accounts.slice(); const i=arr.indexOf('人件費'); if(i>=0) arr.splice(i+1,0,'FL合計'); return arr; })();
+  const opts=TA.map(a=>`<option value="${a}" ${a===state.trendAcct?'selected':''}>${a}</option>`).join('');
   const yrs=DB.years.slice().sort((a,b)=>a-b);
   const rows=yrs.map(y=>{
     const a=annualOf(st,y,state.trendAcct);
