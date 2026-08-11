@@ -54,7 +54,7 @@ body{
 .ctl{
   width:100%;appearance:none;-webkit-appearance:none;
   background:var(--surface);border:1px solid var(--line-strong);border-radius:11px;
-  padding:22px 12px 8px;font:600 15px/1.2 var(--font-jp);color:var(--ink);
+  padding:22px 12px 8px;font:600 16px/1.2 var(--font-jp);color:var(--ink);
   min-height:52px;
 }
 .ctl:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
@@ -191,7 +191,7 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
         </div>
       </div>
       <div class="field year">
-        <label>年度</label>
+        <label id="yearLabel">暦年</label>
         <select class="ctl" id="yearSel"></select>
       </div>
     </div>
@@ -203,8 +203,8 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
     </div>
     <div class="segrow">
       <div class="seg mode" role="group" aria-label="会計期間">
-        <button data-mode="fy" aria-selected="true">年度<span class="sfx">4月〜3月</span></button>
-        <button data-mode="cal" aria-selected="false">暦年<span class="sfx">1月〜12月</span></button>
+        <button data-mode="fy" aria-selected="false">年度<span class="sfx">4月〜3月</span></button>
+        <button data-mode="cal" aria-selected="true">暦年<span class="sfx">1月〜12月</span></button>
       </div>
     </div>
     <div class="segrow">
@@ -243,7 +243,7 @@ const PL_LAYOUT = [
   {a:'EBITDA', role:'ebitda'},
 ];
 
-let state = { store:null, year:null, tab:'pl', mode:'fy', val:'amt', trendAcct:'EBITDA' };
+let state = { store:null, year:null, tab:'pl', mode:'cal', val:'amt', trendAcct:'EBITDA', openRows:new Set() };
 
 // ---------- data ----------
 const sum = arr => (arr||[]).reduce((s,x)=>s+(x||0),0);
@@ -325,6 +325,7 @@ document.addEventListener('click',e=>{ if(!e.target.closest('.combo')) storeList
 const yearSel=document.getElementById('yearSel');
 function fillYears(){
   const sfx=state.mode==='fy'?'年度':'年'; const sel=state.year;
+  const yl=document.getElementById('yearLabel'); if(yl) yl.textContent = state.mode==='fy'?'年度':'暦年';
   yearSel.innerHTML=DB.years.slice().sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}${sfx}</option>`).join('');
   if(sel) yearSel.value=sel;
 }
@@ -439,7 +440,7 @@ function renderPL(){
           <div><div class="h">下期</div><div class="hv ${dnC}">${dn}</div></div>
         </div></div>`;
     }
-    rows+=`<div class="pl-row ${cls}${m?'':' noexp'}">
+    rows+=`<div class="pl-row ${cls}${m?'':' noexp'}${state.openRows.has(r.a)?' open':''}" data-a="${r.a}">
       <button class="pl-head" ${m?'':'disabled'}>
         <span class="nm">${m?'<svg class="chev" viewBox="0 0 10 10"><path d="M2 1l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<span style="width:9px"></span>'}${r.a}</span>
         <span class="pct">${secondary}</span>
@@ -449,7 +450,10 @@ function renderPL(){
   view.innerHTML=heroHTML()+`<div class="card">
     <div class="card-h"><span class="t">損益内訳（タップで月別）</span><span class="u">${dispLabel()}</span></div>
     ${rows}</div>`;
-  view.querySelectorAll('.pl-head:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>btn.closest('.pl-row').classList.toggle('open')));
+  view.querySelectorAll('.pl-head:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>{
+    const row=btn.closest('.pl-row'); row.classList.toggle('open');
+    const a=row.dataset.a; if(row.classList.contains('open')) state.openRows.add(a); else state.openRows.delete(a);
+  }));
 }
 
 function renderTrend(){
@@ -477,7 +481,7 @@ function renderTrend(){
   rows.forEach(({y,v,disp})=>{
     if(v==null){ bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div></div><span class="val" style="color:var(--ink-faint)">–</span></div>`; return; }
     const w=Math.abs(v)/mx*50; const neg=v<0;
-    const fill=neg?`<div class="fill neg" style="right:50%;width:${w}%"></div>`:`<div class="fill" style="left:50%;width:${w}%"></div>`;
+    const fill=neg?`<div class="fill neg" style="left:auto;right:50%;width:${w}%"></div>`:`<div class="fill" style="right:auto;left:50%;width:${w}%"></div>`;
     bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div>${fill}</div><span class="val ${neg?'neg':''}">${disp}</span></div>`;
   });
   view.innerHTML=heroHTML()+`<div class="card">
