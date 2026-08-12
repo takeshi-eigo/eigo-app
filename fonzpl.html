@@ -463,8 +463,8 @@ function renderPL(){
     if(state.val==='yoy'){
       if(isSales){ primary=sliceYoYStr(st,y,r.a,0,12); primCls=sliceNeg(st,y,r.a,0,12); }
       else { const d=sliceRateDiff(st,y,r.a,0,12); primary=diffStr(d); primCls=diffNeg(r.role,d); }
-    } else { primary=valStr(a, salesA); primCls=(isNeg(a)?'neg':''); }
-    const secondary = state.val==='amt' ? pctStr(a,salesA) : fmtAmt(a);
+    } else { primary=(state.val==='amt'||isSales)?fmtAmt(a):pctStr(a,salesA); primCls=(isNeg(a)?'neg':''); }
+    const secondary = (state.val==='amt'||(state.val==='pct'&&isSales)) ? pctStr(a,salesA) : fmtAmt(a);
     const cls={sales:'k-sales',op:'k-op',ebitda:'k-ebitda',cost:'indent',fl:'k-fl'}[r.role]||'';
     let mg='';
     if(m){
@@ -479,7 +479,7 @@ function renderPL(){
             else { const d=monthRateDiff(st,y,r.a,i); txt=diffStr(d); cc=diffNeg(r.role,d); }
           } else { txt='–'; }
         }
-        else { txt=valStr(v, base); cc=isNeg(v)?'neg':''; }
+        else { txt=(state.val==='amt'||isSales)?fmtAmt(v):pctStr(v, base); cc=isNeg(v)?'neg':''; }
         cells+=`<div class="mcell"><div class="ml">${L[i]}月</div><div class="mv ${cc}">${txt}</div></div>`;
       });
       const h1=sum(m.slice(0,6)), h2=sum(m.slice(6,12));
@@ -488,7 +488,7 @@ function renderPL(){
       if(state.val==='yoy'){
         if(isSales){ up=sliceYoYStr(st,y,r.a,0,6); dn=sliceYoYStr(st,y,r.a,6,12); upC=sliceNeg(st,y,r.a,0,6); dnC=sliceNeg(st,y,r.a,6,12); }
         else { const d1=sliceRateDiff(st,y,r.a,0,6), d2=sliceRateDiff(st,y,r.a,6,12); up=diffStr(d1); dn=diffStr(d2); upC=diffNeg(r.role,d1); dnC=diffNeg(r.role,d2); }
-      } else { up=valStr(h1,sb1); dn=valStr(h2,sb2); upC=isNeg(h1)?'neg':''; dnC=isNeg(h2)?'neg':''; }
+      } else { const ua=(state.val==='amt'||isSales); up=ua?fmtAmt(h1):pctStr(h1,sb1); dn=ua?fmtAmt(h2):pctStr(h2,sb2); upC=isNeg(h1)?'neg':''; dnC=isNeg(h2)?'neg':''; }
       mg=`<div class="months"><div class="mgrid">${cells}</div>
         <div class="half">
           <div><div class="h">上期</div><div class="hv ${upC}">${up}</div></div>
