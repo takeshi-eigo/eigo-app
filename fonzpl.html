@@ -173,6 +173,10 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .half .hv.neg{color:var(--neg)}
 
 /* ---- Trend tab ---- */
+.trend-controls{display:flex;gap:8px;align-items:center;padding:12px 14px 4px}
+.trend-controls .ctl{flex:1;min-height:46px;padding:12px 30px 12px 12px}
+.seg.trendmode{flex:0 0 auto}
+.seg.trendmode button{padding:9px 11px;font-size:12.5px}
 .trend-bars{padding:6px 14px 14px}
 .tb-row{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:5px 0}
 .tb-row .yr{font-family:var(--font-num);font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
@@ -263,7 +267,7 @@ const PL_LAYOUT = [
   {a:'EBITDA', role:'ebitda'},
 ];
 
-let state = { store:null, year:null, tab:'pl', mode:'cal', val:'amt', trendAcct:'EBITDA', openRows:new Set(), heroMetric:'純売上高' };
+let state = { store:null, year:null, tab:'pl', mode:'cal', val:'amt', trendAcct:'EBITDA', openRows:new Set(), heroMetric:'純売上高', trendMode:'year' };
 
 // ---------- data ----------
 const sum = arr => (arr||[]).reduce((s,x)=>s+(x||0),0);
@@ -519,40 +523,66 @@ function renderPL(){
 }
 
 function renderTrend(){
-  const st=state.store;
+  const st=state.store, acct=state.trendAcct, y=+state.year;
+  const isSales=(acct==='純売上高'), role=roleOf(acct);
   const TA=(()=>{ const arr=DB.accounts.slice(); const i=arr.indexOf('人件費'); if(i>=0) arr.splice(i+1,0,'FL合計'); return arr; })();
-  const opts=TA.map(a=>`<option value="${a}" ${a===state.trendAcct?'selected':''}>${a}</option>`).join('');
-  const yrs=DB.years.slice().sort((a,b)=>a-b);
-  const rows=yrs.map(y=>{
-    const a=annualOf(st,y,state.trendAcct);
-    const base=annualOf(st,y,'純売上高');
-    let v,disp,bad;
-    if(state.val==='amt'){ v=a; disp=fmtAmt(a); bad=(a||0)<0; }
-    else if(state.val==='pct'){ v=(a!=null&&base)?a/base*100:null; disp=pctNum(v); bad=(v!=null&&v<0); }
-    else if(state.trendAcct==='純売上高'){ v=sliceYoY(st,y,state.trendAcct,0,12); disp=sliceYoYStr(st,y,state.trendAcct,0,12); bad=(v!=null&&v<0); }
-    else { const d=sliceRateDiff(st,y,state.trendAcct,0,12); v=d; disp=diffStr(d); bad=(diffNeg(roleOf(state.trendAcct),d)==='neg'); }
-    return {y,v,disp,bad};
-  });
+  const opts=TA.map(a=>`<option value="${a}" ${a===acct?'selected':''}>${a}</option>`).join('');
+  let rows;
+  if(state.trendMode==='month'){
+    const L=monLabels(); const pm=popMonths(st,y);
+    const cur=monthly(st,y,acct), sales=monthly(st,y,'純売上高'), prev=monthly(st,y-1,acct);
+    rows=L.map((ml,i)=>{
+      const label=ml+'月';
+      if(i>=pm) return {label, v:null, disp:'–', bad:false};
+      const cv=cur?cur[i]:null;
+      let v,disp,bad;
+      if(state.val==='amt'){ v=cv; disp=fmtAmt(cv); bad=(cv||0)<0; }
+      else if(state.val==='pct'){
+        if(isSales){ v=cv; disp=fmtAmt(cv); bad=(cv||0)<0; }
+        else { const s=sales?sales[i]:null; v=(cv!=null&&s)?cv/s*100:null; disp=(v==null?'–':pctNum(v)); bad=(v!=null&&v<0); }
+      } else {
+        if(isSales){ const pv=prev?prev[i]:null; const g=yoyPct(cv,pv); v=g; disp=yoyStr(cv,pv); bad=(g!=null&&g<0); }
+        else { const d=monthRateDiff(st,y,acct,i); v=d; disp=diffStr(d); bad=(diffNeg(role,d)==='neg'); }
+      }
+      return {label, v, disp, bad};
+    });
+  } else {
+    const yrs=DB.years.slice().sort((a,b)=>a-b);
+    rows=yrs.map(yy=>{
+      const a=annualOf(st,yy,acct), base=annualOf(st,yy,'純売上高');
+      let v,disp,bad;
+      if(state.val==='amt'){ v=a; disp=fmtAmt(a); bad=(a||0)<0; }
+      else if(state.val==='pct'){ if(isSales){ v=a; disp=fmtAmt(a); bad=(a||0)<0; } else { v=(a!=null&&base)?a/base*100:null; disp=pctNum(v); bad=(v!=null&&v<0); } }
+      else if(isSales){ v=sliceYoY(st,yy,acct,0,12); disp=sliceYoYStr(st,yy,acct,0,12); bad=(v!=null&&v<0); }
+      else { const d=sliceRateDiff(st,yy,acct,0,12); v=d; disp=diffStr(d); bad=(diffNeg(role,d)==='neg'); }
+      return {label:String(yy), v, disp, bad};
+    });
+  }
   const present=rows.filter(x=>x.v!=null);
-  const head=`<div style="padding:12px 14px 4px"><select class="ctl" id="trendSel" style="min-height:46px;padding:12px 30px 12px 12px">${opts}</select></div>`;
+  const modeseg=`<div class="seg trendmode" role="group"><button data-tmode="year" aria-selected="${state.trendMode!=='month'}">年ごと</button><button data-tmode="month" aria-selected="${state.trendMode==='month'}">月ごと</button></div>`;
+  const head=`<div class="trend-controls"><select class="ctl" id="trendSel">${opts}</select>${modeseg}</div>`;
+  const titleR = state.trendMode==='month' ? `${st}｜${state.year}${periodSfx()} 月別` : `${st}｜${state.mode==='fy'?'年度':'暦年'}推移`;
   if(!present.length){
-    view.innerHTML=heroHTML()+`<div class="card"><div class="card-h"><span class="t">科目の推移</span><span class="u">${dispLabel()}</span></div>${head}<div class="empty">この店舗の推移データがありません。</div></div>`;
-    bindTrendSel(); return;
+    view.innerHTML=heroHTML()+`<div class="card"><div class="card-h"><span class="t">${titleR}</span><span class="u">${dispLabel()}</span></div>${head}<div class="empty">データがありません。</div></div>`;
+    bindTrendCtl(); return;
   }
   const mx=Math.max(1,...present.map(x=>Math.abs(x.v)));
   let bars='';
-  rows.forEach(({y,v,disp,bad})=>{
-    if(v==null){ bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div></div><span class="val" style="color:var(--ink-faint)">–</span></div>`; return; }
+  rows.forEach(({label,v,disp,bad})=>{
+    if(v==null){ bars+=`<div class="tb-row"><span class="yr">${label}</span><div class="track"><div class="zero"></div></div><span class="val" style="color:var(--ink-faint)">–</span></div>`; return; }
     const w=Math.abs(v)/mx*50; const left=v<0; const bc=bad?' neg':'';
     const fill=left?`<div class="fill${bc}" style="left:auto;right:50%;width:${w}%"></div>`:`<div class="fill${bc}" style="right:auto;left:50%;width:${w}%"></div>`;
-    bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div>${fill}</div><span class="val ${bad?'neg':''}">${disp}</span></div>`;
+    bars+=`<div class="tb-row"><span class="yr">${label}</span><div class="track"><div class="zero"></div>${fill}</div><span class="val ${bad?'neg':''}">${disp}</span></div>`;
   });
   view.innerHTML=heroHTML()+`<div class="card">
-    <div class="card-h"><span class="t">${st}｜${state.mode==='fy'?'年度':'暦年'}推移</span><span class="u">${dispLabel()}</span></div>
+    <div class="card-h"><span class="t">${titleR}</span><span class="u">${dispLabel()}</span></div>
     ${head}<div class="trend-bars">${bars}</div></div>`;
-  bindTrendSel();
+  bindTrendCtl();
 }
-function bindTrendSel(){ const sel=document.getElementById('trendSel'); if(sel) sel.addEventListener('change',()=>{ state.trendAcct=sel.value; render(); }); }
+function bindTrendCtl(){
+  const sel=document.getElementById('trendSel'); if(sel) sel.addEventListener('change',()=>{ state.trendAcct=sel.value; render(); });
+  document.querySelectorAll('.seg.trendmode button').forEach(btn=>btn.addEventListener('click',()=>{ state.trendMode=btn.dataset.tmode; render(); }));
+}
 
 // ---------- init ----------
 state.year=DB.years.slice().sort((a,b)=>b-a)[0];
