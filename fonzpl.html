@@ -107,18 +107,33 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 .hero .subrow .cell .l{font-size:10px;letter-spacing:.08em;color:#9EC4BC;font-weight:700}
 .hero .subrow .cell .v{font-family:var(--font-num);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:1px}
 .hero .subrow .cell .v.neg{color:#F6B8BE}
-.spark{margin-top:13px;display:flex;align-items:flex-end;gap:3px;height:40px}
-.spark .bar{flex:1;background:rgba(255,255,255,.28);border-radius:2px 2px 0 0;min-height:2px;position:relative}
-.spark .bar.hl{background:var(--gold)}
-.spark .bar.negbar{background:rgba(246,184,190,.55)}
+.spark{margin-top:6px;position:relative;display:flex;gap:3px;height:46px}
+.spark .barcell{flex:1;position:relative;height:100%}
+.spark .barfill{position:absolute;left:0;right:0;min-height:1px;background:rgba(255,255,255,.28);border-radius:2px 2px 0 0}
+.spark .barfill.hl{background:var(--gold)}
+.spark .barfill.negbar{background:rgba(246,184,190,.6);border-radius:0 0 2px 2px}
+.spark .zline{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.32);z-index:1}
+.hero .kpis{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.hero .kpi{display:flex;justify-content:space-between;align-items:baseline;gap:12px;cursor:pointer;padding:4px 8px;margin:0 -8px;border-radius:9px;transition:background .15s}
+.hero .kpi.active{background:rgba(255,255,255,.08)}
+.hero .kpi.active .kl{color:var(--gold)}
+.hero .kpi:active{background:rgba(255,255,255,.14)}
+.hero .kpi .kl{font-size:12.5px;color:#9EC4BC;font-weight:600;letter-spacing:.01em}
+.hero .kpi .kv{font-family:var(--font-num);font-size:19px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hero .kpi .kv .kc{font-size:12.5px;color:#9EC4BC;margin-left:7px;font-weight:500}
+.spark-cap{font-size:10px;color:#8FB6AE;letter-spacing:.04em;margin-top:14px;font-weight:600}
+.spark-cap .sh{margin-left:8px;color:#6f9a91;font-weight:500}
+.toggle-all{background:var(--accent-soft);color:var(--accent-ink);border:0;border-radius:8px;padding:6px 11px;font:700 11px/1 var(--font-jp);cursor:pointer;letter-spacing:.02em;white-space:nowrap}
 .sparklabs{display:flex;gap:3px;margin-top:4px}
 .sparklabs span{flex:1;text-align:center;font-size:8.5px;color:#8FB6AE;font-family:var(--font-num)}
+.sparkvals{display:flex;gap:3px;margin-bottom:3px}
+.sparkvals span{flex:1;text-align:center;font-size:7px;line-height:1.1;color:#B7D3CC;font-family:var(--font-num);font-variant-numeric:tabular-nums;overflow:hidden;white-space:nowrap}
 
 /* ---- P&L table ---- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .card-h{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);gap:8px}
-.card-h .t{font-size:12px;font-weight:700;letter-spacing:.02em}
-.card-h .u{margin-left:auto;font-size:10px;color:var(--ink-faint);letter-spacing:.06em}
+.card-h .t{font-size:12px;font-weight:700;letter-spacing:.02em;margin-right:auto}
+.card-h .u{margin-left:0;font-size:10px;color:var(--ink-faint);letter-spacing:.06em}
 
 .pl-row{border-bottom:1px solid var(--line);}
 .pl-row:last-child{border-bottom:0}
@@ -248,7 +263,7 @@ const PL_LAYOUT = [
   {a:'EBITDA', role:'ebitda'},
 ];
 
-let state = { store:null, year:null, tab:'pl', mode:'cal', val:'amt', trendAcct:'EBITDA', openRows:new Set() };
+let state = { store:null, year:null, tab:'pl', mode:'cal', val:'amt', trendAcct:'EBITDA', openRows:new Set(), heroMetric:'純売上高' };
 
 // ---------- data ----------
 const sum = arr => (arr||[]).reduce((s,x)=>s+(x||0),0);
@@ -280,6 +295,7 @@ function monthly(store, y, acct){
   return monthlyBase(store,y,acct);
 }
 function annualOf(store,y,acct){ const m=monthly(store,y,acct); return m?sum(m):null; }
+function sumSlice(store,y,acct,hi){ if(hi<=0) return null; const m=monthly(store,y,acct); if(!m) return null; return sum(m.slice(0,hi)); }
 function storeHasYear(store,y){
   const si=DB.stores.indexOf(store); const c=DB.cube[si]||{};
   return state.mode==='fy' ? !!c[yIndex(y)] : (!!c[yIndex(y)]||!!c[yIndex(+y-1)]);
@@ -365,53 +381,61 @@ function render(){
   document.getElementById('rowcount').textContent = state.store ? state.store+' / '+(state.year||'')+periodSfx() : DB.stores.length+'部門';
   if(!state.store){ view.innerHTML='<div class="empty">上の「店舗部門」から店舗コードを選んでください。<br>タップして検索できます。</div>'; document.getElementById('foot').textContent=''; return; }
   if(state.tab==='pl') renderPL(); else renderTrend();
+  bindHero();
   document.getElementById('foot').textContent = 'FONZ 店舗サマリ（EBITDA）｜'+(state.mode==='fy'?'会計年度 4–3月':'暦年 1–12月')+' ｜ '+dispLabel();
+}
+function bindHero(){
+  view.querySelectorAll('.kpi[data-metric]').forEach(el=>el.addEventListener('click',()=>{ state.heroMetric=el.dataset.metric; render(); }));
 }
 
 function heroHTML(){
   const st=state.store, y=+state.year;
-  const ebM=monthly(st,y,'EBITDA');
-  const ebA=annualOf(st,y,'EBITDA'),  ebP=annualOf(st,y-1,'EBITDA');
-  const salesA=annualOf(st,y,'純売上高'), salesP=annualOf(st,y-1,'純売上高');
-  const opA=annualOf(st,y,'営業利益'),   opP=annualOf(st,y-1,'営業利益');
-  const soA=annualOf(st,y,'店舗営業利益'), soP=annualOf(st,y-1,'店舗営業利益');
-  const costA=annualOf(st,y,'売上原価'), laborA=annualOf(st,y,'人件費');
-  const lab = state.val==='amt'?'年間':(state.val==='pct'?'対売上':'前年比');
-  let big, unit, bigNeg='';
-  if(state.val==='amt'){ big=fmtAmt(ebA); unit='千円'; bigNeg=isNeg(ebA)?'neg':''; }
-  else if(state.val==='pct'){ big=pctStr(ebA,salesA); unit=''; bigNeg=isNeg(ebA)?'neg':''; }
-  else { big=sliceYoYStr(st,y,'EBITDA',0,12); unit=''; bigNeg=sliceNeg(st,y,'EBITDA',0,12); }
-  let sub;
-  if(state.val==='amt'){
-    sub=`
-      <div class="cell"><div class="l">純売上高</div><div class="v ${isNeg(salesA)?'neg':''}">${fmtAmt(salesA)}</div></div>
-      <div class="cell"><div class="l">営業利益</div><div class="v ${isNeg(opA)?'neg':''}">${fmtAmt(opA)}</div></div>
-      <div class="cell"><div class="l">EBITDA率</div><div class="v">${pctStr(ebA,salesA)}</div></div>`;
-  } else if(state.val==='pct'){
-    sub=`
-      <div class="cell"><div class="l">原価率</div><div class="v">${pctStr(costA,salesA)}</div></div>
-      <div class="cell"><div class="l">人件費率</div><div class="v">${pctStr(laborA,salesA)}</div></div>
-      <div class="cell"><div class="l">営業利益率</div><div class="v ${isNeg(opA)?'neg':''}">${pctStr(opA,salesA)}</div></div>`;
-  } else {
-    sub=`
-      <div class="cell"><div class="l">純売上 前年比</div><div class="v ${sliceNeg(st,y,'純売上高',0,12)}">${sliceYoYStr(st,y,'純売上高',0,12)}</div></div>
-      <div class="cell"><div class="l">店舗営業利益</div><div class="v ${sliceNeg(st,y,'店舗営業利益',0,12)}">${sliceYoYStr(st,y,'店舗営業利益',0,12)}</div></div>
-      <div class="cell"><div class="l">営業利益 前年比</div><div class="v ${sliceNeg(st,y,'営業利益',0,12)}">${sliceYoYStr(st,y,'営業利益',0,12)}</div></div>`;
-  }
-  let bars='',labs=''; const L=monLabels();
-  if(ebM){
-    const mx=Math.max(1,...ebM.map(v=>Math.abs(v||0)));
-    const top=Math.max(...ebM.map(v=>v||0));
-    ebM.forEach((v,i)=>{ const h=Math.max(2,Math.round(Math.abs(v||0)/mx*40));
-      bars+=`<div class="bar ${isNeg(v)?'negbar':((v||0)===top&&top>0?'hl':'')}" style="height:${h}px"></div>`;
+  const pm=popMonths(st,y);                       // 同時期比較：当年の実績月数だけを前年と比べる
+  const salesM=monthly(st,y,'純売上高');
+  const curSales=sumSlice(st,y,'純売上高',pm), pSales=sumSlice(st,y-1,'純売上高',pm);
+  const curFL=sumSlice(st,y,'FL合計',pm),       pFL=sumSlice(st,y-1,'FL合計',pm);
+  const curEB=sumSlice(st,y,'EBITDA',pm),        pEB=sumSlice(st,y-1,'EBITDA',pm);
+  const salesRatio=(curSales!=null&&pSales!=null&&pSales>0)?curSales/pSales*100:null;
+  const flRate=(curSales)?curFL/curSales*100:null;
+  const flRateP=(pSales)?pFL/pSales*100:null;
+  const flDiff=(flRate!=null&&flRateP!=null)?flRate-flRateP:null;
+  const ebRate=(curSales)?curEB/curSales*100:null;
+  const ebRateP=(pSales)?pEB/pSales*100:null;
+  const ebDiff=(ebRate!=null&&ebRateP!=null)?ebRate-ebRateP:null;
+  const rt=v=>v==null?'–':(Math.round(v*10)/10).toFixed(1)+'%';
+  const pp=v=>v==null?'–':(v>=0?'+':'−')+Math.abs(Math.round(v*10)/10).toFixed(1)+'pt';
+  // monthly bar series follows the selected KPI (tap to switch)
+  const metric=state.heroMetric||'純売上高'; const L=monLabels();
+  let series=null, cap='';
+  if(metric==='純売上高'){ series=salesM?salesM.slice():null; cap='月別 純売上高（百万円）'; }
+  else if(metric==='FL合計'){ const flM=monthly(st,y,'FL合計'); series=(flM&&salesM)?flM.map((v,i)=>salesM[i]?v/salesM[i]*100:null):null; cap='月別 FL率（％）'; }
+  else { const em=monthly(st,y,'EBITDA'); series=(em&&salesM)?em.map((v,i)=>salesM[i]?v/salesM[i]*100:null):null; cap='月別 EBITDA率（％）'; }
+  let bars='',labs='',vlab='',zline='';
+  if(series){
+    const vals=series.map(v=>v==null?0:v);
+    const posMax=Math.max(0,...vals), negMax=Math.max(0,...vals.map(v=>-v));
+    const total=(posMax+negMax)||1; const H=46; const zfb=negMax/total*H;   // zero line height from bottom
+    if(negMax>0) zline=`<div class="zline" style="bottom:${zfb}px"></div>`;
+    const flab=sv=>{ if(sv==null) return ''; if(metric==='純売上高'){ return Math.abs(sv)>=1e8?Math.round(sv/1e6).toLocaleString('ja-JP'):(sv/1e6).toFixed(1); } return (sv<0?'−':'')+Math.abs(sv).toFixed(1); };
+    series.forEach((sv,i)=>{
+      const v=sv==null?0:sv;
+      const hh=Math.max(1,Math.round(Math.abs(v)/total*H));
+      let style, cls;
+      if(v>=0){ style=`bottom:${zfb}px;height:${hh}px`; cls=(posMax>0&&v===posMax?'hl':''); }
+      else { style=`bottom:${Math.max(0,zfb-hh)}px;height:${hh}px`; cls='negbar'; }
+      bars+=`<div class="barcell"><div class="barfill ${cls}" style="${style}"></div></div>`;
+      vlab+=`<span>${i<pm?flab(sv):''}</span>`;
       labs+=`<span>${L[i]}</span>`; });
   }
+  const kpi=(m,lab,val,cmp)=>`<div class="kpi${metric===m?' active':''}" data-metric="${m}"><span class="kl">${lab}</span><span class="kv">${val}<span class="kc">${cmp}</span></span></div>`;
   return `<div class="hero">
     <div class="ctx"><b>${st}</b><span>${state.year}${periodSfx()}</span></div>
-    <div class="metric-lab">EBITDA（${lab}）</div>
-    <div class="metric-val ${bigNeg}">${big}${unit?`<span class="u">${unit}</span>`:''}</div>
-    <div class="subrow">${sub}</div>
-    ${ebM?`<div class="spark">${bars}</div><div class="sparklabs">${labs}</div>`:''}
+    <div class="kpis">
+      ${kpi('純売上高','純売上高（前年比）', fmtAmt(curSales), '('+rt(salesRatio)+')')}
+      ${kpi('FL合計','FL合計（前年差異）', rt(flRate), '('+pp(flDiff)+')')}
+      ${kpi('EBITDA率','EBITDA率（前年差異）', rt(ebRate), '('+pp(ebDiff)+')')}
+    </div>
+    ${series?`<div class="spark-cap">${cap}<span class="sh">指標をタップで切替</span></div><div class="sparkvals">${vlab}</div><div class="spark">${zline}${bars}</div><div class="sparklabs">${labs}</div>`:''}
   </div>`;
 }
 
@@ -462,13 +486,20 @@ function renderPL(){
         <span class="amt ${primCls}">${primary}</span>
       </button>${mg}</div>`;
   });
+  const expandable=PL_LAYOUT.filter(r=>monthly(st,y,r.a)).map(r=>r.a);
+  const anyOpen=expandable.some(a=>state.openRows.has(a));
   view.innerHTML=heroHTML()+`<div class="card">
-    <div class="card-h"><span class="t">損益内訳（タップで月別）</span><span class="u">${dispLabel()}</span></div>
+    <div class="card-h"><span class="t">損益内訳（タップで月別）</span><button class="toggle-all" id="toggleAll">${anyOpen?'すべて閉じる':'すべて展開'}</button><span class="u">${dispLabel()}</span></div>
     ${rows}</div>`;
   view.querySelectorAll('.pl-head:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>{
     const row=btn.closest('.pl-row'); row.classList.toggle('open');
     const a=row.dataset.a; if(row.classList.contains('open')) state.openRows.add(a); else state.openRows.delete(a);
   }));
+  const ta=document.getElementById('toggleAll');
+  if(ta) ta.addEventListener('click',()=>{
+    if(anyOpen) expandable.forEach(a=>state.openRows.delete(a)); else expandable.forEach(a=>state.openRows.add(a));
+    render();
+  });
 }
 
 function renderTrend(){
@@ -505,7 +536,7 @@ function renderTrend(){
     ${head}<div class="trend-bars">${bars}</div></div>`;
   bindTrendSel();
 }
-function bindTrendSel(){ const sel=document.getElementById('trendSel'); if(sel) sel.addEventListener('change',()=>{ state.trendAcct=sel.value; renderTrend(); }); }
+function bindTrendSel(){ const sel=document.getElementById('trendSel'); if(sel) sel.addEventListener('change',()=>{ state.trendAcct=sel.value; render(); }); }
 
 // ---------- init ----------
 state.year=DB.years.slice().sort((a,b)=>b-a)[0];
