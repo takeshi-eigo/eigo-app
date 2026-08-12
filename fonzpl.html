@@ -132,7 +132,7 @@ select.ctl{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.
 /* ---- P&L table ---- */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .card-h{display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);gap:8px}
-.card-h .t{font-size:12px;font-weight:700;letter-spacing:.02em;margin-right:auto}
+.card-h .t{font-size:12px;font-weight:700;letter-spacing:.02em;margin-right:auto;white-space:nowrap}
 .card-h .u{margin-left:0;font-size:10px;color:var(--ink-faint);letter-spacing:.06em}
 
 .pl-row{border-bottom:1px solid var(--line);}
@@ -318,6 +318,12 @@ function popMonths(store,y){ const s=monthly(store,y,'純売上高'); if(!s) ret
 function sliceYoY(store,y,acct,lo,hi){ const p=popMonths(store,y); const cur=monthly(store,y,acct), prev=monthly(store,y-1,acct); if(!cur||!prev) return null; const hiP=Math.min(hi,p); if(hiP<=lo) return null; return yoyPct(sum(cur.slice(lo,hiP)), sum(prev.slice(lo,hiP))); }
 function sliceYoYStr(store,y,acct,lo,hi){ const p=sliceYoY(store,y,acct,lo,hi); if(p==null) return '–'; const r=p+100; return (r<0?'−':'')+Math.abs(Math.round(r*10)/10).toFixed(1)+'%'; }
 function sliceNeg(store,y,acct,lo,hi){ const p=sliceYoY(store,y,acct,lo,hi); return (p!=null&&p<0)?'neg':''; }
+function sliceSums(store,y,acct,lo,hi){ const p=popMonths(store,y); const cur=monthly(store,y,acct), prev=monthly(store,y-1,acct); if(!cur||!prev) return null; const hiP=Math.min(hi,p); if(hiP<=lo) return null; return {c:sum(cur.slice(lo,hiP)), p:sum(prev.slice(lo,hiP))}; }
+function sliceRateDiff(store,y,acct,lo,hi){ const a=sliceSums(store,y,acct,lo,hi), s=sliceSums(store,y,'純売上高',lo,hi); if(!a||!s||!s.c||!s.p) return null; return (a.c/s.c - a.p/s.p)*100; }
+function monthRateDiff(store,y,acct,i){ const cm=monthly(store,y,acct), cs=monthly(store,y,'純売上高'), pmv=monthly(store,y-1,acct), ps=monthly(store,y-1,'純売上高'); if(!cm||!cs||!pmv||!ps||!cs[i]||!ps[i]) return null; return (cm[i]/cs[i]-pmv[i]/ps[i])*100; }
+function diffStr(d){ if(d==null) return '–'; if(Math.abs(d)<0.05) return '0.0%'; return (d>=0?'+':'−')+Math.abs(Math.round(d*10)/10).toFixed(1)+'%'; }
+function roleOf(acct){ const r=PL_LAYOUT.find(x=>x.a===acct); return r?r.role:'cost'; }
+function diffNeg(role,d){ if(d==null||Math.abs(d)<0.05) return ''; const bad=(role==='op'||role==='ebitda')? d<0 : d>0; return bad?'neg':''; }
 
 // value shown for (current value, sales-base, prev-year value) under the active mode
 function valStr(v, base, prev){
@@ -375,7 +381,7 @@ wireSeg('.seg.mode button', b=>{ state.mode=b.dataset.mode; fillYears(); render(
 // ---------- render ----------
 const view=document.getElementById('view');
 function periodSfx(){ return state.mode==='fy'?'年度':'年'; }
-function dispLabel(){ return state.val==='amt'?'単位：千円':(state.val==='pct'?'対売上％':'前年比（対前年）'); }
+function dispLabel(){ return state.val==='amt'?'単位：千円':(state.val==='pct'?'対売上％':'前年比（率＝差）'); }
 
 function render(){
   document.getElementById('rowcount').textContent = state.store ? state.store+' / '+(state.year||'')+periodSfx() : DB.stores.length+'部門';
@@ -403,7 +409,7 @@ function heroHTML(){
   const ebRateP=(pSales)?pEB/pSales*100:null;
   const ebDiff=(ebRate!=null&&ebRateP!=null)?ebRate-ebRateP:null;
   const rt=v=>v==null?'–':(Math.round(v*10)/10).toFixed(1)+'%';
-  const pp=v=>v==null?'–':(v>=0?'+':'−')+Math.abs(Math.round(v*10)/10).toFixed(1)+'pt';
+  const pp=v=>v==null?'–':(v>=0?'+':'−')+Math.abs(Math.round(v*10)/10).toFixed(1)+'%';
   // monthly bar series follows the selected KPI (tap to switch)
   const metric=state.heroMetric||'純売上高'; const L=monLabels();
   let series=null, cap='';
@@ -452,8 +458,12 @@ function renderPL(){
     const m=monthly(st,y,r.a);
     const pm=monthly(st,y-1,r.a);
     const a=m?sum(m):null;
-    const primary   = state.val==='yoy' ? sliceYoYStr(st,y,r.a,0,12) : valStr(a, salesA);
-    const primCls   = state.val==='yoy' ? sliceNeg(st,y,r.a,0,12) : (isNeg(a)?'neg':'');
+    const isSales=(r.a==='純売上高');
+    let primary, primCls;
+    if(state.val==='yoy'){
+      if(isSales){ primary=sliceYoYStr(st,y,r.a,0,12); primCls=sliceNeg(st,y,r.a,0,12); }
+      else { const d=sliceRateDiff(st,y,r.a,0,12); primary=diffStr(d); primCls=diffNeg(r.role,d); }
+    } else { primary=valStr(a, salesA); primCls=(isNeg(a)?'neg':''); }
     const secondary = state.val==='amt' ? pctStr(a,salesA) : fmtAmt(a);
     const cls={sales:'k-sales',op:'k-op',ebitda:'k-ebitda',cost:'indent',fl:'k-fl'}[r.role]||'';
     let mg='';
@@ -463,16 +473,22 @@ function renderPL(){
         const base = salesM ? salesM[i] : null;
         const pv = pm ? pm[i] : null;
         let txt, cc='';
-        if(state.val==='yoy'){ if(i<popM){ txt=yoyStr(v,pv); const pp=yoyPct(v,pv); cc=(pp!=null&&pp<0)?'neg':''; } else { txt='–'; } }
+        if(state.val==='yoy'){
+          if(i<popM){
+            if(isSales){ txt=yoyStr(v,pv); const g=yoyPct(v,pv); cc=(g!=null&&g<0)?'neg':''; }
+            else { const d=monthRateDiff(st,y,r.a,i); txt=diffStr(d); cc=diffNeg(r.role,d); }
+          } else { txt='–'; }
+        }
         else { txt=valStr(v, base); cc=isNeg(v)?'neg':''; }
         cells+=`<div class="mcell"><div class="ml">${L[i]}月</div><div class="mv ${cc}">${txt}</div></div>`;
       });
       const h1=sum(m.slice(0,6)), h2=sum(m.slice(6,12));
       const sb1=salesM?sum(salesM.slice(0,6)):null, sb2=salesM?sum(salesM.slice(6,12)):null;
-      const up = state.val==='yoy' ? sliceYoYStr(st,y,r.a,0,6)  : valStr(h1,sb1);
-      const dn = state.val==='yoy' ? sliceYoYStr(st,y,r.a,6,12) : valStr(h2,sb2);
-      const upC= state.val==='yoy' ? sliceNeg(st,y,r.a,0,6)  : (isNeg(h1)?'neg':'');
-      const dnC= state.val==='yoy' ? sliceNeg(st,y,r.a,6,12) : (isNeg(h2)?'neg':'');
+      let up,dn,upC,dnC;
+      if(state.val==='yoy'){
+        if(isSales){ up=sliceYoYStr(st,y,r.a,0,6); dn=sliceYoYStr(st,y,r.a,6,12); upC=sliceNeg(st,y,r.a,0,6); dnC=sliceNeg(st,y,r.a,6,12); }
+        else { const d1=sliceRateDiff(st,y,r.a,0,6), d2=sliceRateDiff(st,y,r.a,6,12); up=diffStr(d1); dn=diffStr(d2); upC=diffNeg(r.role,d1); dnC=diffNeg(r.role,d2); }
+      } else { up=valStr(h1,sb1); dn=valStr(h2,sb2); upC=isNeg(h1)?'neg':''; dnC=isNeg(h2)?'neg':''; }
       mg=`<div class="months"><div class="mgrid">${cells}</div>
         <div class="half">
           <div><div class="h">上期</div><div class="hv ${upC}">${up}</div></div>
@@ -510,12 +526,12 @@ function renderTrend(){
   const rows=yrs.map(y=>{
     const a=annualOf(st,y,state.trendAcct);
     const base=annualOf(st,y,'純売上高');
-    const pa=annualOf(st,y-1,state.trendAcct);
-    let v,disp;
-    if(state.val==='amt'){ v=a; disp=fmtAmt(a); }
-    else if(state.val==='pct'){ v=(a!=null&&base)?a/base*100:null; disp=pctNum(v); }
-    else { v=sliceYoY(st,y,state.trendAcct,0,12); disp=sliceYoYStr(st,y,state.trendAcct,0,12); }
-    return {y,v,disp};
+    let v,disp,bad;
+    if(state.val==='amt'){ v=a; disp=fmtAmt(a); bad=(a||0)<0; }
+    else if(state.val==='pct'){ v=(a!=null&&base)?a/base*100:null; disp=pctNum(v); bad=(v!=null&&v<0); }
+    else if(state.trendAcct==='純売上高'){ v=sliceYoY(st,y,state.trendAcct,0,12); disp=sliceYoYStr(st,y,state.trendAcct,0,12); bad=(v!=null&&v<0); }
+    else { const d=sliceRateDiff(st,y,state.trendAcct,0,12); v=d; disp=diffStr(d); bad=(diffNeg(roleOf(state.trendAcct),d)==='neg'); }
+    return {y,v,disp,bad};
   });
   const present=rows.filter(x=>x.v!=null);
   const head=`<div style="padding:12px 14px 4px"><select class="ctl" id="trendSel" style="min-height:46px;padding:12px 30px 12px 12px">${opts}</select></div>`;
@@ -525,11 +541,11 @@ function renderTrend(){
   }
   const mx=Math.max(1,...present.map(x=>Math.abs(x.v)));
   let bars='';
-  rows.forEach(({y,v,disp})=>{
+  rows.forEach(({y,v,disp,bad})=>{
     if(v==null){ bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div></div><span class="val" style="color:var(--ink-faint)">–</span></div>`; return; }
-    const w=Math.abs(v)/mx*50; const neg=v<0;
-    const fill=neg?`<div class="fill neg" style="left:auto;right:50%;width:${w}%"></div>`:`<div class="fill" style="right:auto;left:50%;width:${w}%"></div>`;
-    bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div>${fill}</div><span class="val ${neg?'neg':''}">${disp}</span></div>`;
+    const w=Math.abs(v)/mx*50; const left=v<0; const bc=bad?' neg':'';
+    const fill=left?`<div class="fill${bc}" style="left:auto;right:50%;width:${w}%"></div>`:`<div class="fill${bc}" style="right:auto;left:50%;width:${w}%"></div>`;
+    bars+=`<div class="tb-row"><span class="yr">${y}</span><div class="track"><div class="zero"></div>${fill}</div><span class="val ${bad?'neg':''}">${disp}</span></div>`;
   });
   view.innerHTML=heroHTML()+`<div class="card">
     <div class="card-h"><span class="t">${st}｜${state.mode==='fy'?'年度':'暦年'}推移</span><span class="u">${dispLabel()}</span></div>
